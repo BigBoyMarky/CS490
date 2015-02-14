@@ -1,24 +1,22 @@
 import java.lang.*;
 
-public class Client {
+public class ClientObject implements Runnable {
 
 	private String name;
 	private String ipAddress;
 	private int port;
-	private long heartbeattime;
+	private long heartbeat_rate;
 	
-	public Client (String n, String i, int p) {
-		
+	public ClientObject (String n, String i, int p, long h) {
 		name = n;
 		ipAddress = i;
 		port = p;
-		
+		heartbeat_rate = h;
+		(new Thread(this)).start();
 	}
 	
 	public String getName() {
-		
 		return name;
-		
 	}
 	
 	public String getIP() {
@@ -46,4 +44,12 @@ public class Client {
 				
 	}
 	
+	public void run()
+	{
+		do
+		{
+			this.sleep(heartbeat_rate);
+		} while(gotMessage);
+
+	}
 }
