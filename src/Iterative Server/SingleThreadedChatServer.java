@@ -1,51 +1,66 @@
 import java.util.*;
 import java.net.*;
 import java.io.*;
-
-public class SingleThreadedChatServer
+	//Create a server based on command line input, DONE
+	//server waits for clients to connect
+	//once the clients connect, it sends acknowledgement back, adds clinet to list of chatters.
+		//it then sends an update to all previously connectd clients about the new user
+	//it regularly checks for heartbeats. If heartbeat not received, it will assume it's dead and remove it from the list.
+	//the client can initiate a chat with another client
+public class SingleThreadedChatServer// implements Runnable
 {
-	static SingleThreadedChatServer server;
-	static String serverName;
 	ServerSocket serverSocket;
+	static SingleThreadedChatServer server;
 	public static void main(String[] args) throws IOException
 	{
-		//allows the creator of the server to assign a name and a port to the server
 		if(args.length > 0)
 		{
 			try
 			{
 				int port = Integer.parseInt(args[0]);
-				if(port >= 1025  && port <= 65535)
-				{
+				if(port >= 1025 && port <= 65535)
 					server = new SingleThreadedChatServer(port);
-				}
 				else
 				{
-					System.out.println("Port is out of range. Try a port between 1025 and 65535. The program will end.");
+					System.out.println("Port is out of range. Try a port between 1025 and 65535. This program will close.");
 					return;
 				}
 			}
 			catch(Exception e)
 			{
-					System.out.println("Invalid input. Please specify a port using only integers between 1025 and 65535.");
+				server = new SingleThreadedChatServer(0);//if none was specified, uses 0, which locates default
+				System.out.println("Port was not specified. Using free port " + server.serverSocket.getLocalPort());
 			}
-		}
-		else
-		{
-			server = new SingleThreadedChatServer(0);//if none specified, uses 0, which locates one automatically
-			System.out.println("Port was not specified. Using free port " + server.serverSocket.getLocalPort());
 		}
 		server.runServer();
 	}
 
-    public SafeWalkServer(int port) throws IOException 
-    {
-        serverSocket = new ServerSocket(port);
-        serverSocket.setReuseAddress(true);
-    }
+	public SingleThreadedChatServer(int port) throws IOException
+	{
+		serverSocket = new ServerSocket(port);
+		serverSocket.setReuseAddress(true);
+	}
+	public void runServer()
+	{
+		try
+		{
+			while(true)
+			{
+				Socket socket = serverSocket.accept();
+				PrintWriter printer = new PrintWriter(socket.getOutputStream(), true);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				//'0' = getList(); '1' = heartbeat; '2' = ;
+/*				String message = reader.readLine();
+				if(message.equals("0"))
+					getList();
+				if(message.equals("1"))
+					verifyHeartbeat();
+*/			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 
-    public void runServer()
-    {
-    	
-    }
 }
