@@ -1,4 +1,6 @@
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.net.*;
 import java.io.*;
 
@@ -8,11 +10,13 @@ import java.io.*;
 		//it then sends an update to all previously connectd clients about the new user
 	//it regularly checks for heartbeats. If heartbeat not received, it will assume it's dead and remove it from the list.
 	//the client can initiate a chat with another client
+
 public class SingleThreadedChatServer// implements Runnable
 {
 	private long heartbeat_rate = 4000;//in milliseconds
 	ServerSocket serverSocket;
 	static SingleThreadedChatServer server;
+	private int port;
 	public static void main(String[] args) throws IOException
 	{
 		if(args.length > 0)
@@ -43,6 +47,7 @@ public class SingleThreadedChatServer// implements Runnable
 
 	public SingleThreadedChatServer(int port) throws IOException
 	{
+		this.port = port;
 		serverSocket = new ServerSocket(port);
 		serverSocket.setReuseAddress(true);
 	}
@@ -50,6 +55,9 @@ public class SingleThreadedChatServer// implements Runnable
 	public void runServer()
 	{
 		ArrayList<ClientObject> clientList = new ArrayList<ClientObject>();
+		CheckAliveClients heartbeatcheck = new CheckAliveClients( "check thread", clientList, heartbeat_rate );
+		heartbeatcheck.start();
+		
 		try
 		{
 			while(true)
@@ -58,19 +66,64 @@ public class SingleThreadedChatServer// implements Runnable
 				PrintWriter printer = new PrintWriter(socket.getOutputStream(), true);
 				BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				String message = reader.readLine();
-				clientList.add(new ClientObject(message, request.getRemoteAddr(), socket, heartbeat_rate));
+				
+				
 				//'0' = getList(); '1' = heartbeat; '2' = ;
-/*				String message = reader.readLine();
-				if(message.equals("0"))
-					getList();
-				if(message.equals("1"))
-					verifyHeartbeat();
-*/			}
+				
+				// reg_name_ip_port
+				
+				Pattern p = Pattern.compile("reg_(.)+_(.)+");
+				Matcher m = p.matcher(message);
+				boolean regMessage = m.matches();
+				
+				if( regMessage ){
+					String[] info = message.split("_");
+					clientList.add(new ClientObject(info[0], info[1], this.port, heartbeat_rate, socket));
+					printer.println("created!");
+					printer.flush();
+				}
+				
+				if(message.equals("0")){
+					sendList(socket, clientList);
+				}
+				if(message.equals("1")){
+					putHeartbeat(socket, clientList);
+				}
+			}
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
 	}
+	
+	
+	
+	public void sendList(Socket socket, ArrayList<ClientObject> clientList){
+		
+		SocketAddress addr = socket.getRemoteSocketAddress();
+		for( ClientObject c: clientList ){
+			if(addr.equals(c.getSocket().getRemoteSocketAddress())){
+				// SERIALIZE THE ARRAYLIST
+				break;
+			}
+		}
+	}
+	
+	public void putHeartbeat(Socket socket, ArrayList<ClientObject> clientList){
+		long currenttime = System.currentTimeMillis();
+		SocketAddress addr = socket.getRemoteSocketAddress();
+		for( ClientObject c: clientList ){
+			if(addr.equals(c.getSocket().getRemoteSocketAddress())){
+				if( currenttime - c.getLastBeat() <= heartbeat_rate ){
+					c.setHeartBeatTime(System.currentTimeMillis());
+				}
+				break;
+			}
+		}
+	}
 
 }
+
+
+
