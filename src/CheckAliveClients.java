@@ -18,7 +18,7 @@ public class CheckAliveClients implements Runnable{
 			while(true){
 				long currenttime = System.currentTimeMillis();
 				for( ClientObject c : clientList ){
-					if( currenttime - c.getHeartBeatTime() > heartbeat_rate ){
+					if( currenttime - c.getLastBeat() > heartbeat_rate ){
 						clientList.remove(c);
 					}
 				}
