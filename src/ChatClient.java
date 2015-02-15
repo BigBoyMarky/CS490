@@ -41,13 +41,10 @@ public class ChatClient implements Runnable
 		name = console.next();
 		ip = InetAddress.getLocalHost().getHostAddress();
 		try
-		(
-			//try with () is "try-with-resources", which means these things will close after the try is tried
+		{
 			Socket socket = new Socket(HOST, serverPort);
 			printer = new PrintWriter(socket.getOutputStream(), true);
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		)
-		{
 			printer.println("0"+name);
 			printer.println("1"+ip);
 			printer.println("2"+clientPort);
@@ -93,12 +90,19 @@ public class ChatClient implements Runnable
 	{
 		String user;
 		printer.println("get");
-		while(!(user = reader.nextLine()).equals("\0"))
+		try{
+			while(!(user = reader.readLine()).equals("\0"))
+			{
+				//prints out user
+				System.out.println(user);
+				//adds user to hashtable for connection purposes
+				int disjoint = user.indexOf(" ");
+				listOfUsers.put(user.substring(disjoint,user.length()-1),Integer.parseInt(user.substring(0,disjoint)));
+			}
+		}
+		catch(IOException e)
 		{
-			//prints out user
-			System.out.println(user);
-			//adds user to hashtable for connection purposes
-			listOfUsers.put(user.substring(),Integer.parseInt(user.substring()));
+			e.printStackTrace();
 		}
 	}
 
@@ -118,25 +122,37 @@ public class ChatClient implements Runnable
 	{
 		displayCommands();
 		String command;
-		while(true)
+		Scanner console = new Scanner(System.in);
+		try
 		{
-			command = console.nextLine();
-			if(command.substring(0,1).equals("hi"))
+			while(true)
 			{
-				//parse for user name
-				Socket socket = new Socket(HOST, listOfUsers.get(command.substring(2,command.size()-1));//listOfUsers.get returns an integer that is the port of the user
-				System.out.println("Chatting with " + command.substring(2,command.size()-1) + "\nType in \q to quit");
-				String message;
-				while(!(message = console.nextLine()).equals("\q"))
+				command = console.nextLine();
+				if(command.substring(0,2).equals("hi"))
 				{
-					printer.println(message);
-					System.out.println(reader.nextLine());
+					//parse for user name
+					Socket socket = new Socket(HOST, listOfUsers.get(command.substring(2,command.length()-1)));//listOfUsers.get returns an integer that is the port of the user
+					System.out.println("Chatting with " + command.substring(2,command.length()-1) + "\nType in \\q to quit");
+					String message;
+					while(!(message = console.nextLine()).equals("\\q"))
+					{
+						printer.println(message);
+						System.out.println(reader.readLine());
+					}
+					System.out.println("You have exited chat. Type in \'chatlist\' to see who else is online.");
 				}
+				else if(command.substring(0,7).equals("chatlist"))
+					getAndDisplay();
+				else if(command.substring(0,4).equals("help") || command.substring(0,1).equals("?"))
+					displayCommands();
+				else
+					System.out.println("Command not recognized. Type in \'?\' or \'help\' for a list of available commands.");
 			}
-			if(command.substring(0,1).equals("chatlist"))
-				getAndDisplay();
-			if(command.substring(0,1).equals("help") || command.substring(0,1).equals("?"))
-				displayCommands();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.out.println("Sorry. I'm terrible at catching exceptions. :(");
 		}
 	}	
 }
