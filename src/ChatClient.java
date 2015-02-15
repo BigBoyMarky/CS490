@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.ServerSocket;
+import java.util.Hashtable;
 
 public class ChatClient implements Runnable
 {
@@ -27,6 +28,7 @@ public class ChatClient implements Runnable
 	static Socket socket;
 	static PrintWriter printer;
 	static BufferedReader reader;
+	static Hashtable<String,Integer> listOfUsers = new Hashtable<String,Integer>();
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -87,24 +89,34 @@ public class ChatClient implements Runnable
 	/**************************************************************************************************
 	*										GET AND DISPLAY											*
 	**************************************************************************************************/	
-	public void getAndDisplay()
+	public static void getAndDisplay()
 	{
 		String user;
 		printer.println("get");
 		while(!(user = reader.nextLine()).equals("\0"))
+		{
+			//prints out user
 			System.out.println(user);
+			//adds user to hashtable for connection purposes
+			listOfUsers.put(user.substring(),Integer.parseInt(user.substring()));
+		}
+	}
+
+	/**************************************************************************************************
+	*								PRINTING AVAILABLE COMMANDS										*
+	**************************************************************************************************/	
+	public static void displayCommands()
+	{
+		System.out.println("Available commands:\nhi [user] = initiates chat session with [user]");
+		System.out.println("chatlist = shows you the list of all available users on this server");
+		System.out.println("help = shows available commands (same as \'?\')\n? = shows available commands (same as \'help\')");
 	}
 	/**************************************************************************************************
 	*								INITIALIZE CHAT WITH OTHER CLIENTS								*
 	**************************************************************************************************/
 	public void run()
 	{
-		/*
-		Available commands:
-		hi [user] = initiates chat session with [user]
-		chatlist = shows you the list of all available users on this server
-		help = shows available commands (same as '?')
-		? = shows available commands (same as 'help')
+		displayCommands();
 		String command;
 		while(true)
 		{
@@ -112,10 +124,19 @@ public class ChatClient implements Runnable
 			if(command.substring(0,1).equals("hi"))
 			{
 				//parse for user name
-				printer.println(command.substring(2,command.size()));
-
+				Socket socket = new Socket(HOST, listOfUsers.get(command.substring(2,command.size()-1));//listOfUsers.get returns an integer that is the port of the user
+				System.out.println("Chatting with " + command.substring(2,command.size()-1) + "\nType in \q to quit");
+				String message;
+				while(!(message = console.nextLine()).equals("\q"))
+				{
+					printer.println(message);
+					System.out.println(reader.nextLine());
+				}
 			}
+			if(command.substring(0,1).equals("chatlist"))
+				getAndDisplay();
+			if(command.substring(0,1).equals("help") || command.substring(0,1).equals("?"))
+				displayCommands();
 		}
-		*/
 	}	
 }
