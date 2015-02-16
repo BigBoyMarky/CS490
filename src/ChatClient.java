@@ -13,10 +13,6 @@ import java.io.InterruptedIOException;
 
 public class ChatClient implements Runnable
 {
-
-	//upon starting up, the ChatClient grabs the persons IP address and then requests for the name and port number
-	//
-	//the client attempts to initiate
 	/**************************************************************************************************
 	*											FIELDS												*
 	**************************************************************************************************/
@@ -34,7 +30,7 @@ public class ChatClient implements Runnable
 	static BufferedReader reader;//reader to client
 	static Socket currentChatSocket;//the current Socket you're chatting in right now
 	static boolean inChat;//once someone gets a message, they are forced in chat
-	static Hashtable<String,Integer> listOfUsers = new Hashtable<String,Integer>();
+	static Hashtable<String,Integer> listOfUsers = new Hashtable<String,Integer>();//hashtable of users for connecting to others
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -93,7 +89,7 @@ public class ChatClient implements Runnable
 				//why hashtable on client? Because client is the one directly connecting to other clients >.>
 				System.out.print(user.substring(disjoint,user.length()));//prints out user
 			}
-			System.out.println("\n===================================================================================");
+			System.out.println("\n================================================================================");
 		}
 		catch(IOException e)
 		{
@@ -114,7 +110,6 @@ public class ChatClient implements Runnable
 	**************************************************************************************************/
 	public void run()
 	{
-		System.out.println("Chatclient started");
 		heart.println("0"+name);//sends name
 		heart.println("1"+ip);//sends ip
 		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
@@ -138,11 +133,12 @@ public class ChatClient implements Runnable
 						printer.println(message);
 					}
 					System.out.println("You have exited chat. Type in \'chatlist\' to see who else is online.");
+					inChat = false;
 					continue;
 				}
-				System.out.println("Your command was:" + message +"\n====================================================");
-				int size = message.length();				
-				if(message.substring(0,(size<2?size:2)).equals("hi"))
+				System.out.println("Your command was:" + message);
+				int size = message.length();
+				if(message.substring(0,(size<2?size:2)).equals("hi"))//ternary operators to prevent index out of bounds
 				{
 					try
 					{
@@ -187,43 +183,43 @@ public class ChatClient implements Runnable
 			e.printStackTrace();
 		}
 	}
-	public class ChatServer implements Runnable
+	public class ChatServer implements Runnable//ChatClient creates a ChatServer, which means two threads are started in main
 	{
 		public ChatServer() throws IOException
 		{
-			serverSocket = new ServerSocket(0);
+			serverSocket = new ServerSocket(0);//initializes serverSocket
 			serverSocket.setReuseAddress(true);
-			serverSocket.setSoTimeout(100);
-			clientPort = serverSocket.getLocalPort();
+			serverSocket.setSoTimeout(100);//sets a timeout for serverSocket.accept() so when WE initialize contact, we can continue on this thread
+			clientPort = serverSocket.getLocalPort();//clientPort is set up
 		}
 		public void run()
 		{
-			String user = "";
+			String user = "";//user will be the name displayed when chatting e.g. Charlie: hi
 			try
 			{
 				while(true)
 				{
 					try
 					{
-						while(!inChat)
+						while(!inChat)//while you did not initialize chat, wait for a request
 						{
 							Socket socket = serverSocket.accept();
-							currentChatSocket = socket;
-							inChat = true;
+							currentChatSocket = socket;//makes the socket universal so reader/printer can do it write
+							inChat = true;//you're now in chat, no longer focused on waiting for requests, only listening to messages
 							System.out.println("You have received a chat message!");
 							reader = new BufferedReader(new InputStreamReader(currentChatSocket.getInputStream()));
 							printer = new PrintWriter(currentChatSocket.getOutputStream(),true);
-							printer.println(name);
-							user = reader.readLine(); 
+							printer.println(name);//sends your name
+							user = reader.readLine(); //read for name
 						}
 					}
 					catch(InterruptedIOException e)
 					{
 						continue;
 					}
-					if(user.equals(""))
+					if(user.equals(""))//for when you initialize chat, the first message you'll receive is name (as seen above)
 						user = reader.readLine();
-					System.out.println(user + ":" + reader.readLine());
+					System.out.println(user + ":" + reader.readLine());//continue listening for messages
 				}			
 			}
 			catch(IOException e)
@@ -232,4 +228,3 @@ public class ChatClient implements Runnable
 			}
 		}
 	}
-}
