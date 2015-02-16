@@ -28,8 +28,10 @@ public class ChatClient implements Runnable
 	static String ip;//ip of the client
 	static Socket socket;//socket for connecting purposes
 	static ServerSocket serverSocket;//for connecting to other users directly???
-	static PrintWriter printer;//printer
-	static BufferedReader reader;//reader
+	static PrintWriter heart;//printer to server
+	static BufferedReader heartListener;//reader to server
+	static PrintWriter printer;//printer to client
+	static BufferedReader reader;//reader to client
 	static Socket currentChatSocket;//the current Socket you're chatting in right now
 	static boolean inChat;//once someone gets a message, they are forced in chat
 	static Hashtable<String,Integer> listOfUsers = new Hashtable<String,Integer>();
@@ -38,9 +40,9 @@ public class ChatClient implements Runnable
 	**************************************************************************************************/
 	public static void main(String[] args) throws UnknownHostException
 	{
-		/**************************************************************************************************
-		*											MAIN METHOD											*
-		**************************************************************************************************/
+		/**********************************************************************************************
+		*											INITIALIZATION									*
+		**********************************************************************************************/
 		System.out.print("Port of the server to connect to:");
 		Scanner console = new Scanner(System.in);
 		serverPort = console.nextInt();
@@ -49,69 +51,55 @@ public class ChatClient implements Runnable
 		ip = InetAddress.getLocalHost().getHostAddress();//gets local IP address
 		try
 		{
-			Socket socket = new Socket(HOST, serverPort);//connects to server	
-			printer = new PrintWriter(socket.getOutputStream(), true);//allows sending messages
-			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));//allows reading messages				
+			Socket socket = new Socket(HOST, serverPort);//connects to the main server	
+			heart = new PrintWriter(socket.getOutputStream(),true);
+			heartListener = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			new Thread(new ChatClient()).start();//for connecting with other clients and sending messages
-			heartbeat();//heartbeat
-/*
-			Will implement this after finishing server. This = initiating a chat session with another client
-			while(true)
-			{
-				printer.println(console.nextLine());
-			}
-			ServerSocket serverSocket = new ServerSocket();
-*/		
-		}
-		catch(Exception e)//need to better errors
-		{
-			e.printStackTrace();
-		}
-
-	}
-	/**************************************************************************************************
-	*											HEARTBEAT											*
-	**************************************************************************************************/
-	public static void heartbeat()
-	{
-		try
-		{
+			/******************************************************************************************
+			*											HEARTBEAT									*
+			*******************************************************************************************/			
 			while(true)
 			{
 				Thread.sleep(heartbeat_rate);//sleeps for heartrate
-				printer.println("<3");//sends message, isn't it adorable
-			}
+				heart.println("<3");//sends message, isn't it adorable
+			}		
 		}
 		catch(InterruptedException e)
 		{
 			System.err.println("Connection has been interrupted. Our heartbeat has stopped.");
 		}
+		catch(IOException e)	
+		{
+			System.err.println("Connection has been interrupted. Our heartbeat has stopped.");			
+		}
 	}
+
+/*			printer = new PrintWriter(socket.getOutputStream(), true);//allows sending messages
+			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));//allows reading messages*/
 	/**************************************************************************************************
 	*										GET AND DISPLAY											*
 	**************************************************************************************************/	
 	public static void getAndDisplay()
 	{
 		String user;
-		printer.println("get");
-		try{
-			while(!(user = reader.readLine()).equals("\\0"))//basically deserializes server's information
+		heart.println("get");
+		try
+		{
+			System.out.println("Current people online:");
+			while(!(user = heartListener.readLine()).equals("\\0"))//\\0 is used to mark end of list
 			{
-				//prints out user
-				System.out.println(user);
-				//adds user to hashtable for connection purposes
-				int disjoint = user.indexOf(" ");
-				listOfUsers.put(user.substring(disjoint,user.length()),Integer.parseInt(user.substring(0,disjoint)));//puts them into a hashtable
+				int disjoint = user.indexOf(" ");////basically deserializes server's information.
+				listOfUsers.put(user.substring(disjoint,user.length()),Integer.parseInt(user.substring(0,disjoint)));//adds user to hashtable for connection purposes
 				//why hashtable on client? Because client is the one directly connecting to other clients >.>
+				System.out.print(user.substring(disjoint,user.length()));//prints out user
 			}
-			System.out.println("done with get");
+			System.out.println("\n===================================================================================");
 		}
 		catch(IOException e)
 		{
 			e.printStackTrace();
 		}
 	}
-
 	/**************************************************************************************************
 	*								PRINTING AVAILABLE COMMANDS										*
 	**************************************************************************************************/	
@@ -126,56 +114,54 @@ public class ChatClient implements Runnable
 	**************************************************************************************************/
 	public void run()
 	{
-		System.out.println("Chatclient started");		
-		printer.println("0"+name);//sends name
-		printer.println("1"+ip);//sends ip
-		while(clientPort == -1)
-		{
-
-		}
-		printer.println("2"+clientPort);//sends port
+		System.out.println("Chatclient started");
+		heart.println("0"+name);//sends name
+		heart.println("1"+ip);//sends ip
+		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
+		heart.println("2"+clientPort);//sends port		
 		displayCommands();
 		getAndDisplay();
-		String command;
+		String message;//the message string we're going to be dealing with mainly
 		Scanner console = new Scanner(System.in);
 		try
 		{
 			while(true)
 			{
-				command = console.nextLine();
-				System.out.println("Your command was:" + command);
-				int size = command.length();
-				if(command.substring(0,(size<2?size:2)).equals("hi") || inChat)
+				message = console.nextLine();				
+				if(inChat)
 				{
-					//parse for user name
-					if(!inChat)
-					{
-						try
-						{
-							currentChatSocket = new Socket(HOST, listOfUsers.get(command.substring(2,command.length())));//listofusers.get returns an integer that is the port of the user
-							inChat = true;
-						}
-						catch(NullPointerException e)
-						{
-							System.out.println("This user is not online. Check your spelling!");
-							continue;
-						}
-						System.out.println("Chatting with " + command.substring(2,command.length()) + "\nType in \\q to quit");
-					}
-					String message;
-					PrintWriter chatPrinter = new PrintWriter(currentChatSocket.getOutputStream(),true);
-					if(!inChat)
-						chatPrinter.println(name);
+					//I'm surprised there's no structure for: action -> boolean -> action -> repeat based on boolean
+					printer.println(message);
 					while(!(message = console.nextLine()).equals("\\q"))
 					{
-						chatPrinter.println(message);
-						//System.out.println(reader.readLine());
+						//System.out.print("You:");
+						printer.println(message);
 					}
 					System.out.println("You have exited chat. Type in \'chatlist\' to see who else is online.");
+					continue;
 				}
-				else if(command.substring(0,size<8?size:8).equals("chatlist"))
+				System.out.println("Your command was:" + message +"\n====================================================");
+				int size = message.length();				
+				if(message.substring(0,(size<2?size:2)).equals("hi"))
+				{
+					try
+					{
+						currentChatSocket = new Socket(HOST, listOfUsers.get(message.substring(2,message.length())));//listofusers.get returns an integer that is the port of the user
+						System.out.println("Chatting with " + message.substring(2,message.length()) + "\nType in \\q to quit");					
+					}
+					catch(NullPointerException e)
+					{
+						System.out.println("This user is not online. Check your spelling!");
+						continue;
+					}
+					inChat = true;
+					printer = new PrintWriter(currentChatSocket.getOutputStream(),true);
+					reader = new BufferedReader(new InputStreamReader(currentChatSocket.getInputStream()));
+					printer.println(name);
+				}
+				else if(message.substring(0,size<8?size:8).equals("chatlist"))
 					getAndDisplay();
-				else if(command.substring(0,size<1?size:1).equals("?") ||command.substring(0,size<4?size:4).equals("help") )
+				else if(message.substring(0,size<1?size:1).equals("?") ||message.substring(0,size<4?size:4).equals("help") )
 					displayCommands();
 				else
 					System.out.println("Command not recognized. Type in \'?\' or \'help\' for a list of available commands.");
@@ -207,50 +193,42 @@ public class ChatClient implements Runnable
 		{
 			serverSocket = new ServerSocket(0);
 			serverSocket.setReuseAddress(true);
-			serverSocket.setSoTimeout(1900);
+			serverSocket.setSoTimeout(100);
 			clientPort = serverSocket.getLocalPort();
 		}
 		public void run()
 		{
-			while(true)
+			String user = "";
+			try
 			{
-				System.out.println("Chatserver started");
-				String name = "";
-				try
+				while(true)
 				{
-					Socket socket = serverSocket.accept();
-					currentChatSocket = socket;
-					inChat = true;
-					System.out.println("You have received a chat message!");
-	                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-	                name = reader.readLine();
-	                while(true)
-	                	System.out.println(name +":" + reader.readLine());
-				}
-				catch(InterruptedIOException e)
-				{
-					System.out.println("No one chatted you :(");
-					if(inChat)
+					try
 					{
-						try
+						while(!inChat)
 						{
+							Socket socket = serverSocket.accept();
+							currentChatSocket = socket;
+							inChat = true;
 							System.out.println("You have received a chat message!");
-			                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			                name = reader.readLine();
-			                while(true)
-			                	System.out.println(name +":" + reader.readLine());
-						}
-						catch(IOException f)
-						{
-							System.out.println(name + " has disconnected with you.");							
+							reader = new BufferedReader(new InputStreamReader(currentChatSocket.getInputStream()));
+							printer = new PrintWriter(currentChatSocket.getOutputStream(),true);
+							printer.println(name);
+							user = reader.readLine(); 
 						}
 					}
-
-				}
-				catch(IOException e)
-				{
-					System.out.println(name + " has disconnected with you.");
-				}		
+					catch(InterruptedIOException e)
+					{
+						continue;
+					}
+					if(user.equals(""))
+						user = reader.readLine();
+					System.out.println(user + ":" + reader.readLine());
+				}			
+			}
+			catch(IOException e)
+			{
+				System.out.println(user + " has disconnected with you.");											
 			}
 		}
 	}
