@@ -11,6 +11,23 @@ import java.net.ServerSocket;
 import java.util.Hashtable;
 import java.io.InterruptedIOException;
 
+	/**************************************************************************************************
+	*									SPECIFICATIONS FOR SERVER SIDE								*
+	**************************************************************************************************/
+	/**
+	1) When it connects with the server, it will send 4 Strings: 
+		1) its name, which is the username of the chat client (marked with a "0" in front, e.g. "0Charlie")
+		2) its local IPv4 address (marked with a "1" in front, e.g. "1127.0.0.0")
+		3) its ServerSocket port for connecting with other clients directly (marked with a "2" in front, e.g. "24800")
+		4) and "get". It will expect the server to send a list of users with the following format [clientPort clientName]. 
+			(e.g. "4800 Charlie"; "64500 Mark"; "1248 Saranyu";) It will keep waiting until it sees "\\0", so be sure to println
+			that after your for loop is done
+	2) It will continually send "<3" every heartbeat_rate. It's its heartbeat.
+	3) It can send "get" anytime after it connects with the server for any number of times.
+	4) Any number of clients can try to connect to the server
+	5) Do NOT allow multiple clients with the same name. Right during the connection, the client will listen for a message. If
+		the message is "U", it will tell the user to change his/her username. (aka send "U" back if name is a repeat)
+	*/
 public class ChatClient implements Runnable
 {
 	/**************************************************************************************************
@@ -50,6 +67,16 @@ public class ChatClient implements Runnable
 			Socket socket = new Socket(HOST, serverPort);//connects to the main server	
 			heart = new PrintWriter(socket.getOutputStream(),true);
 			heartListener = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			heart.println("0"+name);//sends name
+			heart.println("1"+ip);//sends ip			
+			String verification = heartListener.readLine();//waits for verification
+			while(verification.equals("U"))//if name already in use, tell user to change name
+			{
+				System.out.println("Please select another username. The following are already in use.");
+				getAndDisplay();				
+				name = console.next();
+				verification = heartListener.readLine();
+			}
 			new Thread(new ChatClient()).start();//for connecting with other clients and sending messages
 			/******************************************************************************************
 			*											HEARTBEAT									*
@@ -110,8 +137,6 @@ public class ChatClient implements Runnable
 	**************************************************************************************************/
 	public void run()
 	{
-		heart.println("0"+name);//sends name
-		heart.println("1"+ip);//sends ip
 		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
 		heart.println("2"+clientPort);//sends port		
 		displayCommands();
