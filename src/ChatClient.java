@@ -35,7 +35,7 @@ public class ChatClient implements Runnable
 	*											FIELDS												*
 	**************************************************************************************************/
 	static long heartbeat_rate = 4000;
-	static String HOST = "localhost";
+	static String host;//fuck
 	static int serverPort;//port of the server it's going to connect to
 	static int clientPort;//port of the client's ServerSocket for chatting with other clients
 	static String name;//name of the Client
@@ -57,15 +57,18 @@ public class ChatClient implements Runnable
 		/**********************************************************************************************
 		*											INITIALIZATION									*
 		**********************************************************************************************/
-		System.out.print("Port of the server to connect to:");
+		System.out.print("Hostname of the server you want to connect to:");
 		Scanner console = new Scanner(System.in);
+		host = console.next();		
+		System.out.print("Port of the server to connect to:");
 		serverPort = console.nextInt();
 		System.out.print("Your username:");
 		name = console.next();
+		//name = "localhost";
 		ip = InetAddress.getLocalHost().getHostAddress();//gets local IP address
 		try
 		{
-			Socket socket = new Socket(HOST, serverPort);//connects to the main server	
+			Socket socket = new Socket(host, serverPort);//connects to the main server	
 			heart = new PrintWriter(socket.getOutputStream(),true);
 			heartListener = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			heart.println("0"+name);//sends name
@@ -168,7 +171,7 @@ public class ChatClient implements Runnable
 				{
 					try
 					{
-						currentChatSocket = new Socket(HOST, listOfUsers.get(message.substring(2,message.length())));//listofusers.get returns an integer that is the port of the user
+						currentChatSocket = new Socket(host, listOfUsers.get(message.substring(2,message.length())));//listofusers.get returns an integer that is the port of the user
 						System.out.println("Chatting with " + message.substring(2,message.length()) + "\nType in \\q to quit");					
 					}
 					catch(NullPointerException e)
