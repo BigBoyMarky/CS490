@@ -46,14 +46,14 @@ public class SingleThreadedChatServer// implements Runnable
 			catch(Exception e)
 			{
 					System.out.println("Please enter valid input. We want integers only!");
-			}			
+			}
 		}
 		else
 		{
-			server = new SingleThreadedChatServer(0);//if none was specified, uses 0, which locates default
-			System.out.println("Port was not specified. Using free port " + server.serverSocket.getLocalPort());
-			System.out.println("The IP address of this server is " + InetAddress.getLocalHost().getHostAddress());		
+			server = new SingleThreadedChatServer(0);//if none was specified, uses 0, which locates default			
+			System.out.println("Port was not specified. Using free port " + server.serverSocket.getLocalPort());		
 		}
+		System.out.println("Server Host Name:" + InetAddress.getLocalHost().getHostAddress());
 		server.runServer();
 	}
 	/**************************************************************************************************
@@ -167,6 +167,8 @@ public class SingleThreadedChatServer// implements Runnable
 				String address = "";
 				String message, fifoID, actualMessage;
 				int port = -1;
+				printer.println("Connected!");
+				//insert check for multiple usernames
 				//registering the client here
 				while(name.equals("") || port == -1 || address.equals(""))//if any of them are uninitialized, it means client not done reg
 				{

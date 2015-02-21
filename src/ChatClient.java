@@ -68,12 +68,18 @@ public class ChatClient implements Runnable
 		ip = InetAddress.getLocalHost().getHostAddress();//gets local IP address
 		try
 		{
-			Socket socket = new Socket(host, serverPort);//connects to the main server	
+			Socket socket = new Socket(host, serverPort);//connects to the main server
+			System.out.println("Succesfully connected to host");
 			heart = new PrintWriter(socket.getOutputStream(),true);
+			System.out.println("Succesfully connected to printer");			
 			heartListener = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			System.out.println("Succesfully connected to listener");
 			heart.println("0"+name);//sends name
-			heart.println("1"+ip);//sends ip			
+			System.out.println("Succesfully sent name");			
+			heart.println("1"+ip);//sends ip						
+			System.out.println("Succesfully sent ip");						
 			String verification = heartListener.readLine();//waits for verification
+			System.out.println("got verification");						
 			while(verification.equals("U"))//if name already in use, tell user to change name
 			{
 				System.out.println("Please select another username. The following are already in use.");
