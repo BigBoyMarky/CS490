@@ -51,7 +51,8 @@ public class SingleThreadedChatServer// implements Runnable
 		else
 		{
 			server = new SingleThreadedChatServer(0);//if none was specified, uses 0, which locates default
-			System.out.println("Port was not specified. Using free port " + server.serverSocket.getLocalPort());		
+			System.out.println("Port was not specified. Using free port " + server.serverSocket.getLocalPort());
+			System.out.println("The IP address of this server is " + InetAddress.getLocalHost().getHostAddress());		
 		}
 		server.runServer();
 	}
