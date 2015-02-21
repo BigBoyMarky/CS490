@@ -121,8 +121,9 @@ public class ChatClient implements Runnable
 			System.out.println("Current people online:");
 			while(!(user = heartListener.readLine()).equals("\\0"))//\\0 is used to mark end of list
 			{
+				//61530 Mark
 				int disjoint = user.indexOf(" ");////basically deserializes server's information.
-				listOfUsers.put(user.substring(disjoint,user.length()),Integer.parseInt(user.substring(0,disjoint)));//adds user to hashtable for connection purposes
+				listOfUsers.put(user.substring(disjoint+1,user.length()),Integer.parseInt(user.substring(0,disjoint)));//adds user to hashtable for connection purposes
 				//why hashtable on client? Because client is the one directly connecting to other clients >.>
 				System.out.print(user.substring(disjoint,user.length()));//prints out user
 			}

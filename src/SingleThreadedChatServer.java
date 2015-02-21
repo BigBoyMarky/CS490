@@ -86,6 +86,7 @@ public class SingleThreadedChatServer// implements Runnable
 		public ClientObject(String name, String address,int port, int id)
 		{
 			this.name = name;
+			System.out.println("Mark's name is actually:" + name);
 			this.address = address;
 			this.port = port;
 			this.id = id;
@@ -95,10 +96,11 @@ public class SingleThreadedChatServer// implements Runnable
 	*											heartbeats 											*
 	**************************************************************************************************/			
 		public void run()
-		{
+		{System.out.println("run method");
 			try
-			{
-				BufferedReader reader = new BufferedReader(new InputStreamReader(socketList.get(this.id).getInputStream()));
+			{System.out.println("start of try statement");
+			System.out.printf("socketlist size: %d\tcurrent id: %d",socketList.size(),this.id);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(socketList.get(this.id).getInputStream())); System.out.println("herehrehrhehre");
 				while(this.alive)
 				{
 					//flips switch off, waits for heartbeat, if receive a message, flips switch back on. Otherwise finish execution
@@ -112,7 +114,7 @@ public class SingleThreadedChatServer// implements Runnable
 				}
 				//remove from list
 				clientList.remove(this.id);
-				//thread is done executing and therefore dies				
+				//thread is done executing and therefore dies		
 			}
 			catch(Exception e)
 			{
@@ -142,7 +144,7 @@ public class SingleThreadedChatServer// implements Runnable
 	**************************************************************************************************/	
 		public String serialize()
 		{
-			return (this.name + " " + this.port);//serializing is just turning it into a string :P
+			return (this.port + " " + this.name);//serializing is just turning it into a string :P
 		}
 	}
 	/**************************************************************************************************
@@ -175,7 +177,7 @@ public class SingleThreadedChatServer// implements Runnable
 				{
 					message = reader.readLine();//first message is read
 					fifoID = message.substring(0,1);//to guarantee FIFO oooooohhhh
-					actualMessage = message.substring(1,message.length()-1);//actual message received
+					actualMessage = message.substring(1,message.length());//actual message received
 					if(fifoID.equals("0"))//name
 						name = actualMessage;
 					if(fifoID.equals("1"))//address
@@ -195,10 +197,10 @@ public class SingleThreadedChatServer// implements Runnable
 				//once it's reg'd, we add the client's socket to the list, add the client to the list, then start its heartbeat
 				//this loop ends, and we're ready to service the next client
 				//clientList.add(new Thread(new ClientObject(name, address, port)).start);
-				++numClients;//used to keep track of Clients and their sockets. It's their id
 				socketList.add(socket);										
 				clientList.add(new ClientObject(name, address, port, numClients));
 				new Thread(clientList.get(clientList.size()-1)).start();
+				++numClients;//used to keep track of Clients and their sockets. It's their id				
 			}
 		}
 		catch(Exception e)
