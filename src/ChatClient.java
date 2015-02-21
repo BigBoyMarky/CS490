@@ -26,7 +26,8 @@ import java.io.InterruptedIOException;
 	3) It can send "get" anytime after it connects with the server for any number of times.
 	4) Any number of clients can try to connect to the server
 	5) Do NOT allow multiple clients with the same name. Right during the connection, the client will listen for a message. If
-		the message is "U", it will tell the user to change his/her username. (aka send "U" back if name is a repeat)
+		the message is "U", it will tell the user to change his/her username. (aka send "U" back if name is a repeat). The client
+		will also send a "get" so the user can know which usernames are still available
 	*/
 public class ChatClient implements Runnable
 {
@@ -253,3 +254,4 @@ public class ChatClient implements Runnable
 			}
 		}
 	}
+}
