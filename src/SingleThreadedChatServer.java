@@ -86,6 +86,8 @@ public class SingleThreadedChatServer implements Runnable
 				for(int i = 0; i <= numClients; i++)//go through all sockets
 				{
 					beforeHeartBeat = System.currentTimeMillis();
+					if(!readerList.get(i).ready())
+						continue;
 					message = readerList.get(i).readLine();//will block
 					System.out.println("User #" + i + ":" + message);
 					if(message.substring(0,1).equals("R"))//for registration
@@ -109,6 +111,7 @@ public class SingleThreadedChatServer implements Runnable
 						nameList.add(name);
 						ipList.add(address);
 						portList.add(clientPort);
+						message = readerList.get(i).readLine();//we know a get will begotten
 					}
 					if(message.equals("get"))
 					{
@@ -123,7 +126,7 @@ public class SingleThreadedChatServer implements Runnable
 								printer.println(nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
 						}
 						printer.println("\\0");
-						System.out.println("sent lust");
+						System.out.println("List has been sent!");
 					}
 					if(message.equals("<3"))
 					{
@@ -139,6 +142,11 @@ public class SingleThreadedChatServer implements Runnable
 						System.out.println("User "+ i + " has been terminated");
 						printer.println("You have been terminated! Enjoy the rest of your lonely existence");
 						socketList.remove(i);
+						heartList.remove(i);
+						nameList.remove(i);
+						ipList.remove(i);
+						portList.remove(i);
+						readerList.remove(i);
 						--numClients;
 						--i;
 					}
