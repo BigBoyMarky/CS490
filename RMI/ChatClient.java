@@ -72,8 +72,9 @@ public class ChatClient {
 	    		}
 	    		
 	    		else{
-	    			if(target != server && server.isAlive(targetName))
+	    			if(target != server && server.isAlive(targetName)){
 	    				target.send("["+name+"] " + msg);
+	    			}
 	    			else if(target!=server){
 	    				target = server;
 	    				System.out.println("[System] " + targetName + " is offline. Closing chat session.");
@@ -85,7 +86,7 @@ public class ChatClient {
 		    }
  
 	    	}catch (Exception e) {
-	    		System.out.println("[System] Server failed: " + e);
+	    		System.out.println("[System] Failed " + e);
     	}
 	}
 	

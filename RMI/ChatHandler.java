@@ -48,8 +48,14 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 	}
 	
 	public synchronized void broadcast(String msg) throws RemoteException{
-		for( ChatHandlerInterface c: registeredClients.values() )
-			c.send(msg);
+		for( ChatHandlerInterface c: registeredClients.values() ){
+			try{
+				c.send(msg);
+			}
+			catch(Exception e){
+				// unfortunately, things happen.
+			}
+		}
 	}
 	
 
@@ -81,8 +87,8 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 	@Override
 	public synchronized void getList(ChatHandlerInterface target) throws RemoteException {
 		target.send("[System] Online clients:");
-		for( ChatHandlerInterface c: registeredClients.values() )
-			target.send("[System] " + c.getName());
+		for( String clientName: registeredClients.keySet() )
+			target.send("[System] " + clientName);
 	}
 
 	@Override
