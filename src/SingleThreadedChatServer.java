@@ -1,3 +1,8 @@
+/*
+THINGS LEFT TO DO
+1] MAKE SERVER STAY STRONG EVEN IF CLIENTS ARE DISCONNECTED
+2] REMOVE CLIENT NAME FROM LIST IF CLIENT DISCONNECTS
+*/
 import java.util.*;
 import java.net.*;
 import java.io.*;
@@ -79,13 +84,13 @@ public class SingleThreadedChatServer implements Runnable
 			PrintWriter printer;
 			BufferedReader reader;
 			String message = "";
-			long beforeHeartBeat = 0 ;
-			long afterHeartBeat = 0;
+			//long beforeHeartBeat = 0 ;
+			//long afterHeartBeat = 0;
 			while(true)
 			{
 				for(int i = 0; i <= numClients; i++)//go through all sockets
 				{
-					beforeHeartBeat = System.currentTimeMillis();
+					//beforeHeartBeat = System.currentTimeMillis();
 					if(!readerList.get(i).ready())
 						continue;
 					message = readerList.get(i).readLine();//will block
@@ -98,6 +103,16 @@ public class SingleThreadedChatServer implements Runnable
 						{							
 							printer.println("U");
 							socketList.remove(i);
+							printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
+							for(int j = 0; j <= numClients; j++)
+							{
+								int nameLength = nameList.get(j).length();
+								if(nameLength < 10)
+									printer.println("0"+nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
+								else
+									printer.println(nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
+							}
+							printer.println("\\0");							
 							--numClients;
 							--i;
 							continue;
@@ -133,14 +148,15 @@ public class SingleThreadedChatServer implements Runnable
 						//update heartbeat time
 						heartList.set(i, System.currentTimeMillis());
 					}
-					if(System.currentTimeMillis()-(heartList.get(i)+afterHeartBeat) > heartbeat_rate)
+					if(System.currentTimeMillis()-/*(*/heartList.get(i)/*+afterHeartBeat)*/ > heartbeat_rate)
 					{
 						//NOTE: if server lags, then this solution will just kill everyone
 						//terminate
 						//send message
 						printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
 						System.out.println("User "+ i + " has been terminated");
-						printer.println("You have been terminated! Enjoy the rest of your lonely existence");
+						printer.println("E");
+						socketList.get(i).close();
 						socketList.remove(i);
 						heartList.remove(i);
 						nameList.remove(i);
@@ -150,7 +166,7 @@ public class SingleThreadedChatServer implements Runnable
 						--numClients;
 						--i;
 					}
-					afterHeartBeat = System.currentTimeMillis() - beforeHeartBeat;//will adjust heart beat to compensate for block					
+					//afterHeartBeat = System.currentTimeMillis() - beforeHeartBeat;//will adjust heart beat to compensate for block					
 				}
 			}
 		}
@@ -187,3 +203,6 @@ public class SingleThreadedChatServer implements Runnable
 		}
 	}
 }
+/*
+
+*/

@@ -1,3 +1,14 @@
+/*
+THINGS LEFT TO DO
+1] Update protocol documentation
+2] LIST OF EXCEPTIONS TO CATCH
+		1] SERVER DISCONNECTED
+		2] SERVER TERMINATED YOU
+		3] PERSON YOU WERE CHATTING WITH DISCONNECTED
+		4] PROTOCL VIOLATED
+3] ADD COMMAND FOR SWITCHING TO DIFFERENT USER FOR CHATTING
+*/
+
 import java.util.Scanner;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -58,43 +69,45 @@ public class ChatClient implements Runnable
 		/**********************************************************************************************
 		*											INITIALIZATION									*
 		**********************************************************************************************/
-		System.out.print("Hostname of the server you want to connect to:");
-		Scanner console = new Scanner(System.in);
-		host = console.next();		
-		System.out.print("Port of the server to connect to:");
-		serverPort = console.nextInt();
-		System.out.print("Your username (max char: 13):");
-		name = console.next();
-		while(name.length()>13 || name.length()==0)
+		while(true)//for loop is for keeping client active
 		{
-			System.out.print("Enter a username that is at least 1 character long and at most 13 characters:");
+			System.out.print("Hostname of the server you want to connect to:");
+			Scanner console = new Scanner(System.in);
+			host = console.next();		
+			System.out.print("Port of the server to connect to:");
+			serverPort = console.nextInt();
+			System.out.print("Your username (max char: 13):");
 			name = console.next();
-		}
-		spaces = spaces.substring(0,13-name.length());
-		ip = InetAddress.getLocalHost().getHostAddress();//gets local IP address
-		try
-		{
-			Socket socket = new Socket(host, serverPort);//connects to the main server
-			System.out.println("Successfully connected to host");
-			heart = new PrintWriter(socket.getOutputStream(),true);
-			heartListener = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			new Thread(new ChatClient()).start();//for connecting with other clients and sending messages
-			/******************************************************************************************
-			*											HEARTBEAT									*
-			*******************************************************************************************/			
-			while(true)
+			while(name.length()>13 || name.length()==0)
 			{
-				Thread.sleep(heartbeat_rate);//sleeps for heartrate
-				heart.println("<3");//sends message, isn't it adorable
-			}		
-		}
-		catch(InterruptedException e)
-		{
-			System.err.println("Connection has been interrupted. Our heartbeat has stopped.");
-		}
-		catch(IOException e)	
-		{
-			System.err.println("Connection has been interrupted. Our heartbeat has stopped.");			
+				System.out.print("Enter a username that is at least 1 character long and at most 13 characters:");
+				name = console.next();
+			}
+			spaces = spaces.substring(0,13-name.length());
+			ip = InetAddress.getLocalHost().getHostAddress();//gets local IP address
+			try
+			{
+				Socket socket = new Socket(host, serverPort);//connects to the main server
+				heart = new PrintWriter(socket.getOutputStream(),true);
+				heartListener = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				new Thread(new ChatClient()).start();//for connecting with other clients and sending messages
+				/******************************************************************************************
+				*											HEARTBEAT									*
+				*******************************************************************************************/			
+				while(true)
+				{
+					Thread.sleep(heartbeat_rate);//sleeps for heartrate
+					heart.println("<3");//sends message, isn't it adorable
+				}		
+			}
+			catch(InterruptedException e)
+			{
+				System.err.println("Connection has been interrupted. Our heartbeat has stopped. Try connecting to the server again.");
+			}
+			catch(IOException e)	
+			{
+				System.err.println("Connection has been interrupted. Our heartbeat has stopped. Try connecting again.");			
+			}
 		}
 	}
 
@@ -110,6 +123,7 @@ public class ChatClient implements Runnable
 		System.out.println("sent get");
 		try
 		{
+			//while(!heartListener.ready()){};
 			System.out.println("Current people online:");
 			//needs InvalidProtoclException
 			while(!(user = heartListener.readLine()).equals("\\0"))//\\0 is used to mark end of list
@@ -146,9 +160,9 @@ public class ChatClient implements Runnable
 		{
 			String verification = heartListener.readLine();//if receive "A" means good, if receive "U" means bad			
 		}
-		catch(Exception e)
+		catch(IOException e)
 		{
-			e.printStackTrace();
+			System.out.println("Could not read from server...");
 		}
 		displayCommands();
 		getAndDisplay();
