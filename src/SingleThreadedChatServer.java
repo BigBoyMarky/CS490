@@ -59,6 +59,7 @@ public class SingleThreadedChatServer implements Runnable
 	static ArrayList<Integer> portList = new ArrayList<Integer>();//for port	
 	static ArrayList<Socket> socketList = new ArrayList<Socket>();//socket lists for accessing them later, e.g. when a client requests the list of group G
 	static ArrayList<ClientObject> clientList = new ArrayList<ClientObject>();
+	static ArrayList<BufferedReader> readerList = new ArrayList<BufferedReader>();
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -244,6 +245,7 @@ public class SingleThreadedChatServer implements Runnable
 				{
 					System.out.println("in for loop, reading...");
 					reader = new BufferedReader(new InputStreamReader(socketList.get(i).getInputStream()));
+					readerList.add(reader);
 					System.out.println("made bufferedreader..");
 					message = reader.readLine();
 					System.out.println(message);
