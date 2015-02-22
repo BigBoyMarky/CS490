@@ -39,6 +39,7 @@ public class ChatClient implements Runnable
 	static int serverPort;//port of the server it's going to connect to
 	static int clientPort;//port of the client's ServerSocket for chatting with other clients
 	static String name;//name of the Client
+	static String spaces = "             ";//for limiting maximum characters and for protocol purposes
 	static String ip;//ip of the client
 	static Socket socket;//socket for connecting purposes
 	static ServerSocket serverSocket;//for connecting to other users directly???
@@ -48,7 +49,7 @@ public class ChatClient implements Runnable
 	static BufferedReader reader;//reader to client
 	static Socket currentChatSocket;//the current Socket you're chatting in right now
 	static boolean inChat;//once someone gets a message, they are forced in chat
-	static Hashtable<String,Integer> listOfUsers = new Hashtable<String,Integer>();//hashtable of users for connecting to others
+	static Hashtable<String,String> listOfUsers = new Hashtable<String,String>();//hashtable of users for connecting to others
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -62,32 +63,21 @@ public class ChatClient implements Runnable
 		host = console.next();		
 		System.out.print("Port of the server to connect to:");
 		serverPort = console.nextInt();
-		System.out.print("Your username:");
+		System.out.print("Your username (max char: 13):");
 		name = console.next();
-		//name = "localhost";
+		while(name.length()>13 || name.length()==0)
+		{
+			System.out.print("Enter a username that is at least 1 character long and at most 13 characters:");
+			name = console.next();
+		}
+		spaces = spaces.substring(0,13-name.length());
 		ip = InetAddress.getLocalHost().getHostAddress();//gets local IP address
 		try
 		{
 			Socket socket = new Socket(host, serverPort);//connects to the main server
 			System.out.println("Successfully connected to host");
 			heart = new PrintWriter(socket.getOutputStream(),true);
-			System.out.println("Successfully connected to printer");
 			heartListener = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			System.out.println("Successfully connected to listener");
-			heart.println("0"+name);//sends name
-			System.out.println("Successfully sent name");			
-			heart.println("1"+ip);//sends ip						
-			System.out.println("Successfully sent ip");
-			String verification = heartListener.readLine();//waits for verification
-			System.out.println("got verification");
-			while(verification.equals("U"))//if name already in use, tell user to change name
-			{
-				System.out.println("Please select another username. The following are already in use.");
-				getAndDisplay();				
-				name = console.next();
-				verification = heartListener.readLine();
-			}		
-
 			new Thread(new ChatClient()).start();//for connecting with other clients and sending messages
 			/******************************************************************************************
 			*											HEARTBEAT									*
@@ -120,15 +110,13 @@ public class ChatClient implements Runnable
 		try
 		{
 			System.out.println("Current people online:");
+			//needs InvalidProtoclException
 			while(!(user = heartListener.readLine()).equals("\\0"))//\\0 is used to mark end of list
 			{
-				//61530 Mark
-				int disjoint = user.indexOf(" ");////basically deserializes server's information.
-				System.out.printf("String length =%d\tLocation of space=%d\n",user.length(),disjoint);
-				if(disjoint!=-1)
-					listOfUsers.put(user.substring(disjoint+1,user.length()),Integer.parseInt(user.substring(0,disjoint)));//adds user to hashtable for connection purposes
-				//why hashtable on client? Because client is the one directly connecting to other clients >.>
-				System.out.print(user.substring(disjoint,user.length()));//prints out user
+				//Messages will be in this format: 04Mark127.0.0.1 65432
+				int nameLength = Integer.parseInt(user.substring(0,2));
+				listOfUsers.put(user.substring(2,nameLength+2),user.substring(nameLength+3,user.length()));
+				System.out.print(user.substring(2, nameLength+2));//prints out user
 			}
 			System.out.println("\n================================================================================");
 		}
@@ -152,7 +140,7 @@ public class ChatClient implements Runnable
 	public void run()
 	{
 		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
-		heart.println("2"+clientPort);//sends port		
+		heart.println(name + spaces + ip + " " + clientPort);
 		displayCommands();
 		getAndDisplay();
 		String message;//the message string we're going to be dealing with mainly
@@ -181,7 +169,10 @@ public class ChatClient implements Runnable
 				{
 					try
 					{
-						currentChatSocket = new Socket(host, listOfUsers.get(message.substring(2,message.length())));//listofusers.get returns an integer that is the port of the user
+						String personalInfo = listOfUsers.get(message.substring(2,message.length()));
+						String persons_IP_Address = personalInfo.substring(0,personalInfo.indexOf(" "));
+						int personsPortNumber = Integer.parseInt(personalInfo.substring(personalInfo.indexOf(" ")+1,personalInfo.length()));
+						currentChatSocket = new Socket(persons_IP_Address,personsPortNumber);//listofUsers.get returns an integer that is the port of the user
 						System.out.println("Chatting with " + message.substring(2,message.length()) + "\nType in \\q to quit");					
 					}
 					catch(NullPointerException e)
