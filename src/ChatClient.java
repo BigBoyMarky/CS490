@@ -6,7 +6,7 @@ THINGS LEFT TO DO
 		2] SERVER TERMINATED YOU
 		3] PERSON YOU WERE CHATTING WITH DISCONNECTED
 		4] PROTOCL VIOLATED
-3] ADD COMMAND FOR SWITCHING TO DIFFERENT USER FOR CHATTING
+3] ADD COMMAND FOR SWITCHING TO DIFFERENT USER FOR CHATTING//might not be necessary bc we have \\q
 */
 
 import java.util.Scanner;
@@ -26,13 +26,12 @@ import java.io.InterruptedIOException;
 	*									SPECIFICATIONS FOR SERVER SIDE								*
 	**************************************************************************************************/
 	/**
-	1) When it connects with the server, it will send 4 Strings: 
-		1) its name, which is the username of the chat client (marked with a "0" in front, e.g. "0Charlie")
-		2) its local IPv4 address (marked with a "1" in front, e.g. "1127.0.0.0")
-		3) its ServerSocket port for connecting with other clients directly (marked with a "2" in front, e.g. "24800")
-		4) and "get". It will expect the server to send a list of users with the following format [clientPort clientName]. 
-			(e.g. "4800 Charlie"; "64500 Mark"; "1248 Saranyu";) It will keep waiting until it sees "\\0", so be sure to println
-			that after your for loop is done
+	1) When it connects with the server, it will send 2 Strings: 
+		1) "R"[username][spaces until 13 characters][local ipv4 address][space][port #], e.g.: RCharlie      127.0.0.1 42691
+		2) and "get". It will expect the server to send a list of users with the following format for each single user 
+			[length of name][username][local ipv4 address][space][port #], e.g.: 07Charlie127.0.0.1 42691. 
+			It will keep reading users and waiting until it sees "\\0", so be sure to println that after your for loop is done
+		3) If registration is valid, it expects a response. It can be any response, but if it's "U", it will disconnect.
 	2) It will continually send "<3" every heartbeat_rate. It's its heartbeat.
 	3) It can send "get" anytime after it connects with the server for any number of times.
 	4) Any number of clients can try to connect to the server
