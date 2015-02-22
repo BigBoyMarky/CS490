@@ -25,6 +25,7 @@ public class MultiThreadedChatServer implements Runnable
 	static ArrayList<Integer> portList = new ArrayList<Integer>();//for port	
 	static ArrayList<Socket> socketList = new ArrayList<Socket>();//socket lists for accessing them later, e.g. when a client requests the list of group G
 	static ArrayList<BufferedReader> readerList = new ArrayList<BufferedReader>();
+	static ArrayList<ClientObject> clientList = new ArrayList<ClientObject>();
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -60,6 +61,9 @@ public class MultiThreadedChatServer implements Runnable
 	/**************************************************************************************************
 	*											CONSTRUCTOR												*
 	**************************************************************************************************/
+	public MultiThreadedChatServer() {
+
+	}
 	public MultiThreadedChatServer(int port) throws IOException
 	{
 		this.port = port;
@@ -167,18 +171,20 @@ public class MultiThreadedChatServer implements Runnable
 				socketList.add(socket);
 				readerList.add(new BufferedReader(new InputStreamReader(socket.getInputStream())));
 				++numClients;
-				new Thread(new ClientObject()).start();
+				new Thread(new MultiThreadedChatServer()).start();
 			}
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}			
-			PrintWriter printer;
-			BufferedReader reader;
-			String message = "";
-			new Thread(new MultiThreadedChatServer()).start();//for receiving connections
-			
+		PrintWriter printer;
+		BufferedReader reader;
+		String message = "";
+		new Thread(new MultiThreadedChatServer()).start();//for receiving connections
+		
+		try {
+
 			while(true)
 			{
 				System.out.println(server.serverSocket.getLocalPort());
@@ -241,8 +247,10 @@ public class MultiThreadedChatServer implements Runnable
 						--i;
 					}
 				}
-			}
-		}
+			}// end while
+
+		} // end try
+
 		catch(Exception e)
 		{
 			e.printStackTrace();
