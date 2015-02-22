@@ -115,10 +115,9 @@ public class ChatClient implements Runnable
 			while(!(user = heartListener.readLine()).equals("\\0"))//\\0 is used to mark end of list
 			{
 				//Messages will be in this format: 04Mark127.0.0.1 65432
-				System.out.println(user);
 				int nameLength = Integer.parseInt(user.substring(0,2));
 				listOfUsers.put(user.substring(2,nameLength+2),user.substring(nameLength+3,user.length()));
-				System.out.print(user.substring(2, nameLength+2));//prints out user
+				System.out.printf("\t%s",user.substring(2, nameLength+2));//prints out user
 			}
 			System.out.println("\n================================================================================");
 		}
@@ -179,9 +178,10 @@ public class ChatClient implements Runnable
 				{
 					try
 					{
-						String personalInfo = listOfUsers.get(message.substring(2,message.length()));
-						String persons_IP_Address = personalInfo.substring(0,personalInfo.indexOf(" "));
-						int personsPortNumber = Integer.parseInt(personalInfo.substring(personalInfo.indexOf(" ")+1,personalInfo.length()));
+						String personalInfo = listOfUsers.get(message.substring(3,message.length()));
+						System.out.println(personalInfo);
+						String persons_IP_Address = personalInfo.substring(0,personalInfo.indexOf(","));
+						int personsPortNumber = Integer.parseInt(personalInfo.substring(personalInfo.indexOf(",")+1,personalInfo.length()));
 						currentChatSocket = new Socket(persons_IP_Address,personsPortNumber);//listofUsers.get returns an integer that is the port of the user
 						System.out.println("Chatting with " + message.substring(2,message.length()) + "\nType in \\q to quit");					
 					}

@@ -9,14 +9,14 @@ import java.io.*;
 //it regularly checks for heartbeats. If heartbeat not received, it will assume it's dead and remove it from the list.
 //the client can initiate a chat with another client
 
-public class SingleThreadedChatServer implements Runnable
+public class MultiThreadedChatServer implements Runnable
 {
 	/**************************************************************************************************
 	*											FIELDS												*
 	**************************************************************************************************/	
 	private long heartbeat_rate = 4000;//in milliseconds
 	static ServerSocket serverSocket;
-	static SingleThreadedChatServer server;
+	static MultiThreadedChatServer server;
 	private int port;//port
 	static private int numClients = -1;//keeps track of number of clients for ID'ing purposes
 	static ArrayList<Long> heartList = new ArrayList<Long>();//for checking the time passed for heartbeats
@@ -37,7 +37,7 @@ public class SingleThreadedChatServer implements Runnable
 			{
 				int port = Integer.parseInt(args[0]);
 				if(port >= 1025 && port <= 65535)
-					server = new SingleThreadedChatServer(port);
+					server = new MultiThreadedChatServer(port);
 				else
 				{
 					System.out.println("Port is out of range. Try a port between 1025 and 65535. This program will close.");
@@ -51,7 +51,7 @@ public class SingleThreadedChatServer implements Runnable
 		}
 		else
 		{
-			server = new SingleThreadedChatServer(0);//if none was specified, uses 0, which locates default			
+			server = new MultiThreadedChatServer(0);//if none was specified, uses 0, which locates default			
 			System.out.println("Port was not specified. Using free port " + server.serverSocket.getLocalPort());
 		}
 		System.out.println("Server Host Name:" + InetAddress.getLocalHost().getHostAddress());
@@ -60,10 +60,7 @@ public class SingleThreadedChatServer implements Runnable
 	/**************************************************************************************************
 	*											CONSTRUCTOR												*
 	**************************************************************************************************/
-	public SingleThreadedChatServer()
-	{
-	}
-	public SingleThreadedChatServer(int port) throws IOException
+	public MultiThreadedChatServer(int port) throws IOException
 	{
 		this.port = port;
 		serverSocket = new ServerSocket(port);
@@ -74,19 +71,120 @@ public class SingleThreadedChatServer implements Runnable
 	**************************************************************************************************/	
 	public void run()
 	{
+	}
+/**************************************************************************************************
+	*										ClientObject INNER CLASS								*
+	**************************************************************************************************/
+	public class ClientObject implements Runnable
+	{
+				/****************************************************************************
+				*							ClientObject's FIELDS							*
+				*****************************************************************************/
+		private String name;
+		private String address;
+		private int port;
+		private int id;
+		private boolean alive;
+				/****************************************************************************
+				*							ClientObject's CONSTRUCTOR						*
+				*****************************************************************************/		
+		public ClientObject(String name, String address,int port, int id)
+		{
+			this.name = name;
+			this.address = address;
+			this.port = port;
+			this.id = id;
+			alive = true;
+		}
+	/**************************************************************************************************
+	*											heartbeats 											*
+	**************************************************************************************************/			
+		public void run()
+		{
+			try
+			{
+				BufferedReader reader = new BufferedReader(new InputStreamReader(socketList.get(this.id).getInputStream()));
+				while(this.alive)
+				{
+					//flips switch off, waits for heartbeat, if receive a message, flips switch back on. Otherwise finish execution
+					this.alive = false;
+					Thread.sleep(heartbeat_rate);//in essence our timer
+					String message;
+					if((message=reader.readLine()) != null)//if not null, message received
+						this.alive = true;//flips switch on
+					if(message.equals("get"))//if message was "get", sendList()
+						sendList();
+				}
+				//remove from list
+				clientList.remove(this.id);
+				//thread is done executing and therefore dies				
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				//could either be IOException or InterruptedException
+			}
+		}
+	/**************************************************************************************************
+	*											SEND LIST											*
+	**************************************************************************************************/
+		public void sendList()
+		{
+			try
+			{
+				PrintWriter printer = new PrintWriter(socketList.get(this.id).getOutputStream(),true);//creates a new PrintWriter object to service this specific socket
+				for(int i= 0; i < clientList.size(); i++)//prints out all clients on list
+					printer.println(clientList.get(i).serialize());
+				printer.println("\\0");//null terminator to tell the guy reading the list that's it's done and no more messages not bc of latency
+			}
+			catch(IOException e)
+			{
+				System.err.println(e);
+			}
+		}		
+	/**************************************************************************************************
+	*										SERIALIZING	CLIENTOBJECT								*
+	**************************************************************************************************/	
+		public String serialize()
+		{
+			return (this.name + " " + this.port);//serializing is just turning it into a string :P
+		}
+	}
+	/**************************************************************************************************
+	*									END OF ClientObject INNER CLASS								*
+	**************************************************************************************************/	
+
+	/**************************************************************************************************
+	*										RECEIVE/PROCESS MESSAGES								*
+	**************************************************************************************************/	
+	public void runServer()
+	{
 		try
 		{
+			while(true)
+			{
+				Socket socket = serverSocket.accept();
+				socketList.add(socket);
+				readerList.add(new BufferedReader(new InputStreamReader(socket.getInputStream())));
+				++numClients;
+				new Thread(new ClientObject()).start();
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}			
 			PrintWriter printer;
 			BufferedReader reader;
 			String message = "";
-			long beforeHeartBeat = 0 ;
-			long afterHeartBeat = 0;
+			new Thread(new MultiThreadedChatServer()).start();//for receiving connections
+			
 			while(true)
 			{
+				System.out.println(server.serverSocket.getLocalPort());
 				for(int i = 0; i <= numClients; i++)//go through all sockets
 				{
-					beforeHeartBeat = System.currentTimeMillis();
-					message = readerList.get(i).readLine();//will block
+					message = readerList.get(i).readLine();
 					System.out.println("User #" + i + ":" + message);
 					if(message.substring(0,1).equals("R"))//for registration
 					{
@@ -120,7 +218,7 @@ public class SingleThreadedChatServer implements Runnable
 							if(nameLength < 10)
 								printer.println("0"+nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
 							else
-								printer.println(nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
+								printer.println(nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));								
 						}
 						printer.println("\\0");
 						System.out.println("sent lust");
@@ -130,7 +228,7 @@ public class SingleThreadedChatServer implements Runnable
 						//update heartbeat time
 						heartList.set(i, System.currentTimeMillis());
 					}
-					if(System.currentTimeMillis()-(heartList.get(i)+afterHeartBeat) > heartbeat_rate)
+					if(System.currentTimeMillis()-heartList.get(i) > heartbeat_rate)
 					{
 						//NOTE: if server lags, then this solution will just kill everyone
 						//terminate
@@ -142,40 +240,13 @@ public class SingleThreadedChatServer implements Runnable
 						--numClients;
 						--i;
 					}
-					afterHeartBeat = System.currentTimeMillis() - beforeHeartBeat;//will adjust heart beat to compensate for block					
 				}
 			}
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
-		}
-	}
-
-	/**************************************************************************************************
-	*										RECEIVE/PROCESS MESSAGES								*
-	**************************************************************************************************/	
-	public void runServer()
-	{
-		try
-		{
-			Socket socket = serverSocket.accept();
-			socketList.add(socket);
-			readerList.add(new BufferedReader(new InputStreamReader(socket.getInputStream())));
-			++numClients;
-			new Thread(new SingleThreadedChatServer()).start();//for receiving connections
-			while(true)
-			{
-				socket = serverSocket.accept();
-				socketList.add(socket);
-				readerList.add(new BufferedReader(new InputStreamReader(socket.getInputStream())));
-				++numClients;
-			}
-		}
-		catch(Exception e)
-		{
-			//need to better Exception catching
-			//look for socket disconnect,
+			System.out.println("Will be more specific about exceptions later");
 		}
 	}
 }
