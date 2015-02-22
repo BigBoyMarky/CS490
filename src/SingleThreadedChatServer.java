@@ -100,13 +100,14 @@ public class SingleThreadedChatServer implements Runnable
 			BufferedReader reader;
 			String message = "";
 			new Thread(new SingleThreadedChatServer()).start();//for receiving connections
-			
+
 			while(true)
 			{
-				System.out.println(server.serverSocket.getLocalPort());
+				//System.out.println("fuck");//the server gives fucks, but when you comment it out, it literally gives no fucks
+				//must analyze and ask for help
 				for(int i = 0; i <= numClients; i++)//go through all sockets
 				{
-					message = readerList.get(i).readLine();
+					message = readerList.get(i).readLine();//
 					System.out.println("User #" + i + ":" + message);
 					if(message.substring(0,1).equals("R"))//for registration
 					{
