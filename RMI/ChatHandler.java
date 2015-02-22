@@ -2,38 +2,50 @@
 import java.rmi.*;
 import java.rmi.server.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
  
 public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInterface{
 	
 	private String name;
-	private List<ChatHandlerInterface> registeredClients;
-	private long lastHeartBeat;
+	private ConcurrentMap<String, ChatHandlerInterface> registeredClients;
+	private ConcurrentMap<String, Long> lastHeartBeat;
 	private long heartbeatRate;
 	
 	public ChatHandler(long heartbeatrate) throws RemoteException{
-		this.registeredClients = new ArrayList<ChatHandlerInterface>();
+		this.registeredClients = new ConcurrentHashMap<String, ChatHandlerInterface>();
+		this.lastHeartBeat = new ConcurrentHashMap<String, Long>();
 		this.heartbeatRate = heartbeatrate;
 	}
 	
 	public ChatHandler(String name) throws RemoteException{
 		this.name = name;
-		this.lastHeartBeat = System.currentTimeMillis();
 	}
 	
 	public synchronized void clearClient() throws RemoteException{
-		for(ChatHandlerInterface x: registeredClients){
-			if(System.currentTimeMillis() - x.getHeartBeatTime() > heartbeatRate){
-				registeredClients.remove(x);
-				broadcast("[System] " + x.getName() +" has disconnected.");
+		
+		Set<String> removed = new HashSet<String>();
+		
+		for(String clientName: lastHeartBeat.keySet()){
+			if(System.currentTimeMillis() - lastHeartBeat.get(clientName) > heartbeatRate){
+				registeredClients.remove(clientName);
+				broadcast("[System] " + clientName +" has disconnected.");
+				removed.add(clientName);
 			}
 		}
+		for(String clientName: removed)
+			lastHeartBeat.remove(clientName);
+		
 	}
 	
 	public synchronized void broadcast(String msg) throws RemoteException{
-		//for( ChatHandlerInterface c: registeredClients )
-		//	c.send(msg);
+		for( ChatHandlerInterface c: registeredClients.values() )
+			c.send(msg);
 	}
 	
 
@@ -50,48 +62,31 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 
 	@Override
 	public synchronized void registerClient(ChatHandlerInterface c) throws RemoteException {
-		for( ChatHandlerInterface i: registeredClients ){
-			i.send("[System] "+c.getName()+" is online");
-		}
-		registeredClients.add(c);
+		broadcast("[System] "+c.getName()+" is online");
+		registeredClients.put(c.getName(), c);
 		c.send("[System] Connected to server");
 		getList(c);
 	}
 	
 	@Override
 	public synchronized ChatHandlerInterface startChat(String targetName)
-			throws RemoteException {
-		for( ChatHandlerInterface c: registeredClients ){
-			if(c.getName().equals(targetName))
-				return c;
-		}
-			
-		return null;
+			throws RemoteException {	
+		return registeredClients.get(targetName);
 	}
 
 	@Override
 	public synchronized void getList(ChatHandlerInterface target) throws RemoteException {
 		target.send("[System] Online clients:");
-		for( ChatHandlerInterface c: registeredClients )
+		for( ChatHandlerInterface c: registeredClients.values() )
 			target.send("[System] " + c.getName());
 	}
 
 	@Override
 	public synchronized void sendHeartBeat(String name) throws RemoteException {
-		for( ChatHandlerInterface c: registeredClients )
-			if(c.getName().equals(name))
-				c.setHeartBeatTime();
+		System.out.println(name +" <3");
+		lastHeartBeat.put(name, System.currentTimeMillis());
 	}
 
-	@Override
-	public synchronized void setHeartBeatTime() throws RemoteException {
-		this.lastHeartBeat = System.currentTimeMillis();
-	}
-
-	@Override
-	public synchronized long getHeartBeatTime() throws RemoteException {
-		return this.lastHeartBeat;
-	}
 }
 
 /*

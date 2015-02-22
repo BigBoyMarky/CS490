@@ -6,7 +6,7 @@ import java.util.*;
  
 public class ChatServer {
 public static void main (String[] argv) {
-	long heartbeatrate = 4000;
+	long heartbeatrate = 1000;
     try {
 	    	System.setSecurityManager(new RMISecurityManager());
 	    	Scanner s=new Scanner(System.in);
@@ -20,12 +20,8 @@ public static void main (String[] argv) {
 	    	System.out.println("[System] Chat Remote Object is ready:");
  
 	    	while(true){
-	    		String msg=s.nextLine().trim();
-	    		if (s.equals("quit")){
-	    			break;
-	    		}
-	    		
 				server.clearClient();
+				Thread.sleep(200);
 	    	}
  
     	}catch (Exception e) {

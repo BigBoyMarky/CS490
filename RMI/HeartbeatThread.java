@@ -7,7 +7,11 @@ public class HeartbeatThread extends Thread{
 		while(true){
 			try {
 				server.sendHeartBeat(name);
+				Thread.sleep(300);
 			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
