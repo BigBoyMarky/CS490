@@ -126,7 +126,7 @@ public class SingleThreadedChatServer implements Runnable
 						nameList.add(name);
 						ipList.add(address);
 						portList.add(clientPort);
-						message = readerList.get(i).readLine();//we know a get will begotten
+						message = readerList.get(i).readLine();//we know a get will beg otten
 					}
 					if(message.equals("get"))
 					{

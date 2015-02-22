@@ -27,6 +27,10 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 		this.name = name;
 	}
 	
+	public boolean isAlive(String name) throws RemoteException{
+		return registeredClients.containsKey(name);
+	}
+	
 	public synchronized void clearClient() throws RemoteException{
 		
 		Set<String> removed = new HashSet<String>();
@@ -44,8 +48,14 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 	}
 	
 	public synchronized void broadcast(String msg) throws RemoteException{
-		for( ChatHandlerInterface c: registeredClients.values() )
-			c.send(msg);
+		for( ChatHandlerInterface c: registeredClients.values() ){
+			try{
+				c.send(msg);
+			}
+			catch(Exception e){
+				// unfortunately, things happen.
+			}
+		}
 	}
 	
 
@@ -57,15 +67,15 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 
 	@Override
 	public void send(String s) throws RemoteException {
-		System.out.println(s);
+		//System.out.println(s);
 	}
 
 	@Override
 	public synchronized void registerClient(ChatHandlerInterface c) throws RemoteException {
-		broadcast("[System] "+c.getName()+" is online");
+		//broadcast("[System] "+c.getName()+" is online");
 		registeredClients.put(c.getName(), c);
 		c.send("[System] Connected to server");
-		getList(c);
+		//getList(c);
 	}
 	
 	@Override
@@ -77,8 +87,8 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 	@Override
 	public synchronized void getList(ChatHandlerInterface target) throws RemoteException {
 		target.send("[System] Online clients:");
-		for( ChatHandlerInterface c: registeredClients.values() )
-			target.send("[System] " + c.getName());
+		for( String clientName: registeredClients.keySet() )
+			target.send("[System] " + clientName);
 	}
 
 	@Override

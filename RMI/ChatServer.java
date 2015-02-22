@@ -15,7 +15,7 @@ public static void main (String[] argv) {
  
 	    	ChatHandler server = new ChatHandler(heartbeatrate);	
  
-	    	Naming.rebind("rmi://localhost/ABC", server);
+	    	Naming.rebind("rmi://localhost/rmichat", server);
  
 	    	System.out.println("[System] Chat Remote Object is ready:");
  
