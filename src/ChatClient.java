@@ -143,6 +143,14 @@ public class ChatClient implements Runnable
 	{
 		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
 		heart.println("R"+ name + spaces + ip + " " + clientPort);
+		try
+		{
+			String verification = heartListener.readLine();//if receive "A" means good, if receive "U" means bad			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		displayCommands();
 		getAndDisplay();
 		String message;//the message string we're going to be dealing with mainly

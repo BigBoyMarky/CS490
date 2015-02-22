@@ -100,8 +100,10 @@ public class SingleThreadedChatServer implements Runnable
 			BufferedReader reader;
 			String message = "";
 			new Thread(new SingleThreadedChatServer()).start();//for receiving connections
+			
 			while(true)
 			{
+				System.out.println(server.serverSocket.getLocalPort());
 				for(int i = 0; i <= numClients; i++)//go through all sockets
 				{
 					message = readerList.get(i).readLine();
