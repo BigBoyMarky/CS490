@@ -67,15 +67,15 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 
 	@Override
 	public void send(String s) throws RemoteException {
-		System.out.println(s);
+		//System.out.println(s);
 	}
 
 	@Override
 	public synchronized void registerClient(ChatHandlerInterface c) throws RemoteException {
-		broadcast("[System] "+c.getName()+" is online");
+		//broadcast("[System] "+c.getName()+" is online");
 		registeredClients.put(c.getName(), c);
 		c.send("[System] Connected to server");
-		getList(c);
+		//getList(c);
 	}
 	
 	@Override
