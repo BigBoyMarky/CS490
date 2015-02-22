@@ -1,37 +1,3 @@
-//Woah woah woah. Is this really what engineering is? We learn the ultimate power of creation and stuff, but in the end all we really are
-//are just laborers that build other people's dreams for them? We have to deal with overly nitpicky customers who don't even have
-//a clue of what they want with their unreasonable demands? What happened to making things because we were passionate about it?
-//What happened to creating NEW technology that hasn't existed yet? What happened to going above and beyond and laughing at "just good enough"?
-//Is this what we're getting trained to be? Laborers who will listen to their bosses demands? Please, please tell me, what is teh
-//major that gets to DREAM and build their own dreams?
-
-//Seriously...as people with the ultimate power of creations, we should be the most CAPABLE people in the world, not only in building
-//things, but also DREAMING up of things. We should be learning how to break down a seemingly impossible problem, we should be learning
-//about teamwork, we should be trained, not just hah be content with good enough, in fact you guys make it feel like going above and beyond
-//is a scary thing to do, No we should be trained to always go above and beyond. We shouldn't cower to others, we should be GLAD
-//to help others. The world needs to advanced forward and become a meritocracy. We are the greatest thinkers in the world, the
-//smartest and brightest, and yet we're the ones serving those who can't even do fucking Calculus. Fuck this shit man.
-
-//Choosing an API over your own methods is fine, but choosing an API over your own methods "because that is what real software engineers do"
-//is complete bullshit. If your method is as efficient as a popular API's implementation, then there's no fucking reason to use the API's method
-//Unless of course, you're one of those people who can't actually analyze the efficiency of their own code..
-
-//"Using tried and true API's is what makrs a true software engineer"
-//"Haha, that's funny. Anyone can mix and match API's. That's not true engineering. It's like saying buying parts and building your own"
-//"desktop computer is engineering! REAL engineering is MAKING the new parts that opens up new boundaries in our technology,
-//PSEUDO engineering is using existing parts to build something"
-
-//After I took my first engineering class, I stopped taking them. I didn't like their way of thinking. They taught about industry
-//standards and how this is the "right" way of doing it without explaining why. Where's that fearless sense of inquiry that begets
-//the question: "WHY is it considered the 'right' way to do it? And if it's already pretty good, how can we improve on it?"
-
-//You want to build something? 
-//Just doing "Good enough" is not innovative. "Good enough" will be "good enough", but it will never ever scrape the edge of our
-//technological boundaries. When I hear engineers spouting that our goal is to be "good enough", I feel that they have lost their
-//sense of idealism, their sense of drive and innovation. That isn't the attitude of innovators that envision new technology, that's
-//the attitude of manual laborers drafted to build someone else's visions for them.
-//Pam Graf LWSN 1151, Mail/Copy Room for Key Fob//pgraf@purdue.edu//oatmeal + honey + bananas + grain/oats + (soy)milk
-
 import java.util.*;
 import java.net.*;
 import java.io.*;
@@ -58,7 +24,6 @@ public class SingleThreadedChatServer implements Runnable
 	static ArrayList<String> ipList = new ArrayList<String>();//for ip
 	static ArrayList<Integer> portList = new ArrayList<Integer>();//for port	
 	static ArrayList<Socket> socketList = new ArrayList<Socket>();//socket lists for accessing them later, e.g. when a client requests the list of group G
-	static ArrayList<ClientObject> clientList = new ArrayList<ClientObject>();
 	static ArrayList<BufferedReader> readerList = new ArrayList<BufferedReader>();
 	/**************************************************************************************************
 	*											MAIN METHOD											*
@@ -97,8 +62,6 @@ public class SingleThreadedChatServer implements Runnable
 	**************************************************************************************************/
 	public SingleThreadedChatServer()
 	{
-		//for making new thread only
-		System.out.println("fuck");
 	}
 	public SingleThreadedChatServer(int port) throws IOException
 	{
@@ -106,121 +69,20 @@ public class SingleThreadedChatServer implements Runnable
 		serverSocket = new ServerSocket(port);
 		serverSocket.setReuseAddress(true);
 	}
-
-	/**************************************************************************************************
-	*										ClientObject INNER CLASS								*
-	**************************************************************************************************/
-	public class ClientObject implements Runnable
-	{
-				/****************************************************************************
-				*							ClientObject's FIELDS							*
-				*****************************************************************************/
-		private String name;
-		private String address;
-		private int port;
-		private int id;//for tracking and management in the server
-		private boolean alive;//whether or not this guy is alive
-				/****************************************************************************
-				*							ClientObject's CONSTRUCTOR						*
-				*****************************************************************************/		
-		public ClientObject()
-		{
-			alive = true;
-		}
-		public ClientObject(String name, String address,int port, int id)
-		{
-			this.name = name;
-			this.address = address;
-			this.port = port;
-			this.id = id;
-			alive = true;
-		}
-	/**************************************************************************************************
-	*											heartbeats 											*
-	**************************************************************************************************/			
-		public void run()
-		{
-			try
-			{
-				BufferedReader reader = new BufferedReader(new InputStreamReader(socketList.get(this.id).getInputStream()));
-				while(this.alive)
-				{
-					//flips switch off, waits for heartbeat, if receive a message, flips switch back on. Otherwise finish execution
-					this.alive = false;
-					Thread.sleep(heartbeat_rate);//in essence our timer
-					String message;
-					if((message=reader.readLine()) != null)//if not null, message received
-						this.alive = true;//flips switch on
-					if(message.equals("get"))//if message was "get", sendList()
-						sendList();
-				}
-				//remove from list
-				clientList.remove(this.id);
-				//thread is done executing and therefore dies		
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-				//could either be IOException or InterruptedException
-			}
-		}
-	/**************************************************************************************************
-	*											SEND LIST											*
-	**************************************************************************************************/
-		public void sendList()
-		{
-			try
-			{
-				PrintWriter printer = new PrintWriter(socketList.get(this.id).getOutputStream(),true);//creates a new PrintWriter object to service this specific socket
-				for(int i= 0; i < clientList.size(); i++)//prints out all clients on list
-					printer.println(clientList.get(i).serialize());
-				printer.println("\\0");//null terminator to tell the guy reading the list that's it's done and no more messages not bc of latency
-			}
-			catch(IOException e)
-			{
-				System.err.println(e);
-			}
-		}		
-	/**************************************************************************************************
-	*										SERIALIZING	CLIENTOBJECT								*
-	**************************************************************************************************/	
-		public String serialize()
-		{
-			return (this.port + " " + this.name);//serializing is just turning it into a string :P
-		}
-
-		public String getName()
-		{
-			return (this.name);
-		}
-	}
-	/**************************************************************************************************
-	*									END OF ClientObject INNER CLASS								*
-	**************************************************************************************************/	
-
-
-	/*
-	*/
-
 	/**************************************************************************************************
 	*								SEPARATE THREAD TO CONNECT NEW CLIENTS							*
 	**************************************************************************************************/	
 	public void run()
 	{
-		System.out.println("IN RUN MOTHERFUCKER");
 		try
 		{
 			while(true)
 			{
-				System.out.println("IN RUN'S WHILE LOOP MOTHERFUCKER");				
 				Socket socket = serverSocket.accept();
-				System.out.println("ACCEPTED CONNECTION MOTHERFUCKER");				
 				socketList.add(socket);
-				System.out.println("Received a client!");
+				readerList.add(new BufferedReader(new InputStreamReader(socket.getInputStream())));
 				++numClients;
-				System.out.println(numClients);
 			}
-
 		}
 		catch(Exception e)
 		{
@@ -240,23 +102,14 @@ public class SingleThreadedChatServer implements Runnable
 			new Thread(new SingleThreadedChatServer()).start();//for receiving connections
 			while(true)
 			{
-				System.out.println(numClients + "\tPort:" + server.serverSocket.getLocalPort());
 				for(int i = 0; i <= numClients; i++)//go through all sockets
 				{
-					System.out.println("in for loop, reading...");
-					if(readerList.size()<=i)
-						readerList.add(new BufferedReader(new InputStreamReader(socketList.get(i).getInputStream())));
-					//readerList.add(reader);
-					System.out.println("made bufferedreader..");
 					message = readerList.get(i).readLine();
-					System.out.println(message);
+					System.out.println("User #" + i + ":" + message);
 					if(message.substring(0,1).equals("R"))//for registration
 					{
-						System.out.println("New User Accepted!");
-						//System.out.println(message);
 						printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
 						String name = message.substring(1,14).trim();//whatever
-						System.out.println("User's name is:"+name);
 						if(nameList.contains(name))
 						{							
 							printer.println("U");
@@ -267,20 +120,18 @@ public class SingleThreadedChatServer implements Runnable
 						}
 						int spacePosition = message.indexOf(" ",14);
 						String address = message.substring(14,spacePosition);
-						System.out.println("User's IP Address is:"+address);
 						int clientPort = Integer.parseInt(message.substring(spacePosition+1,message.length()));
-						System.out.println("User's port number is:"+clientPort);
+						printer.println("A");//accepted
+						//Adding data to respective lists
 						heartList.add(System.currentTimeMillis());
 						nameList.add(name);
 						ipList.add(address);
 						portList.add(clientPort);
-						System.out.println("Added to all the lists. New user is done registering");
 					}
 					if(message.equals("get"))
 					{
 						System.out.println("Received a get request from user " + i);
 						printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
-						System.out.println("printer ready!");
 						for(int j = 0; j <= numClients; j++)
 						{
 							int nameLength = nameList.get(j).length();
@@ -288,7 +139,6 @@ public class SingleThreadedChatServer implements Runnable
 								printer.println("0"+nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
 							else
 								printer.println(nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));								
-							System.out.println("User" + j + nameList.get(j) + ipList.get(j) +portList.get(j)); 							
 						}
 						printer.println("\\0");
 						System.out.println("sent lust");
