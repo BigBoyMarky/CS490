@@ -107,6 +107,7 @@ public class ChatClient implements Runnable
 	{
 		String user;
 		heart.println("get");
+		System.out.println("sent get");
 		try
 		{
 			System.out.println("Current people online:");
@@ -114,6 +115,7 @@ public class ChatClient implements Runnable
 			while(!(user = heartListener.readLine()).equals("\\0"))//\\0 is used to mark end of list
 			{
 				//Messages will be in this format: 04Mark127.0.0.1 65432
+				System.out.println(user);
 				int nameLength = Integer.parseInt(user.substring(0,2));
 				listOfUsers.put(user.substring(2,nameLength+2),user.substring(nameLength+3,user.length()));
 				System.out.print(user.substring(2, nameLength+2));//prints out user

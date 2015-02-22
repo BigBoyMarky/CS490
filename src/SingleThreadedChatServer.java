@@ -240,10 +240,11 @@ public class SingleThreadedChatServer implements Runnable
 				for(int i = 0; i <= numClients; i++)//go through all sockets
 				{
 					System.out.println("in for loop, reading...");
-					reader = new BufferedReader(new InputStreamReader(socketList.get(i).getInputStream()));
-					readerList.add(reader);
+					if(readerList.size()<=i)
+						readerList.add(new BufferedReader(new InputStreamReader(socketList.get(i).getInputStream())));
+					//readerList.add(reader);
 					System.out.println("made bufferedreader..");
-					message = reader.readLine();
+					message = readerList.get(i).readLine();
 					System.out.println(message);
 					if(message.substring(0,1).equals("R"))//for registration
 					{
@@ -299,6 +300,7 @@ public class SingleThreadedChatServer implements Runnable
 						//terminate
 						//send message
 						printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
+						System.out.println("User "+ i + " has been terminated");
 						printer.println("You have been terminated! Enjoy the rest of your lonely existence");
 						socketList.remove(i);
 						--numClients;
