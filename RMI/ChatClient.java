@@ -14,7 +14,7 @@ public class ChatClient {
 		    String name=s.nextLine().trim();		    		    	
 		    ChatHandlerInterface client = new ChatHandler(name);
 		    
-		    ChatHandlerInterface server = (ChatHandlerInterface)Naming.lookup("rmi://localhost/ABC");
+		    ChatHandlerInterface server = (ChatHandlerInterface)Naming.lookup("rmi://localhost/rmichat");
 		    
 	    	server.registerClient(client);
 	    	String msg="[System] "+client.getName()+" is online";
@@ -38,7 +38,7 @@ public class ChatClient {
 	    		/*
 	    		 * 	type :1 <name> to chat another person
 	    		 *  type :2 to cancel
-	    		 * 
+	    		 *  type :3 to get the list
 	    		 */
 	    		
 	    		if(msg.indexOf(':')==0){
@@ -51,7 +51,6 @@ public class ChatClient {
 			    		
 			    		if( target != null){
 			    			System.out.println("[System] Start sending message to " + targetName);
-			    			msg="["+client.getName()+"] "+msg;
 			    		}
 			    		else{
 			    			System.out.println("[System] Error: " + targetName + " is either offline or not found.");
@@ -64,24 +63,23 @@ public class ChatClient {
 			    		target = server;
 			    	}
 	    			
-	    			else if(msg.indexOf('q')==1){
+	    			else if(msg.indexOf('3')==1){
 
-	    				System.out.println("Good bye!");
-	    				heart.kill();
-	    				break;
+	    				server.getList(client);
 			    	}
 	    			
+	    			else target.send("["+name+"] " + msg);
 	    		}
 	    		
 	    		else{
 	    			if(target != server && server.isAlive(targetName))
-	    				target.send("["+client.getName()+"] " + msg);
+	    				target.send("["+name+"] " + msg);
 	    			else if(target!=server){
 	    				target = server;
 	    				System.out.println("[System] " + targetName + " is offline. Closing chat session.");
 	    			}
 	    			else 
-	    				target.send("["+client.getName()+"] " + msg);
+	    				target.send("["+name+"] " + msg);
 	    		}
 	    		
 		    }
