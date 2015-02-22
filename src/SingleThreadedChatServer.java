@@ -207,16 +207,12 @@ public class SingleThreadedChatServer implements Runnable
 	**************************************************************************************************/	
 	public void run()
 	{
-		System.out.println("IN RUN MOTHERFUCKER");
 		try
 		{
 			while(true)
-			{
-				System.out.println("IN RUN'S WHILE LOOP MOTHERFUCKER");				
-				Socket socket = serverSocket.accept();
-				System.out.println("ACCEPTED CONNECTION MOTHERFUCKER");				
+			{		
+				Socket socket = serverSocket.accept();		
 				socketList.add(socket);
-				System.out.println("Received a client!");
 				++numClients;
 				System.out.println(numClients);
 			}
