@@ -3,8 +3,9 @@ import java.rmi.RemoteException;
 public class HeartbeatThread extends Thread{
 	private ChatHandlerInterface server;
 	private String name;
+	private Boolean alive;
 	public void run(){
-		while(true){
+		while(alive){
 			try {
 				server.sendHeartBeat(name);
 				Thread.sleep(300);
@@ -17,8 +18,14 @@ public class HeartbeatThread extends Thread{
 			}
 		}
 	}
+	
+	public void kill(){
+		alive = false;
+	}
+	
 	public HeartbeatThread(ChatHandlerInterface server,String name){
 		this.server = server;
 		this.name = name;
+		alive = true;
 	}
 }

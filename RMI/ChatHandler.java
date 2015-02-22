@@ -27,6 +27,10 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 		this.name = name;
 	}
 	
+	public boolean isAlive(String name) throws RemoteException{
+		return registeredClients.containsKey(name);
+	}
+	
 	public synchronized void clearClient() throws RemoteException{
 		
 		Set<String> removed = new HashSet<String>();

@@ -20,34 +20,71 @@ public class ChatClient {
 	    	String msg="[System] "+client.getName()+" is online";
 	    	server.send(msg);
 	    	
-	    	System.out.println("[System] To start chatting, type 1 follow by space and the name of the person you want to chat to i.e. 1 Gott");
+	    	System.out.println("[System] To start chatting, type :1 follow by space and the name of the person you want to chat to i.e. :1 Gott");
 	    	
 	    	ChatHandlerInterface target = server;
+	    	
 	    	
 	    	HeartbeatThread heart = new HeartbeatThread(server, name);
 	    	heart.start();
 	    	
+	    	String targetName = null;
+	    	
+	    	
 	    	while(true){
 	    		
 	    		msg= s.nextLine().trim();
-	    		target.send("["+client.getName()+"] " + msg);
 	    		
-	    		if(msg.indexOf('1')==0 && target==server){
+	    		/*
+	    		 * 	type :1 <name> to chat another person
+	    		 *  type :2 to cancel
+	    		 * 
+	    		 */
+	    		
+	    		if(msg.indexOf(':')==0){
+	    			
+	    			if(msg.indexOf('1')==1){
 
-		    		String targetName = msg.split(" ")[1];
-		    		
-		    		target = server.startChat(targetName);
-		    		
-		    		if( target != null){
-		    			System.out.println("[System] Start sending message to " + targetName);
-		    			msg="["+client.getName()+"] "+msg;
-		    		}
-		    		else{
-		    			System.out.println("[System] Error: " + targetName + " is either offline or not found.");
-			    			target = server;
+			    		targetName = msg.split(" ")[1];
+			    		
+			    		target = server.startChat(targetName);
+			    		
+			    		if( target != null){
+			    			System.out.println("[System] Start sending message to " + targetName);
+			    			msg="["+client.getName()+"] "+msg;
 			    		}
-		    		}
-		    	}
+			    		else{
+			    			System.out.println("[System] Error: " + targetName + " is either offline or not found.");
+				    		target = server;
+				    	}
+			    	}
+	    			
+	    			else if(msg.indexOf('2')==1){
+
+			    		target = server;
+			    	}
+	    			
+	    			else if(msg.indexOf('q')==1){
+
+	    				System.out.println("Good bye!");
+	    				heart.kill();
+	    				break;
+			    	}
+	    			
+	    		}
+	    		
+	    		else{
+	    			if(target != server && server.isAlive(targetName))
+	    				target.send("["+client.getName()+"] " + msg);
+	    			else if(target!=server){
+	    				target = server;
+	    				System.out.println("[System] " + targetName + " is offline. Closing chat session.");
+	    			}
+	    			else 
+	    				target.send("["+client.getName()+"] " + msg);
+	    		}
+	    		
+		    }
  
 	    	}catch (Exception e) {
 	    		System.out.println("[System] Server failed: " + e);
