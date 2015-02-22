@@ -90,9 +90,38 @@ public class SingleThreadedChatServer implements Runnable
 			{
 				for(int i = 0; i <= numClients; i++)//go through all sockets
 				{
-					//beforeHeartBeat = System.currentTimeMillis();
 					if(!readerList.get(i).ready())
-						continue;
+					{
+						if(heartList.size()>i)//means it hasn't reg so don't check plz
+						{
+							if(System.currentTimeMillis()-heartList.get(i) > (heartbeat_rate+100))//fault tolerance for processing on serverside
+							{
+								//NOTE: if server lags, then this solution will just kill everyone
+								//terminate
+								//send message
+								try
+								{
+									printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
+									System.out.println("User "+ i + " has been terminated");
+									printer.println("E");
+								}
+								catch(IOException e)
+								{
+									System.out.println("Client is already dead!");
+								}
+								socketList.get(i).close();
+								socketList.remove(i);
+								heartList.remove(i);
+								nameList.remove(i);
+								ipList.remove(i);
+								portList.remove(i);
+								readerList.remove(i);
+								--numClients;
+								--i;
+							}
+						}
+						continue;						
+					}
 					message = readerList.get(i).readLine();//will block
 					System.out.println("User #" + i + ":" + message);
 					if(message.substring(0,1).equals("R"))//for registration
@@ -148,14 +177,21 @@ public class SingleThreadedChatServer implements Runnable
 						//update heartbeat time
 						heartList.set(i, System.currentTimeMillis());
 					}
-					if(System.currentTimeMillis()-/*(*/heartList.get(i)/*+afterHeartBeat)*/ > heartbeat_rate)
+					if(System.currentTimeMillis()-heartList.get(i) > heartbeat_rate)
 					{
 						//NOTE: if server lags, then this solution will just kill everyone
 						//terminate
 						//send message
-						printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
-						System.out.println("User "+ i + " has been terminated");
-						printer.println("E");
+						try
+						{
+							printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
+							System.out.println("User "+ i + " has been terminated");
+							printer.println("E");							
+						}
+						catch(IOException e)
+						{
+							System.out.println("Client is already dead!");
+						}
 						socketList.get(i).close();
 						socketList.remove(i);
 						heartList.remove(i);
@@ -166,7 +202,6 @@ public class SingleThreadedChatServer implements Runnable
 						--numClients;
 						--i;
 					}
-					//afterHeartBeat = System.currentTimeMillis() - beforeHeartBeat;//will adjust heart beat to compensate for block					
 				}
 			}
 		}
