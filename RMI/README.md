@@ -1,7 +1,7 @@
 # Instruction
 
-* compile all the classes
-* type ``` rmic ChatHandler ```
-* type rmiregistry
-* start the server
-* start the client
+* Compile all the classes
+* Type ``` rmic ChatHandler ```
+* Type ``` rmiregistry <port>``` 
+* To start the server: ``` coming soon ``` 
+* start the client: ``` coming soon ```
