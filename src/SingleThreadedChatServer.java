@@ -49,13 +49,16 @@ public class SingleThreadedChatServer implements Runnable
 	*											FIELDS												*
 	**************************************************************************************************/	
 	private long heartbeat_rate = 4000;//in milliseconds
-	ServerSocket serverSocket;
+	static ServerSocket serverSocket;
 	static SingleThreadedChatServer server;
 	private int port;//port
-	private int numClients = 0;//keeps track of number of clients for ID'ing purposes
-	static ArrayList<ClientObject> clientList = new ArrayList<ClientObject>();//the lists = the group G
+	static private int numClients = -1;//keeps track of number of clients for ID'ing purposes
+	static ArrayList<Long> heartList = new ArrayList<Long>();//for checking the time passed for heartbeats
+	static ArrayList<String> nameList = new ArrayList<String>();//for names
+	static ArrayList<String> ipList = new ArrayList<String>();//for ip
+	static ArrayList<Integer> portList = new ArrayList<Integer>();//for port	
 	static ArrayList<Socket> socketList = new ArrayList<Socket>();//socket lists for accessing them later, e.g. when a client requests the list of group G
-
+	static ArrayList<ClientObject> clientList = new ArrayList<ClientObject>();
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -91,6 +94,11 @@ public class SingleThreadedChatServer implements Runnable
 	/**************************************************************************************************
 	*											CONSTRUCTOR												*
 	**************************************************************************************************/
+	public SingleThreadedChatServer()
+	{
+		//for making new thread only
+		System.out.println("fuck");
+	}
 	public SingleThreadedChatServer(int port) throws IOException
 	{
 		this.port = port;
@@ -114,6 +122,10 @@ public class SingleThreadedChatServer implements Runnable
 				/****************************************************************************
 				*							ClientObject's CONSTRUCTOR						*
 				*****************************************************************************/		
+		public ClientObject()
+		{
+			alive = true;
+		}
 		public ClientObject(String name, String address,int port, int id)
 		{
 			this.name = name;
@@ -194,22 +206,26 @@ public class SingleThreadedChatServer implements Runnable
 	**************************************************************************************************/	
 	public void run()
 	{
+		System.out.println("IN RUN MOTHERFUCKER");
 		try
 		{
 			while(true)
 			{
+				System.out.println("IN RUN'S WHILE LOOP MOTHERFUCKER");				
 				Socket socket = serverSocket.accept();
+				System.out.println("ACCEPTED CONNECTION MOTHERFUCKER");				
 				socketList.add(socket);
+				System.out.println("Received a client!");
 				++numClients;
+				System.out.println(numClients);
 			}
 
 		}
 		catch(Exception e)
 		{
-			//Sockets
+			e.printStackTrace();
 		}
 	}
-
 	/**************************************************************************************************
 	*										RECEIVE/PROCESS MESSAGES								*
 	**************************************************************************************************/	
@@ -220,22 +236,24 @@ public class SingleThreadedChatServer implements Runnable
 			PrintWriter printer;
 			BufferedReader reader;
 			String message = "";
-			ArrayList<Long> heartList = new ArrayList<Long>();//for checking the time passed for heartbeats
-			ArrayList<Socket> socketList = new ArrayList<Socket>();//for connecting with the socket for communication
-			ArrayList<String> nameList = new ArrayList<String>();//for names
-			ArrayList<String> ipList = new ArrayList<String>();//for ip
-			ArrayList<Integer> portList = new ArrayList<Integer>();//for port
-			new Thread().start();//for receiving connections
+			new Thread(new SingleThreadedChatServer()).start();//for receiving connections
 			while(true)
 			{
-				for(int i = 0; i < numClients; i++)//go through all sockets
+				System.out.println(numClients + "\tPort:" + server.serverSocket.getLocalPort());
+				for(int i = 0; i <= numClients; i++)//go through all sockets
 				{
+					System.out.println("in for loop, reading...");
 					reader = new BufferedReader(new InputStreamReader(socketList.get(i).getInputStream()));
+					System.out.println("made bufferedreader..");
 					message = reader.readLine();
+					System.out.println(message);
 					if(message.substring(0,1).equals("R"))//for registration
 					{
+						System.out.println("New User Accepted!");
+						//System.out.println(message);
 						printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
 						String name = message.substring(1,14).trim();//whatever
+						System.out.println("User's name is:"+name);
 						if(nameList.contains(name))
 						{							
 							printer.println("U");
@@ -246,25 +264,38 @@ public class SingleThreadedChatServer implements Runnable
 						}
 						int spacePosition = message.indexOf(" ",14);
 						String address = message.substring(14,spacePosition);
-						spacePosition = message.indexOf(" ", spacePosition+1);
-						int port = Integer.parseInt(message.substring(spacePosition,message.length()));
+						System.out.println("User's IP Address is:"+address);
+						int clientPort = Integer.parseInt(message.substring(spacePosition+1,message.length()));
+						System.out.println("User's port number is:"+clientPort);
 						heartList.add(System.currentTimeMillis());
 						nameList.add(name);
 						ipList.add(address);
-						portList.add(port);
+						portList.add(clientPort);
+						System.out.println("Added to all the lists. New user is done registering");
 					}
-					else if(message.equals("get"))
+					if(message.equals("get"))
 					{
+						System.out.println("Received a get request from user " + i);
 						printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
-						for(int j = 0; j < numClients; j++)
-							printer.println(nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
+						System.out.println("printer ready!");
+						for(int j = 0; j <= numClients; j++)
+						{
+							int nameLength = nameList.get(j).length();
+							if(nameLength < 10)
+								printer.println("0"+nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
+							else
+								printer.println(nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));								
+							System.out.println("User" + j + nameList.get(j) + ipList.get(j) +portList.get(j)); 							
+						}
+						printer.println("\\0");
+						System.out.println("sent lust");
 					}
-					else if(message.equals("<3"))
+					if(message.equals("<3"))
 					{
 						//update heartbeat time
 						heartList.set(i, System.currentTimeMillis());
 					}
-					else if(System.currentTimeMillis()-heartList.get(i) > heartbeat_rate)
+					if(System.currentTimeMillis()-heartList.get(i) > heartbeat_rate)
 					{
 						//NOTE: if server lags, then this solution will just kill everyone
 						//terminate
