@@ -140,7 +140,7 @@ public class ChatClient implements Runnable
 	public void run()
 	{
 		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
-		heart.println(name + spaces + ip + " " + clientPort);
+		heart.println("R" + name + spaces + ip + " " + clientPort);
 		displayCommands();
 		getAndDisplay();
 		String message;//the message string we're going to be dealing with mainly
