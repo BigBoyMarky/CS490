@@ -66,33 +66,33 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 
 
 	@Override
-	public void send(String s) throws RemoteException {
-		//System.out.println(s);
+	public synchronized void send(String s) throws RemoteException {
+		System.out.println(s);
 	}
 
 	@Override
-	public synchronized void registerClient(ChatHandlerInterface c) throws RemoteException {
-		//broadcast("[System] "+c.getName()+" is online");
+	public void registerClient(ChatHandlerInterface c) throws RemoteException {
+		broadcast("[System] "+c.getName()+" is online");
 		registeredClients.put(c.getName(), c);
 		c.send("[System] Connected to server");
 		//getList(c);
 	}
 	
 	@Override
-	public synchronized ChatHandlerInterface startChat(String targetName)
+	public ChatHandlerInterface startChat(String targetName)
 			throws RemoteException {	
 		return registeredClients.get(targetName);
 	}
 
 	@Override
-	public synchronized void getList(ChatHandlerInterface target) throws RemoteException {
+	public void getList(ChatHandlerInterface target) throws RemoteException {
 		target.send("[System] Online clients:");
 		for( String clientName: registeredClients.keySet() )
 			target.send("[System] " + clientName);
 	}
 
 	@Override
-	public synchronized void sendHeartBeat(String name) throws RemoteException {
+	public void sendHeartBeat(String name) throws RemoteException {
 		System.out.println(name +" <3");
 		lastHeartBeat.put(name, System.currentTimeMillis());
 	}

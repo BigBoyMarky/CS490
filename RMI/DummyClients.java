@@ -23,8 +23,8 @@ public class DummyClients {
 				server.registerClient(client);
 				latency += System.currentTimeMillis() - start2;
 			}
-			System.out.println(System.currentTimeMillis() - start);
-			System.out.println(latency/100000);
+			System.out.println(100000/(System.currentTimeMillis() - start));
+			System.out.println(latency);
 			
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			// TODO Auto-generated catch block

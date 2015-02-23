@@ -14,8 +14,14 @@ public class ChatClient {
 			String name = s.nextLine().trim();
 			ChatHandlerInterface client = new ChatHandler(name);
 
-			ChatHandlerInterface server = (ChatHandlerInterface) Naming
-					.lookup("rmi://localhost/rmichat");
+			ChatHandlerInterface server;
+			
+			if(argv.length > 0)
+				server = (ChatHandlerInterface) Naming
+				.lookup(argv[0]);
+			else
+				server = (ChatHandlerInterface) Naming
+					.lookup("rmi://mc01.cs.purdue.edu/rmichat");
 
 			server.registerClient(client);
 			String msg = "[System] " + client.getName() + " is online";
