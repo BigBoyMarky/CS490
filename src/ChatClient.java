@@ -60,6 +60,7 @@ public class ChatClient implements Runnable
 	static Socket currentChatSocket;//the current Socket you're chatting in right now
 	static boolean inChat;//once someone gets a message, they are forced in chat
 	static Hashtable<String,String> listOfUsers = new Hashtable<String,String>();//hashtable of users for connecting to others
+	static boolean isTesting = false;
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -70,19 +71,24 @@ public class ChatClient implements Runnable
 		**********************************************************************************************/
 		while(true)//for loop is for keeping client active
 		{
-			System.out.print("Hostname of the server you want to connect to:");
-			Scanner console = new Scanner(System.in);
-			host = console.next();		
-			System.out.print("Port of the server to connect to:");
-			serverPort = console.nextInt();
-			console.nextLine();
-			System.out.print("Your username (max char: 13):");
-			name = console.nextLine();
-			while(name.length()>13 || name.length()==0)
-			{
-				System.out.print("Enter a username that is at least 1 character long and at most 13 characters:");
-				name = console.next();
+			if (!isTesting) {
+				System.out.print("Hostname of the server you want to connect to:");
+				Scanner console = new Scanner(System.in);
+				host = console.next();		
+				System.out.print("Port of the server to connect to:");
+				serverPort = console.nextInt();
+				console.nextLine();
+				System.out.print("Your username (max char: 13):");
+				name = console.nextLine();
+				while(name.length()>13 || name.length()==0)
+				{
+					System.out.print("Enter a username that is at least 1 character long and at most 13 characters:");
+					name = console.next();
+				}
 			}
+			System.out.println("name: " + name);
+			System.out.println("name length: " + name.length());
+			System.out.println("Space starts:" + spaces + ": Ends here");
 			spaces = spaces.substring(0,13-name.length());
 			ip = InetAddress.getLocalHost().getHostAddress();//gets local IP address
 			try
@@ -108,6 +114,7 @@ public class ChatClient implements Runnable
 			{
 				System.err.println("Connection has been interrupted. Our heartbeat has stopped. Try connecting again.");			
 			}
+			isTesting = false;
 		}
 	}
 
@@ -237,6 +244,14 @@ public class ChatClient implements Runnable
 			e.printStackTrace();
 		}
 	}
+
+	public ChatClient(String h, int p, String n) {
+		host = h;
+		serverPort = p;
+		name = n;
+		isTesting = true;
+	}
+
 	public class ChatServer implements Runnable//ChatClient creates a ChatServer, which means two threads are started in main
 	{
 		public ChatServer() throws IOException
