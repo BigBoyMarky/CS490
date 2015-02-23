@@ -38,7 +38,8 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 		for(String clientName: lastHeartBeat.keySet()){
 			if(System.currentTimeMillis() - lastHeartBeat.get(clientName) > heartbeatRate){
 				registeredClients.remove(clientName);
-				broadcast("[System] " + clientName +" has disconnected.");
+				if(registeredClients.size() < 1000)
+					broadcast("[System] " + clientName +" has disconnected.");
 				removed.add(clientName);
 			}
 		}
@@ -76,6 +77,10 @@ public class ChatHandler extends UnicastRemoteObject implements ChatHandlerInter
 		registeredClients.put(c.getName(), c);
 		c.send("[System] Connected to server");
 		//getList(c);
+	}
+	
+	public void registerClientExperiment(ChatHandlerInterface c) throws RemoteException {
+		registeredClients.put(c.getName(), c);
 	}
 	
 	@Override

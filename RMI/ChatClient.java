@@ -16,12 +16,16 @@ public class ChatClient {
 
 			ChatHandlerInterface server;
 			
+			String hostname;
+			
 			if(argv.length > 0)
-				server = (ChatHandlerInterface) Naming
-				.lookup(argv[0]);
+				hostname = argv[0];
+				
 			else
-				server = (ChatHandlerInterface) Naming
-					.lookup("rmi://mc01.cs.purdue.edu/rmichat");
+				hostname = "rmi://localhost/server";
+				
+			server = (ChatHandlerInterface) Naming
+					.lookup(hostname);
 
 			server.registerClient(client);
 			String msg = "[System] " + client.getName() + " is online";
@@ -29,6 +33,10 @@ public class ChatClient {
 
 			System.out
 					.println("[System] To start chatting, type :1 follow by space and the name of the person you want to chat to i.e. :1 Gott");
+			System.out
+					.println("[System] To start chatting, type :2 to stop sending message to your current version.");
+			System.out
+					.println("[System] To start chatting, type :3 to show the online users.");
 
 			ChatHandlerInterface target = server;
 
