@@ -99,7 +99,7 @@ public class SingleThreadedChatServer implements Runnable
 					{
 						if(heartList.size()>i)//means it hasn't reg so don't check plz
 						{
-							if(System.currentTimeMillis()-heartList.get(i) > (heartbeat_rate+25))//fault tolerance for processing on serverside
+							if(System.currentTimeMillis()-heartList.get(i) > (heartbeat_rate+100))//fault tolerance for processing on serverside
 							{
 								//NOTE: if server lags, then this solution will just kill everyone
 								//terminate

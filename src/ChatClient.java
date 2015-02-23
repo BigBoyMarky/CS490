@@ -93,6 +93,7 @@ public class ChatClient implements Runnable
 			System.out.println("name: " + name);
 			System.out.println("name length: " + name.length());
 			System.out.println("Space starts:" + spaces + ": Ends here");
+			System.out.println("Spaces' length:" + spaces.length());
 			spaces = spaces.substring(0,13-name.length());
 			ip = InetAddress.getLocalHost().getHostAddress();//gets local IP address
 			try

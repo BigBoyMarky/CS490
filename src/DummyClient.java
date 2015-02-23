@@ -10,14 +10,15 @@ public class DummyClient implements Runnable
 	{
 		for (int i = 0; i < 10; i++) {
 			name+=i;
-			System.out.printf("index:%d:%s",i,name);
+			System.out.printf("index:%d:%s\n",i,name);
+			try{Thread.sleep(100);}catch(InterruptedException e) { Thread.currentThread().interrupt();}
 			new Thread(new DummyClient()).start();
-		name = "a";	
+			name = "a";	
 		}
 	}
 	public void run()
 	{
-		ChatClient dummyClient = new ChatClient("localhost", 5578, name);	
+		ChatClient dummyClient = new ChatClient("localhost", 5620, name);	
 			//System.out.println(name);
 		String[] sucks = {};
 		try
