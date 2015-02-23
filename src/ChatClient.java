@@ -1,6 +1,6 @@
 /*
 THINGS LEFT TO DO
-1] Update protocol documentation
+1] Update protocol documentation | DONE
 2] LIST OF EXCEPTIONS TO CATCH
 		1] SERVER DISCONNECTED
 		2] SERVER TERMINATED YOU
