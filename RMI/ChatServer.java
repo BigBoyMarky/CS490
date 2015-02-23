@@ -1,5 +1,6 @@
 
 
+import java.net.InetAddress;
 import java.rmi.*;
 import java.rmi.server.*;
 import java.util.*;
@@ -14,8 +15,9 @@ public static void main (String[] argv) {
 	    	//String name=s.nextLine().trim();
  
 	    	ChatHandler server = new ChatHandler(heartbeatrate);	
- 
-	    	Naming.rebind("rmi://localhost/rmichat", server);
+	    	
+	    	System.out.println(InetAddress.getLocalHost().getHostAddress());
+	    	Naming.rebind("rmi://mc01.cs.purdue.edu/rmichat", server);
  
 	    	System.out.println("[System] Chat Remote Object is ready:");
  
