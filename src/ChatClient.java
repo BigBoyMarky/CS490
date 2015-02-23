@@ -75,8 +75,9 @@ public class ChatClient implements Runnable
 			host = console.next();		
 			System.out.print("Port of the server to connect to:");
 			serverPort = console.nextInt();
+			console.nextLine();
 			System.out.print("Your username (max char: 13):");
-			name = console.next();
+			name = console.nextLine();
 			while(name.length()>13 || name.length()==0)
 			{
 				System.out.print("Enter a username that is at least 1 character long and at most 13 characters:");
