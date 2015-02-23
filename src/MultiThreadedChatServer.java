@@ -4,8 +4,11 @@
 3] UPDATE PROTOCOLS BASED ON SINGLETHREADED CHAT SERVER
 */
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.net.*;
 import java.io.*;
+
 
 //Create a server based on command line input, DONE
 //server waits for clients to connect, DONE
@@ -77,7 +80,7 @@ public class MultiThreadedChatServer implements Runnable
 		serverSocket.setReuseAddress(true);
 	}
 	/**************************************************************************************************
-	*								SEPARATE THREAD TO CONNECT NEW CLIENTS							*
+	*								SEPARATE THREAD TO MANAGE CLIENTS								*
 	**************************************************************************************************/	
 	public void run()
 	{
@@ -179,13 +182,17 @@ public class MultiThreadedChatServer implements Runnable
 	{
 		try
 		{
+			ExecutorService executor = Executors.newFixedThreadPool(10);
+			Executors.newFixedThreadPool(4);
 			while(true)
 			{
 				Socket socket = serverSocket.accept();
 				socketList.add(socket);
 				readerList.add(new BufferedReader(new InputStreamReader(socket.getInputStream())));
 				++numClients;
-				new Thread(new MultiThreadedChatServer()).start();
+				executor.execute(new MultiThreadedChatServer());
+				//executor.execute(new MultiThreadedChatServer());
+				//new Thread(new MultiThreadedChatServer()).start();
 			}
 		}
 		catch(Exception e)

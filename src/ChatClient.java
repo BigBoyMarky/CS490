@@ -1,4 +1,8 @@
 /*
+LIST OF BUGS TO FIX
+1] CAN'T SAY HI TO YOURSELF
+2] FIRST QUIT SENDS TO OTHER GUY
+3] SPACE
 THINGS LEFT TO DO
 1] Update protocol documentation | DONE
 2] LIST OF EXCEPTIONS TO CATCH
@@ -75,7 +79,7 @@ public class ChatClient implements Runnable
 			host = console.next();		
 			System.out.print("Port of the server to connect to:");
 			serverPort = console.nextInt();
-			System.out.print("Your username (max char: 13):");
+			System.out.print("Your username (max char: 13, no spaces):");
 			name = console.next();
 			while(name.length()>13 || name.length()==0)
 			{

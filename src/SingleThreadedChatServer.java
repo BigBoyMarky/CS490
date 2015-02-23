@@ -1,7 +1,12 @@
 /*
+LIST OF BUGS
+1] ADDING SPACE TO NAMES MAKES IT ONLY PRINT FIRST NAME WHICH SUCKS FOR CHATLIST
+2]
+
 THINGS LEFT TO DO
 1] MAKE SERVER STAY STRONG EVEN IF CLIENTS ARE DISCONNECTED | DONE
 2] REMOVE CLIENT NAME FROM LIST IF CLIENT DISCONNECTS | DONE
+3] When a new client joins, notify everyone about the new member |?
 */
 import java.util.*;
 import java.net.*;
@@ -94,7 +99,7 @@ public class SingleThreadedChatServer implements Runnable
 					{
 						if(heartList.size()>i)//means it hasn't reg so don't check plz
 						{
-							if(System.currentTimeMillis()-heartList.get(i) > (heartbeat_rate+100))//fault tolerance for processing on serverside
+							if(System.currentTimeMillis()-heartList.get(i) > (heartbeat_rate+25))//fault tolerance for processing on serverside
 							{
 								//NOTE: if server lags, then this solution will just kill everyone
 								//terminate
@@ -238,6 +243,3 @@ public class SingleThreadedChatServer implements Runnable
 		}
 	}
 }
-/*
-
-*/
