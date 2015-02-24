@@ -49,7 +49,7 @@ public class ChatClient implements Runnable
 	*											FIELDS												*
 	**************************************************************************************************/
 	static long heartbeat_rate = 4000;
-	static String host;//fuck
+	static String host;
 	static int serverPort;//port of the server it's going to connect to
 	static int clientPort;//port of the client's ServerSocket for chatting with other clients
 	static String name;//name of the Client

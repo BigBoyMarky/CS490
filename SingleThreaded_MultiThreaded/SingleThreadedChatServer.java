@@ -28,7 +28,7 @@ public class SingleThreadedChatServer implements Runnable
 	static ServerSocket serverSocket;
 	static SingleThreadedChatServer server;
 	private int port;//port
-	static private int numClients = -1;//keeps track of number of clients for ID'ing purposes
+	volatile static private int numClients = -1;//keeps track of number of clients for ID'ing purposes
 	static ArrayList<Long> heartList = new ArrayList<Long>();//for checking the time passed for heartbeats
 	static ArrayList<String> nameList = new ArrayList<String>();//for names
 	static ArrayList<String> ipList = new ArrayList<String>();//for ip
@@ -99,7 +99,7 @@ public class SingleThreadedChatServer implements Runnable
 					{
 						if(heartList.size()>i)//means it hasn't reg so don't check plz
 						{
-							if(System.currentTimeMillis()-heartList.get(i) > (heartbeat_rate+100))//fault tolerance for processing on serverside
+							if(System.currentTimeMillis()-heartList.get(i) > (heartbeat_rate+25))//fault tolerance for processing on serverside
 							{
 								//NOTE: if server lags, then this solution will just kill everyone
 								//terminate
