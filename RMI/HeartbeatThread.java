@@ -8,7 +8,7 @@ public class HeartbeatThread extends Thread{
 		while(alive){
 			try {
 				server.sendHeartBeat(name);
-				Thread.sleep(300);
+				Thread.sleep(5000);
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

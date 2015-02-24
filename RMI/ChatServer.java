@@ -7,7 +7,7 @@ import java.util.*;
  
 public class ChatServer {
 public static void main (String[] argv) {
-	long heartbeatrate = 10000;
+	long heartbeatrate = 40000;
     try {
 	    	System.setSecurityManager(new RMISecurityManager());
 	    	Scanner s=new Scanner(System.in);
@@ -32,7 +32,7 @@ public static void main (String[] argv) {
  
 	    	while(true){
 				server.clearClient();
-				Thread.sleep(200);
+				Thread.sleep(40000);
 	    	}
  
     	}catch (Exception e) {
