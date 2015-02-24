@@ -8,7 +8,7 @@ import java.io.*;
 //it regularly checks for heartbeats. If heartbeat not received, it will assume it's dead and remove it from the list.
 //the client can initiate a chat with another client
 
-public class SingleThreadedChatServer implements Runnable
+public class SingleThreadedChatServer
 {
 	/**************************************************************************************************
 	*											FIELDS												*

@@ -1,53 +1,40 @@
-import java.lang.*;
-import java.net.Socket;
-import java.util.*;
-
-public class ClientObject {
-
-	private String name;
+import java.io.Serializable;
+public class ClientObject implements Serializable
+{
+	private String username;
 	private String ipAddress;
 	private int port;
-	private long heartbeat_rate;
-	private final Socket socket;
-	private long lastbeat;
-	
-	public ClientObject (String n, String i, int p, long h, Socket s) {
-		name = n;
-		ipAddress = i;
-		port = p;
-		heartbeat_rate = h;
-		socket = s;
-		lastbeat = System.currentTimeMillis();
-		//(new Thread(this)).start();
+	private long heartbeat;
+	public ClientObject(String username, String ipAddress, int port)
+	{
+		this.username = username;
+		this.ipAddress = ipAddress;
+		this.port = port;
 	}
-	
-	public String getName() {
-		return name;
+	public ClientObject(ClientObject objectToCopy)
+	{
+		this.username = objectToCopy.getName();
+		this.ipAddress = objectToCopy.getIpAddress();
+		this.port = objectToCopy.getPort();
 	}
-	
-	public String getIP() {
-		
+	public String getName()
+	{
+		return username;
+	}
+	public String getIpAddress()
+	{
 		return ipAddress;
-		
 	}
-	
-	public int getPort() {
-		
+	public int getPort()
+	{
 		return port;
-		
 	}
-	
-	public Socket getSocket(){
-		return socket;
+	public long getHeart()
+	{
+		return heartbeat;
 	}
-	
-	public void setHeartBeatTime(long heartbeattime) {
-		this.lastbeat = heartbeattime;
-		
+	public void updateHeart(long timeStamp)
+	{
+		heartbeat = timeStamp;
 	}
-	
-	public long getLastBeat(){
-		return lastbeat;
-	}
-	
 }
