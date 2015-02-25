@@ -1,21 +1,30 @@
 import java.io.Serializable;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 public class ClientObject implements Serializable
 {
 	private String username;
 	private String ipAddress;
 	private int port;
 	private long heartbeat;
+	private transient Socket socket;
+	private transient ObjectInputStream ois;
+	private transient ObjectOutputStream oos;
 	public ClientObject(String username, String ipAddress, int port)
-	{
+	{//information sent from the clientside
 		this.username = username;
 		this.ipAddress = ipAddress;
 		this.port = port;
 	}
-	public ClientObject(ClientObject objectToCopy)
-	{
-		this.username = objectToCopy.getName();
-		this.ipAddress = objectToCopy.getIpAddress();
-		this.port = objectToCopy.getPort();
+	public ClientObject(ClientObject copy, Socket socket, ObjectInputStream ois, ObjectOutputStream oos)
+	{//for the serverside
+		this.username = copy.getName();
+		this.ipAddress = copy.getIpAddress();
+		this.port = copy.getPort();
+		this.socket = socket;
+		this.ois = ois;
+		this.oos = oos;
 	}
 	public String getName()
 	{
@@ -33,8 +42,20 @@ public class ClientObject implements Serializable
 	{
 		return heartbeat;
 	}
+	public ObjectInputStream getIn()
+	{
+		return ois;
+	}
+	public ObjectOutputStream getOut()
+	{
+		return oos;
+	}
 	public void updateHeart(long timeStamp)
 	{
 		heartbeat = timeStamp;
+	}
+	public void setName(String newName)
+	{
+		username = newName;
 	}
 }

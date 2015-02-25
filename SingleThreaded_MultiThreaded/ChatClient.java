@@ -1,19 +1,10 @@
-/*
-LIST OF BUGS TO FIX
-1] CAN'T SAY HI TO YOURSELF
-2] FIRST QUIT SENDS TO OTHER GUY
-3] SPACE
-THINGS LEFT TO DO
-1] Update protocol documentation | DONE
-2] LIST OF EXCEPTIONS TO CATCH
-		1] SERVER DISCONNECTED
-		2] SERVER TERMINATED YOU
-		3] PERSON YOU WERE CHATTING WITH DISCONNECTED
-		4] PROTOCL VIOLATED
-3] ADD COMMAND FOR SWITCHING TO DIFFERENT USER FOR CHATTING//might not be necessary bc we have \\q
-*/
-
+import java.net.SocketException;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.Iterator;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.io.BufferedReader;
@@ -48,108 +39,147 @@ public class ChatClient implements Runnable
 	/**************************************************************************************************
 	*											FIELDS												*
 	**************************************************************************************************/
-	static long heartbeat_rate = 4000;
-	static String host;
-	static int serverPort;//port of the server it's going to connect to
-	static int clientPort;//port of the client's ServerSocket for chatting with other clients
-	static String name;//name of the Client
-	static String spaces = "             ";//for limiting maximum characters and for protocol purposes
-	static String ip;//ip of the client
-	static Socket socket;//socket for connecting purposes
-	static ServerSocket serverSocket;//for connecting to other users directly???
-	static PrintWriter heart;//printer to server
-	static BufferedReader heartListener;//reader to server
-	static PrintWriter printer;//printer to client
-	static BufferedReader reader;//reader to client
-	static Socket currentChatSocket;//the current Socket you're chatting in right now
-	static boolean inChat;//once someone gets a message, they are forced in chat
-	static Hashtable<String,String> listOfUsers = new Hashtable<String,String>();//hashtable of users for connecting to others
-	static boolean isTesting = false;
+	private static long heartbeat_rate = 5000;
+	private String host;
+	private String name;//name of the Client
+	private int serverPort;//port of the server it's going to connect to
+	private int clientPort;//port of the client's ServerSocket for chatting with other clients
+	private String ip;//ip of the client
+	private Socket socket;//socket for connecting purposes
+	private ServerSocket serverSocket;//for connecting to other users directly???
+	private ObjectOutputStream heart;//printer to server
+	private ObjectInputStream heartListener;//reader to server
+	private PrintWriter printer;//printer to client
+	private BufferedReader reader;//reader to client
+	private Socket currentChatSocket;//the current Socket you're chatting in right now
+	private boolean inChat;//once someone gets a message, they are forced in chat
+	private ClientObject myClientObject;//object representing this specific client for server purposes
+	private ConcurrentHashMap<String,ClientObject> listOfUsers = new ConcurrentHashMap<String,ClientObject>();//hashmap of users for connecting to others
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
-	public static void main(String[] args) throws UnknownHostException
+	public static void main(String[] args)
 	{
-		/**********************************************************************************************
-		*											INITIALIZATION									*
-		**********************************************************************************************/
-		while(true)//for loop is for keeping client active
+		ChatClient myChatClient = new ChatClient();
+		myChatClient.register();
+		System.exit(0);
+	}
+	/************************************************************************************************
+	*											INITIALIZATION									*
+	*************************************************************************************************/
+	public void register()
+	{
+		System.out.print("Hostname of the server you want to connect to:");
+		Scanner console = new Scanner(System.in);
+		host = console.next();
+		//check validity
+		System.out.print("Port of the server to connect to:");
+		//check validity
+		serverPort = console.nextInt();
+		console.nextLine();
+		System.out.print("Enter your name:");
+		name = console.nextLine();
+		myClientObject = new ClientObject(name,host,serverPort);
+		System.out.println("made client object");
+		this.heartbeat();
+	}
+	public void register(String name, String ipAddress, int port)
+	{
+		myClientObject = new ClientObject(name, ipAddress, port);//for DummyClient purposes
+		this.heartbeat();
+	}
+	/**********************************************************************************************
+	*											HEARTBEAT									*
+	***********************************************************************************************/	
+	public void heartbeat()
+	{
+		long firstAttempt = System.currentTimeMillis();
+		long currentAttempt;
+		while(true)
 		{
-			if (!isTesting) {
-				System.out.print("Hostname of the server you want to connect to:");
-				Scanner console = new Scanner(System.in);
-				host = console.next();		
-				System.out.print("Port of the server to connect to:");
-				serverPort = console.nextInt();
-				console.nextLine();
-				System.out.print("Your username (max char: 13):");
-				name = console.nextLine();
-				while(name.length()>13 || name.length()==0)
-				{
-					System.out.print("Enter a username that is at least 1 character long and at most 13 characters:");
-					name = console.next();
-				}
-			}
-			System.out.println("name: " + name);
-			System.out.println("name length: " + name.length());
-			System.out.println("Space starts:" + spaces + ": Ends here");
-			System.out.println("Spaces' length:" + spaces.length());
-			spaces = spaces.substring(0,13-name.length());
-			ip = InetAddress.getLocalHost().getHostAddress();//gets local IP address
 			try
 			{
-				Socket socket = new Socket(host, serverPort);//connects to the main server
-				heart = new PrintWriter(socket.getOutputStream(),true);
-				heartListener = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				new Thread(new ChatClient()).start();//for connecting with other clients and sending messages
-				/******************************************************************************************
-				*											HEARTBEAT									*
-				*******************************************************************************************/			
+				System.out.println("in try loop");
+				Socket socket = new Socket(host,serverPort);
+				System.out.println("made socket");
+				heart = new ObjectOutputStream(socket.getOutputStream());
+				heart.flush();
+				System.out.println("made otputstream");
+				heartListener = new ObjectInputStream(socket.getInputStream());
+				System.out.println("made inputstream");				
+				new Thread(this).start();//create a new thread for sending messages
+				System.out.println("made new thread");
 				while(true)
 				{
-					Thread.sleep(heartbeat_rate);//sleeps for heartrate
-					heart.println("<3");//sends message, isn't it adorable
-				}		
+					try
+					{
+						Thread.sleep(heartbeat_rate);//sleeps for heartrate
+						System.out.println("sending hearts...D;");
+						heart.writeObject("<3");//sends message, isn't it adorable
+						heart.flush();
+					}
+					catch(InterruptedException e)
+					{
+						continue;
+					}
+				}
 			}
-			catch(InterruptedException e)
+			catch(SocketException e)//exception for not being able to connect to server; attempt to try for 5 seconds then try again
+			{				
+				System.out.print("Attempting connecting with server...\n");
+				//System.out.println(e);
+				currentAttempt = System.currentTimeMillis();
+				if(currentAttempt-firstAttempt > 5000)//5 seconds too long
+				{
+					System.out.println("Server seems to be unavailable. Try again later?");
+					//chatThread.interrupt();
+					return;
+				}
+			}
+			catch(IOException e)
 			{
-				System.err.println("Connection has been interrupted. Our heartbeat has stopped. Try connecting to the server again.");
+				System.out.println("can't connect...");
+				continue;
 			}
-			catch(IOException e)	
-			{
-				System.err.println("Connection has been interrupted. Our heartbeat has stopped. Try connecting again.");			
-			}
-			isTesting = false;
+			//exception for something else here
 		}
 	}
-
-/*			printer = new PrintWriter(socket.getOutputStream(), true);//allows sending messages
-			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));//allows reading messages*/
 	/**************************************************************************************************
 	*										GET AND DISPLAY											*
 	**************************************************************************************************/	
-	public static void getAndDisplay()
+	public void getAndDisplay()
 	{
-		String user;
-		heart.println("get");
-		System.out.println("sent get");
 		try
 		{
+			String user;
+			heart.writeObject("get");
+			heart.flush();
+			System.out.println("sent get");			
 			//while(!heartListener.ready()){};
 			System.out.println("Current people online:");
 			//needs InvalidProtoclException
-			while(!(user = heartListener.readLine()).equals("\\0"))//\\0 is used to mark end of list
+			listOfUsers = (ConcurrentHashMap)heartListener.readObject();
+			//iterate through the hashmap
+			Iterator availableUsers = listOfUsers.entrySet().iterator();
+			int counter = 1;
+			while(availableUsers.hasNext())
 			{
-				//Messages will be in this format: 04Mark127.0.0.1 65432
-				int nameLength = Integer.parseInt(user.substring(0,2));
-				listOfUsers.put(user.substring(2,nameLength+2),user.substring(nameLength+3,user.length()));
-				System.out.printf("\t%s",user.substring(2, nameLength+2));//prints out user
+				Map.Entry pair = (Map.Entry)availableUsers.next();
+				System.out.printf("%d. %s\t",counter++,pair.getKey());
 			}
 			System.out.println("\n================================================================================");
 		}
 		catch(IOException e)
 		{
 			e.printStackTrace();
+		}
+		catch(ClassNotFoundException e)
+		{
+			System.out.println("Oh my god.");
+		}
+		catch(ClassCastException e)
+		{//means that the object we read is not actually what we read...haha
+			System.out.printf("The server is sending an object that we cannot read. This is what was sent: %s",listOfUsers.toString());
 		}
 	}
 	/**************************************************************************************************
@@ -166,18 +196,47 @@ public class ChatClient implements Runnable
 	**************************************************************************************************/
 	public void run()
 	{
+		System.out.println("new thread created!");
 		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
-		heart.println("R"+ name + spaces + ip + " " + clientPort);
 		try
 		{
-			String verification = heartListener.readLine();//if receive "A" means good, if receive "U" means bad			
+			heart.writeObject("reg");	
+			heart.flush();
+			heart.writeObject(myClientObject);
+			heart.flush();
+		}
+		catch(IOException e)
+		{
+			System.out.println("Server is not responding. Will attempt to reconnect");
+			//reconnect here
+		}
+		try
+		{
+			String verification = (String) heartListener.readObject();//if receive "A" means good, if receive "U" means bad
+			while(verification.equals("U"))
+			{
+				System.out.println("Registration failed because you have the same name as another user");
+				Scanner console = new Scanner(System.in);
+				System.out.println("Enter your username again!");
+				myClientObject.setName(console.nextLine());
+				heart.writeObject("reg");
+				heart.flush();
+				heart.writeObject(myClientObject);
+				heart.flush();
+			}
+			System.out.println("Verified!");
 		}
 		catch(IOException e)
 		{
 			System.out.println("Could not read from server...");
 		}
+		catch(ClassNotFoundException e)
+		{
+			//fatal error man
+			System.out.println("Oh my god.");
+		}
 		displayCommands();
-		getAndDisplay();
+		this.getAndDisplay();
 		String message;//the message string we're going to be dealing with mainly
 		Scanner console = new Scanner(System.in);
 		try
@@ -204,11 +263,8 @@ public class ChatClient implements Runnable
 				{
 					try
 					{
-						String personalInfo = listOfUsers.get(message.substring(3,message.length()));
-						System.out.println(personalInfo);
-						String persons_IP_Address = personalInfo.substring(0,personalInfo.indexOf(","));
-						int personsPortNumber = Integer.parseInt(personalInfo.substring(personalInfo.indexOf(",")+1,personalInfo.length()));
-						currentChatSocket = new Socket(persons_IP_Address,personsPortNumber);//listofUsers.get returns an integer that is the port of the user
+						ClientObject personYourChattingWith = listOfUsers.get(message.substring(3,message.length()));
+						currentChatSocket = new Socket(personYourChattingWith.getIpAddress(),personYourChattingWith.getPort());
 						System.out.println("Chatting with " + message.substring(2,message.length()) + "\nType in \\q to quit");					
 					}
 					catch(NullPointerException e)
@@ -248,13 +304,6 @@ public class ChatClient implements Runnable
 		{
 			e.printStackTrace();
 		}
-	}
-
-	public ChatClient(String h, int p, String n) {
-		host = h;
-		serverPort = p;
-		name = n;
-		isTesting = true;
 	}
 
 	public class ChatServer implements Runnable//ChatClient creates a ChatServer, which means two threads are started in main
