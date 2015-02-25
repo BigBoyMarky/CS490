@@ -1,53 +1,61 @@
-import java.lang.*;
+import java.io.Serializable;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.*;
-
-public class ClientObject {
-
-	private String name;
+public class ClientObject implements Serializable
+{
+	private String username;
 	private String ipAddress;
 	private int port;
-	private long heartbeat_rate;
-	private final Socket socket;
-	private long lastbeat;
-	
-	public ClientObject (String n, String i, int p, long h, Socket s) {
-		name = n;
-		ipAddress = i;
-		port = p;
-		heartbeat_rate = h;
-		socket = s;
-		lastbeat = System.currentTimeMillis();
-		//(new Thread(this)).start();
+	private long heartbeat;
+	private transient Socket socket;
+	private transient ObjectInputStream ois;
+	private transient ObjectOutputStream oos;
+	public ClientObject(String username, String ipAddress, int port)
+	{//information sent from the clientside
+		this.username = username;
+		this.ipAddress = ipAddress;
+		this.port = port;
 	}
-	
-	public String getName() {
-		return name;
+	public ClientObject(ClientObject copy, Socket socket, ObjectInputStream ois, ObjectOutputStream oos)
+	{//for the serverside
+		this.username = copy.getName();
+		this.ipAddress = copy.getIpAddress();
+		this.port = copy.getPort();
+		this.socket = socket;
+		this.ois = ois;
+		this.oos = oos;
 	}
-	
-	public String getIP() {
-		
+	public String getName()
+	{
+		return username;
+	}
+	public String getIpAddress()
+	{
 		return ipAddress;
-		
 	}
-	
-	public int getPort() {
-		
+	public int getPort()
+	{
 		return port;
-		
 	}
-	
-	public Socket getSocket(){
-		return socket;
+	public long getHeart()
+	{
+		return heartbeat;
 	}
-	
-	public void setHeartBeatTime(long heartbeattime) {
-		this.lastbeat = heartbeattime;
-		
+	public ObjectInputStream getIn()
+	{
+		return ois;
 	}
-	
-	public long getLastBeat(){
-		return lastbeat;
+	public ObjectOutputStream getOut()
+	{
+		return oos;
 	}
-	
+	public void updateHeart(long timeStamp)
+	{
+		heartbeat = timeStamp;
+	}
+	public void setName(String newName)
+	{
+		username = newName;
+	}
 }

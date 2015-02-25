@@ -1,40 +1,27 @@
 /*
-LIST OF BUGS
-1] ADDING SPACE TO NAMES MAKES IT ONLY PRINT FIRST NAME WHICH SUCKS FOR CHATLIST
-2]
-
-THINGS LEFT TO DO
-1] MAKE SERVER STAY STRONG EVEN IF CLIENTS ARE DISCONNECTED | DONE
-2] REMOVE CLIENT NAME FROM LIST IF CLIENT DISCONNECTS | DONE
-3] When a new client joins, notify everyone about the new member |?
+TODO: HANDLE 100K REQUESTS
+//Handle NullPointerException for people who send null
 */
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.net.*;
 import java.io.*;
 
-//Create a server based on command line input, DONE
-//server waits for clients to connect, DONE
-//once the clients connect, it sends acknowledgement back, adds clinet to a list.
-//it then sends an update to all previously connectd clients about the new user
-//it regularly checks for heartbeats. If heartbeat not received, it will assume it's dead and remove it from the list.
-//the client can initiate a chat with another client
-
-public class SingleThreadedChatServer implements Runnable
+public class SingleThreadedChatServer
 {
 	/**************************************************************************************************
 	*											FIELDS												*
 	**************************************************************************************************/	
-	private long heartbeat_rate = 4000;//in milliseconds
-	static ServerSocket serverSocket;
-	static SingleThreadedChatServer server;
+	private int SOCKET_TIMEOUT = 100;//in milliseconds
+	private long heartbeat_rate = 5000 + SOCKET_TIMEOUT;//in milliseconds
+	private static SingleThreadedChatServer server;	
+	private ServerSocket serverSocket;
 	private int port;//port
-	volatile static private int numClients = -1;//keeps track of number of clients for ID'ing purposes
-	static ArrayList<Long> heartList = new ArrayList<Long>();//for checking the time passed for heartbeats
-	static ArrayList<String> nameList = new ArrayList<String>();//for names
-	static ArrayList<String> ipList = new ArrayList<String>();//for ip
-	static ArrayList<Integer> portList = new ArrayList<Integer>();//for port	
-	static ArrayList<Socket> socketList = new ArrayList<Socket>();//socket lists for accessing them later, e.g. when a client requests the list of group G
-	static ArrayList<BufferedReader> readerList = new ArrayList<BufferedReader>();
+	private int numClients = -1;//keeps track of number of clients for ID'ing purposes
+	private ArrayList<String> keyList = new ArrayList<String>();	
+	private ArrayList<ClientObject> clientList = new ArrayList<ClientObject>();
+	private ConcurrentHashMap<String,ClientObject> clientMap = new ConcurrentHashMap<String,ClientObject>();//hashmap used so we can check if there is a duplicate name easily
+	private long currentTime;
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -70,176 +57,185 @@ public class SingleThreadedChatServer implements Runnable
 	/**************************************************************************************************
 	*											CONSTRUCTOR												*
 	**************************************************************************************************/
-	public SingleThreadedChatServer()
-	{
-	}
 	public SingleThreadedChatServer(int port) throws IOException
 	{
 		this.port = port;
 		serverSocket = new ServerSocket(port);
 		serverSocket.setReuseAddress(true);
+		serverSocket.setSoTimeout(SOCKET_TIMEOUT);
 	}
 	/**************************************************************************************************
-	*								SEPARATE THREAD TO CONNECT NEW CLIENTS							*
-	**************************************************************************************************/	
-	public void run()
+	*										PROCESSING MESSAGES										*
+	**************************************************************************************************/		
+	public void forLoop()
 	{
+		//System.out.println("forLoop START");		
+		String message ="";
+		String currentClient="";
 		try
 		{
-			PrintWriter printer;
-			BufferedReader reader;
-			String message = "";
-			//long beforeHeartBeat = 0 ;
-			//long afterHeartBeat = 0;
-			while(true)
+			numClients = keyList.size();		
+			for(int i = 0; i < numClients; i++)
 			{
-				for(int i = 0; i <= numClients; i++)//go through all sockets
+				currentClient = keyList.get(i);
+				try
 				{
-					if(!readerList.get(i).ready())
-					{
-						if(heartList.size()>i)//means it hasn't reg so don't check plz
+					message = (String) clientMap.get(currentClient).getIn().readObject();//reads a String Object					
+				}
+				catch(SocketTimeoutException e)//exception thrown when reading/writing/closing
+				{
+					//e.printStackTrace();
+					//System.out.println("FORLoop IOExceptioN");				
+					//for(int j = 0; j < numClients; j++)
+					//{
+						clientMap.get(keyList.get(i)).getHeart();
+						if(System.currentTimeMillis()-clientMap.get(keyList.get(i)).getHeart() > heartbeat_rate)
 						{
-							if(System.currentTimeMillis()-heartList.get(i) > (heartbeat_rate+25))//fault tolerance for processing on serverside
+							System.out.printf("Because of lack of heartbeat, user %s has been terminated. (in IOEXCEPT 1)\n",keyList.get(i));
+							clientMap.remove(keyList.get(i));
+							keyList.remove(i);
+							numClients = keyList.size();//anytime we make a change we must update numClients to prevent indexoutofbounds
+						}					
+					//}
+					continue;
+				}
+				catch(IOException e)				
+				{
+					e.printStackTrace();
+				}
+				//System.out.printf("clientMap's getIn() delays for %d milliseconds.\n",(System.currentTimeMillis()-currentTime));
+				System.out.printf("%s sent the following message: %s\n",currentClient,message);
+				if(message.equals("get"))
+				{
+					try
+					{
+						clientMap.get(currentClient).getOut().writeObject(clientMap);
+						clientMap.get(currentClient).getOut().reset();//apparently Object stream keeps cache
+						clientMap.get(currentClient).getOut().flush();
+					}
+					catch(IOException e)//exception thrown when reading/writing/closing
+					{
+						System.out.println("Unable to send clientMap...");				
+						for(int j = 0; j < numClients; j++)
+						{
+							clientMap.get(keyList.get(j)).getHeart();
+							if(System.currentTimeMillis()-clientMap.get(keyList.get(j)).getHeart() > heartbeat_rate)
 							{
-								//NOTE: if server lags, then this solution will just kill everyone
-								//terminate
-								//send message
-								try
-								{
-									printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
-									System.out.println("User "+ i + " has been terminated");
-									printer.println("E");
-								}
-								catch(IOException e)
-								{
-									System.out.println("Client is already dead!");
-								}
-								socketList.get(i).close();
-								socketList.remove(i);
-								heartList.remove(i);
-								nameList.remove(i);
-								ipList.remove(i);
-								portList.remove(i);
-								readerList.remove(i);
-								--numClients;
-								--i;
-							}
+								System.out.printf("Because of lack of heartbeat, user %s has been terminated. (in IOEXCEPT 2)\n",keyList.get(j));
+								clientMap.remove(keyList.get(j));
+								keyList.remove(j);
+								numClients = keyList.size();
+							}					
 						}
-						continue;						
-					}
-					message = readerList.get(i).readLine();//will block
-					System.out.println("User #" + i + ":" + message);
-					if(message.substring(0,1).equals("R"))//for registration
-					{
-						printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
-						String name = message.substring(1,14).trim();//whatever
-						if(nameList.contains(name))
-						{							
-							printer.println("U");
-							socketList.remove(i);
-							printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
-							for(int j = 0; j <= numClients; j++)
-							{
-								int nameLength = nameList.get(j).length();
-								if(nameLength < 10)
-									printer.println("0"+nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
-								else
-									printer.println(nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
-							}
-							printer.println("\\0");							
-							--numClients;
-							--i;
-							continue;
-						}
-						int spacePosition = message.indexOf(" ",14);
-						String address = message.substring(14,spacePosition);
-						int clientPort = Integer.parseInt(message.substring(spacePosition+1,message.length()));
-						printer.println("A");//accepted
-						//Adding data to respective lists
-						heartList.add(System.currentTimeMillis());
-						nameList.add(name);
-						ipList.add(address);
-						portList.add(clientPort);
-						message = readerList.get(i).readLine();//we know a get will beg otten
-					}
-					if(message.equals("get"))
-					{
-						System.out.println("Received a get request from user " + i);
-						printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
-						for(int j = 0; j <= numClients; j++)
-						{
-							int nameLength = nameList.get(j).length();
-							if(nameLength < 10)
-								printer.println("0"+nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
-							else
-								printer.println(nameLength+nameList.get(j) + "," + ipList.get(j) + "," + portList.get(j));
-						}
-						printer.println("\\0");
-						System.out.println("List has been sent!");
-					}
-					if(message.equals("<3"))
-					{
-						//update heartbeat time
-						heartList.set(i, System.currentTimeMillis());
-					}
-					if(System.currentTimeMillis()-heartList.get(i) > heartbeat_rate)
-					{
-						//NOTE: if server lags, then this solution will just kill everyone
-						//terminate
-						//send message
-						try
-						{
-							printer = new PrintWriter(socketList.get(i).getOutputStream(),true);
-							System.out.println("User "+ i + " has been terminated");
-							printer.println("E");							
-						}
-						catch(IOException e)
-						{
-							System.out.println("Client is already dead!");
-						}
-						socketList.get(i).close();
-						socketList.remove(i);
-						heartList.remove(i);
-						nameList.remove(i);
-						ipList.remove(i);
-						portList.remove(i);
-						readerList.remove(i);
-						--numClients;
-						--i;
-					}
+						continue;
+					}							
+					clientMap.get(currentClient).updateHeart(System.currentTimeMillis());//in case heartbeat sent same time
+					//System.out.printf("Get took %d milliseconds.\n",(System.currentTimeMillis()-currentTime));
+				}
+				else if(message.equals("<3"))
+				{
+					clientMap.get(currentClient).updateHeart(System.currentTimeMillis());
+				}
+				else
+				{
+					System.out.printf("Invalid message. Request from %s will be ignored.",currentClient);
+				}
+				if(System.currentTimeMillis()-clientMap.get(keyList.get(i)).getHeart() > heartbeat_rate)
+				{
+					System.out.printf("Because of lack of heartbeat, user %s has been terminated (in FOR).\n",currentClient);
+					clientMap.remove(currentClient);
+					keyList.remove(i);
+					numClients = keyList.size();					
 				}
 			}
 		}
-		catch(Exception e)
+		catch(ClassNotFoundException e)
 		{
-			e.printStackTrace();
-		}
+			//System.out.println("rFORLoop CNFException's");			
+			for(int i = 0; i < numClients; i++)
+			{
+				if(System.currentTimeMillis()-clientMap.get(keyList.get(i)).getHeart() > heartbeat_rate)
+				{
+					System.out.printf("Because of lack of heartbeat, user %s has been terminated. (in CNFEXCEPT)\n",keyList.get(i));
+					clientMap.remove(keyList.get(i));
+					keyList.remove(i);
+					numClients = keyList.size();
+				}					
+			}				
+		}		
 	}
-
 	/**************************************************************************************************
-	*										RECEIVE/PROCESS MESSAGES								*
-	**************************************************************************************************/	
+	*										THE ONLY THREAD 										*
+	**************************************************************************************************/		
 	public void runServer()
 	{
-		try
+		Socket socket;
+		ObjectInputStream reader;
+		ObjectOutputStream writer;
+		ClientObject newClient;
+		while(true)
 		{
-			Socket socket = serverSocket.accept();
-			socketList.add(socket);
-			readerList.add(new BufferedReader(new InputStreamReader(socket.getInputStream())));
-			++numClients;
-			new Thread(new SingleThreadedChatServer()).start();//for receiving connections
-			while(true)
+			try
 			{
-				socket = serverSocket.accept();
-				socketList.add(socket);
-				readerList.add(new BufferedReader(new InputStreamReader(socket.getInputStream())));
-				++numClients;
+				socket = serverSocket.accept();//has timeout
+				System.out.println("A new client has connected!");
+				socket.setSoTimeout(50);//for socket.getInputStream() reading purposes
+				reader = new ObjectInputStream(socket.getInputStream());
+				writer = new ObjectOutputStream(socket.getOutputStream());
+				writer.flush();//need to flush header for other side to start reading
+				String regKey = (String) reader.readObject();
+				if(regKey.equals("reg"))//registration
+				{
+					System.out.println("Client has sent a valid registration key.");
+					newClient = new ClientObject((ClientObject)reader.readObject(), socket, reader, writer);
+					String clientName = newClient.getName();
+					System.out.printf("Client name is:%s\n",clientName);
+					if(clientMap.containsKey(clientName))
+					{
+						writer.writeObject("U");//invalid
+						writer.flush();
+						socket.close();
+						System.out.println("Client's name was a duplicate. Client has been terminated.");
+					}
+					else
+					{
+						writer.writeObject("A");//valid
+						writer.flush();
+						clientMap.put(clientName,newClient);
+						keyList.add(clientName);
+						newClient.updateHeart(System.currentTimeMillis());//for reg purposes
+						System.out.printf("%s has successfully registered.\n",clientName);
+					}
+				}
+				else
+				{
+					System.out.println("Client has sent an invalid registration key. We will not process the client's requests");
+					continue;
+				}
+				this.forLoop();
+				//System.out.println("regLoop's forLoop END");
 			}
-		}
-		catch(Exception e)
-		{
-			//need to better Exception catching
-			//look for socket disconnect,
+			catch(SocketTimeoutException e)//exception thrown when timeout, no worries
+			{
+				//System.out.println("regLoop STException");
+				this.forLoop();
+				//System.out.println("regLoop STException's forLoop END");				
+				continue;//making the server truly single threaded
+			}
+			catch(IOException e)//exception thrown when a Socket is disconnected
+			{
+				//System.out.println("regLoop IOException");				
+				this.forLoop();
+				//System.out.println("regLoop IOException's forLoop END");				
+				continue;
+			}	
+			catch(ClassNotFoundException e)		
+			{
+				//System.out.println("regLoop CNFException");				
+				this.forLoop();
+				//System.out.println("regLoop CNFException's forLoop END");				
+				continue;
+			}
 		}
 	}
 }

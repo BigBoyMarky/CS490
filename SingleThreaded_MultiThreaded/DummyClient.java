@@ -1,47 +1,53 @@
 /*
 THINGS LEFT TO DO: MAKE IT WORK
 */
-import java.net.UnknownHostException;
-
 public class DummyClient implements Runnable
 {
-	static String name = "a";
+	static String ip;
 	static int port = 0;
+	volatile static ChatClient clientArray[] = new ChatClient[100000];	
+	private int n;
 	public static void main(String[] args)
 	{
 		try
 		{
+			ip = "localhost";
 			port = Integer.parseInt(args[0]);
 		}
 		catch(Exception e)
 		{
 			System.out.println("Need to enter port of the server!");
+			System.exit(0);
 		}
-		for (int i = 0; i < 10000; i++) {
-			name+=i;
-			System.out.printf("index:%d:%s\n",i,name);
-			try{Thread.sleep(100);}catch(InterruptedException e) {Thread.currentThread().interrupt();}
-			new Thread(new DummyClient()).start();
-			name = "a";	
+		for(int i = 0; i < clientArray.length; i++)
+		{
+			try
+			{
+				Thread.sleep(1000);//to prevent i from being blocked constantly				
+			}
+			catch(Exception e)
+			{
+				System.out.println("Thread was interrupted derr");
+			}
+			new Thread(new DummyClient(i)).start();
 		}
 	}
 	public void run()
 	{
-		ChatClient dummyClient = new ChatClient("localhost", port, name);	
-			//System.out.println(name);
-		String[] sucks = {};
 		try
 		{
-			dummyClient.main(sucks);
+			System.out.printf("%dnth thread\n",n);
+			String name = "user " + n;
+			clientArray[n] = new ChatClient();		
+			clientArray[n].register(name,ip,port);			
 		}
-		catch(UnknownHostException e)
+		catch(Exception e)
 		{
-			System.out.println("er");
+			e.printStackTrace();
 		}
-		/*PrintWriter printer = new PrintWriter(new ,true)
-		InputStream = new ByteArrayInputStream
-		System.setin()
-		System.out.println("localhost");
-		System.out.println("65471");*/
+	}
+	public DummyClient(int n)
+	{
+		this.n = n;
 	}
 }
