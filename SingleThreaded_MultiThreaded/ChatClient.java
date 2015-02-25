@@ -1,3 +1,10 @@
+/*
+TESTS TO DO
+1] SERVER CLOSES
+2] OTHER CLIENT CLOSES
+3] SERVER TERMINATES CLIENT
+
+*/
 import java.net.SocketException;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
@@ -79,13 +86,14 @@ public class ChatClient implements Runnable
 		console.nextLine();
 		System.out.print("Enter your name:");
 		name = console.nextLine();
-		myClientObject = new ClientObject(name,host,serverPort);
 		System.out.println("made client object");
 		this.heartbeat();
 	}
 	public void register(String name, String ipAddress, int port)
 	{
-		myClientObject = new ClientObject(name, ipAddress, port);//for DummyClient purposes
+		this.name = name;
+		host = ipAddress;
+		serverPort = port;
 		this.heartbeat();
 	}
 	/**********************************************************************************************
@@ -99,22 +107,22 @@ public class ChatClient implements Runnable
 		{
 			try
 			{
-				System.out.println("in try loop");
+				//System.out.println("in try loop");
 				Socket socket = new Socket(host,serverPort);
-				System.out.println("made socket");
+				//System.out.println("made socket");
 				heart = new ObjectOutputStream(socket.getOutputStream());
 				heart.flush();
-				System.out.println("made otputstream");
+				//System.out.println("made otputstream");
 				heartListener = new ObjectInputStream(socket.getInputStream());
-				System.out.println("made inputstream");				
+				//System.out.println("made inputstream");				
 				new Thread(this).start();//create a new thread for sending messages
-				System.out.println("made new thread");
+				//System.out.println("made new thread");
 				while(true)
 				{
 					try
 					{
 						Thread.sleep(heartbeat_rate);//sleeps for heartrate
-						System.out.println("sending hearts...D;");
+						//System.out.println("sending hearts...D;");
 						heart.writeObject("<3");//sends message, isn't it adorable
 						heart.flush();
 					}
@@ -129,7 +137,7 @@ public class ChatClient implements Runnable
 				System.out.print("Attempting connecting with server...\n");
 				//System.out.println(e);
 				currentAttempt = System.currentTimeMillis();
-				if(currentAttempt-firstAttempt > 5000)//5 seconds too long
+				if(currentAttempt-firstAttempt > 1000)//5 seconds too long
 				{
 					System.out.println("Server seems to be unavailable. Try again later?");
 					//chatThread.interrupt();
@@ -154,7 +162,7 @@ public class ChatClient implements Runnable
 			String user;
 			heart.writeObject("get");
 			heart.flush();
-			System.out.println("sent get");			
+			//System.out.println("sent get");			
 			//while(!heartListener.ready()){};
 			System.out.println("Current people online:");
 			//needs InvalidProtoclException
@@ -200,16 +208,25 @@ public class ChatClient implements Runnable
 		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
 		try
 		{
+			myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(), clientPort);			
 			heart.writeObject("reg");	
 			heart.flush();
+			System.out.println("sent reg");			
 			heart.writeObject(myClientObject);
 			heart.flush();
+			System.out.println("sent object");
 		}
 		catch(IOException e)
 		{
 			System.out.println("Server is not responding. Will attempt to reconnect");
 			//reconnect here
 		}
+		/*
+		catch(UnknownHostException e)
+		{
+			System.out.println("This might be a problem. We can't identify your IP Address...");
+			System.exit(0);
+		}*/
 		try
 		{
 			String verification = (String) heartListener.readObject();//if receive "A" means good, if receive "U" means bad
@@ -236,7 +253,7 @@ public class ChatClient implements Runnable
 			System.out.println("Oh my god.");
 		}
 		displayCommands();
-		this.getAndDisplay();
+		//this.getAndDisplay();
 		String message;//the message string we're going to be dealing with mainly
 		Scanner console = new Scanner(System.in);
 		try

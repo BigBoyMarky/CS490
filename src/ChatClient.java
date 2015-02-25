@@ -80,13 +80,8 @@ public class ChatClient implements Runnable
 			System.out.print("Port of the server to connect to:");
 			serverPort = console.nextInt();
 			console.nextLine();
-			System.out.print("Your username (max char: 13):");
+			System.out.print("Your username:");
 			name = console.nextLine();
-			while(name.length()>13 || name.length()==0)
-			{
-				System.out.print("Enter a username that is at least 1 character long and at most 13 characters:");
-				name = console.next();
-			}
 			spaces = spaces.substring(0,13-name.length());
 			ip = InetAddress.getLocalHost().getHostAddress();//gets local IP address
 			try
