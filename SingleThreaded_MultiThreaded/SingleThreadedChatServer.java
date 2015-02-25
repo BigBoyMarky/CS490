@@ -1,6 +1,6 @@
 /*
 TODO: HANDLE 100K REQUESTS
-Handle NullPointerException for people who send null
+//Handle NullPointerException for people who send null
 */
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +12,7 @@ public class SingleThreadedChatServer
 	/**************************************************************************************************
 	*											FIELDS												*
 	**************************************************************************************************/	
-	private int SOCKET_TIMEOUT = 10;//in milliseconds
+	private int SOCKET_TIMEOUT = 100;//in milliseconds
 	private long heartbeat_rate = 5000 + SOCKET_TIMEOUT;//in milliseconds
 	private static SingleThreadedChatServer server;	
 	private ServerSocket serverSocket;
@@ -82,22 +82,27 @@ public class SingleThreadedChatServer
 				{
 					message = (String) clientMap.get(currentClient).getIn().readObject();//reads a String Object					
 				}
-				catch(IOException e)//exception thrown when reading/writing/closing
+				catch(SocketTimeoutException e)//exception thrown when reading/writing/closing
 				{
+					//e.printStackTrace();
 					//System.out.println("FORLoop IOExceptioN");				
-					for(int j = 0; j < numClients; j++)
-					{
-						clientMap.get(keyList.get(j)).getHeart();
-						if(System.currentTimeMillis()-clientMap.get(keyList.get(j)).getHeart() > heartbeat_rate)
+					//for(int j = 0; j < numClients; j++)
+					//{
+						clientMap.get(keyList.get(i)).getHeart();
+						if(System.currentTimeMillis()-clientMap.get(keyList.get(i)).getHeart() > heartbeat_rate)
 						{
-							System.out.printf("Because of lack of heartbeat, user %s has been terminated. (in IOEXCEPT 1)\n",keyList.get(j));
-							clientMap.remove(keyList.get(j));
-							keyList.remove(j);
+							System.out.printf("Because of lack of heartbeat, user %s has been terminated. (in IOEXCEPT 1)\n",keyList.get(i));
+							clientMap.remove(keyList.get(i));
+							keyList.remove(i);
 							numClients = keyList.size();//anytime we make a change we must update numClients to prevent indexoutofbounds
 						}					
-					}
+					//}
 					continue;
-				}				
+				}
+				catch(IOException e)				
+				{
+					e.printStackTrace();
+				}
 				//System.out.printf("clientMap's getIn() delays for %d milliseconds.\n",(System.currentTimeMillis()-currentTime));
 				System.out.printf("%s sent the following message: %s\n",currentClient,message);
 				if(message.equals("get"))
@@ -140,6 +145,7 @@ public class SingleThreadedChatServer
 					System.out.printf("Because of lack of heartbeat, user %s has been terminated (in FOR).\n",currentClient);
 					clientMap.remove(currentClient);
 					keyList.remove(i);
+					numClients = keyList.size();					
 				}
 			}
 		}
@@ -153,6 +159,7 @@ public class SingleThreadedChatServer
 					System.out.printf("Because of lack of heartbeat, user %s has been terminated. (in CNFEXCEPT)\n",keyList.get(i));
 					clientMap.remove(keyList.get(i));
 					keyList.remove(i);
+					numClients = keyList.size();
 				}					
 			}				
 		}		

@@ -236,10 +236,15 @@ public class ChatClient implements Runnable
 				Scanner console = new Scanner(System.in);
 				System.out.println("Enter your username again!");
 				myClientObject.setName(console.nextLine());
+				Socket socket = new Socket(host, serverPort);
+				heart = new ObjectOutputStream(socket.getOutputStream());
+				heart.flush();
+				heartListener = new ObjectInputStream(socket.getInputStream());
 				heart.writeObject("reg");
 				heart.flush();
 				heart.writeObject(myClientObject);
 				heart.flush();
+				verification = (String)heartListener.readObject();
 			}
 			System.out.println("Verified!");
 		}

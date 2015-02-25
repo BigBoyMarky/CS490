@@ -5,7 +5,7 @@ public class DummyClient implements Runnable
 {
 	static String ip;
 	static int port = 0;
-	volatile static ChatClient clientArray[] = new ChatClient[10];	
+	volatile static ChatClient clientArray[] = new ChatClient[100000];	
 	private int n;
 	public static void main(String[] args)
 	{
@@ -23,7 +23,7 @@ public class DummyClient implements Runnable
 		{
 			try
 			{
-				Thread.sleep(100);//to prevent i from being blocked constantly				
+				Thread.sleep(1000);//to prevent i from being blocked constantly				
 			}
 			catch(Exception e)
 			{
