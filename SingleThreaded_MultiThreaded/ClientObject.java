@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.io.ObjectInputStream;
+import java.io.BufferedReader;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 public class ClientObject implements Serializable
@@ -11,6 +12,7 @@ public class ClientObject implements Serializable
 	private transient Socket socket;
 	private transient ObjectInputStream ois;
 	private transient ObjectOutputStream oos;
+	private transient BufferedReader buffer;
 	public ClientObject(String username, String ipAddress, int port)
 	{//information sent from the clientside
 		this.username = username;
@@ -18,7 +20,7 @@ public class ClientObject implements Serializable
 		this.port = port;
 	}
 	public ClientObject(ClientObject copy, Socket socket, ObjectInputStream ois, ObjectOutputStream oos)
-	{//for the serverside
+	{//for the sigle-threaded serverside
 		this.username = copy.getName();
 		this.ipAddress = copy.getIpAddress();
 		this.port = copy.getPort();
@@ -26,6 +28,16 @@ public class ClientObject implements Serializable
 		this.ois = ois;
 		this.oos = oos;
 	}
+	public ClientObject(ClientObject copy, Socket socket, ObjectInputStream ois, ObjectOutputStream oos, BufferedReader buffer)
+	{//for the sigle-threaded serverside
+		this.username = copy.getName();
+		this.ipAddress = copy.getIpAddress();
+		this.port = copy.getPort();
+		this.socket = socket;
+		this.ois = ois;
+		this.oos = oos;
+		this.buffer = buffer;
+	}	
 	public String getName()
 	{
 		return username;
@@ -49,6 +61,10 @@ public class ClientObject implements Serializable
 	public ObjectOutputStream getOut()
 	{
 		return oos;
+	}
+	public BufferedReader getBuffer()
+	{
+		return buffer;
 	}
 	public void updateHeart(long timeStamp)
 	{

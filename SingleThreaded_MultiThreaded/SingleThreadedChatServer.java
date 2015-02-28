@@ -1,6 +1,7 @@
 /*
 TODO: HANDLE 100K REQUESTS
 //Handle NullPointerException for people who send null
+
 */
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -179,7 +180,7 @@ public class SingleThreadedChatServer
 			{
 				socket = serverSocket.accept();//has timeout
 				System.out.println("A new client has connected!");
-				socket.setSoTimeout(50);//for socket.getInputStream() reading purposes
+				socket.setSoTimeout(SOCKET_TIMEOUT);//for socket.getInputStream() reading purposes
 				reader = new ObjectInputStream(socket.getInputStream());
 				writer = new ObjectOutputStream(socket.getOutputStream());
 				writer.flush();//need to flush header for other side to start reading
