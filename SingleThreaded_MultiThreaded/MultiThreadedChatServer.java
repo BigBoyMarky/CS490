@@ -48,11 +48,6 @@ public class Runner() implements Runnable
 }
 */
 
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.*;
-import java.net.*;
-import java.io.*;
 
 //Create a server based on command line input, DONE
 //server waits for clients to connect, DONE
@@ -61,14 +56,20 @@ import java.io.*;
 //it regularly checks for heartbeats. If heartbeat not received, it will assume it's dead and remove it from the list.
 //the client can initiate a chat with another client
 
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.*;
+import java.net.*;
+import java.io.*;
+
 public class MultiThreadedChatServer
 {
 	/**************************************************************************************************
 	*											FIELDS												*
 	**************************************************************************************************/	
 	private int THREADPOOL_SIZE = 4;
-	private int SOCKET_TIMEOUT = 100;//in milliseconds
-	private long heartbeat_rate = 5000 + SOCKET_TIMEOUT;//in milliseconds
+	private int SOCKET_TIMEOUT = 1;//in milliseconds
+	private long heartbeat_rate = 5000;//in milliseconds
 	private static MultiThreadedChatServer server;	
 	private ServerSocket serverSocket;
 	private int port;//port
@@ -122,53 +123,51 @@ public class MultiThreadedChatServer
 	**************************************************************************************************/	
 	public class Runner implements Runnable
 	{
+		private String message;
 		private ClientObject client;
-		public Runner(ClientObject client){
+		public Runner(ClientObject client, String message){
 			this.client = client;
+			this.message = message;
 		}
 		public void run()
 		{
-			//System.out.println("We're in run");
-			String message ="";
 			try
 			{
-				message = (String) clientMap.get(client).getIn().readObject();//reads a String Object					
 				System.out.printf("%s has sent the following message:%s\n",client.getName(),message);
 				if(message.equals("get"))
 				{
-					System.out.println("GET RECEIVED!");
 					try
 					{
-						clientMap.get(client).getOut().writeObject(clientMap);
-						clientMap.get(client).getOut().reset();//apparently Object stream keeps cache
-						clientMap.get(client).getOut().flush();
+						client.getOut().writeObject(clientMap);
+						client.getOut().reset();//apparently Object stream keeps cache
+						client.getOut().flush();
 					}
 					catch(IOException e)//exception thrown when reading/writing/closing
 					{
 						System.out.println("Unable to send clientMap...");
 					}							
-					clientMap.get(client).updateHeart(System.currentTimeMillis());//in case heartbeat sent same time
+					client.updateHeart(System.currentTimeMillis());//in case heartbeat sent same time
 					//System.out.printf("Get took %d milliseconds.\n",(System.currentTimeMillis()-currentTime));
 				}
 				else if(message.equals("<3"))
 				{
-					clientMap.get(client).updateHeart(System.currentTimeMillis());
+					client.updateHeart(System.currentTimeMillis());
 				}
 				else
 				{
 					System.out.printf("Invalid message. Request from %s will be ignored.",client);
 				}
-				if(System.currentTimeMillis()-clientMap.get(client.getName()).getHeart() > heartbeat_rate)
+				if(System.currentTimeMillis()-client.getHeart() > heartbeat_rate)
 				{
 					System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN WORKER THREAD)\n",client);
-					clientMap.remove(client);
+					clientMap.remove(client.getName());
 					keyList.remove(client);
 					numClients = keyList.size();
 				}
 			}
 			catch(Exception e)
 			{
-				System.out.print(".");
+				e.printStackTrace();
 			}
 		}
 	}
@@ -180,8 +179,8 @@ public class MultiThreadedChatServer
 		Socket socket;
 		ObjectInputStream reader;
 		ObjectOutputStream writer;
-		BufferedReader buffer;
 		ClientObject newClient;
+		long timeElapsed = 0;
 		//1 thread for accepting new clients
 		//1 thread for peeping at the inputstream
 		//n threads for managing messages
@@ -190,6 +189,7 @@ public class MultiThreadedChatServer
 		{
 			public void run()
 			{
+				String message;
 				//checks if each
 				//iterates through key
 				while(true)
@@ -200,23 +200,23 @@ public class MultiThreadedChatServer
 						ClientObject currentClient = clientMap.get(keyList.get(i));
 						try
 						{
-							if(currentClient.getBuffer().ready())
-							{
-								System.out.printf("Ready for executor");
-								executor.execute(new Runner(currentClient));
-							}						
+							message = (String) currentClient.getIn().readObject();
+							executor.execute(new Runner(currentClient, message));
 						}
-						catch(IOException e)
+						catch(SocketTimeoutException e)
+						{
+							if ((System.currentTimeMillis() - currentClient.getHeart()) > heartbeat_rate)
+							{
+								System.out.printf("%sBecause of lack of heartbeat, user %s has been terminated. (IN MANAGER THREAD)\n",new Date(), currentClient.getName());
+								clientMap.remove(currentClient.getName());
+								keyList.remove(i);
+								numClients = keyList.size();
+								--i;
+							}
+						}
+						catch(Exception e)
 						{
 							System.out.println("Unable to read input stream");
-						}
-						if ((System.currentTimeMillis() - currentClient.getHeart()) > heartbeat_rate)
-						{
-							System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN MANAGER THREAD)\n",currentClient);
-							clientMap.remove(currentClient.getName());
-							keyList.remove(i);
-							numClients = keyList.size();
-							--i;
 						}
 					}
 
@@ -228,20 +228,20 @@ public class MultiThreadedChatServer
 		{
 			try
 			{
-				socket =serverSocket.accept();//no timeout
+				socket =serverSocket.accept();//no timeout jk
 				System.out.println("A new client has connected!");
-				//buffer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				reader = new ObjectInputStream(socket.getInputStream());//so it reads from buffer
-				buffer = new BufferedReader(new InputStreamReader(reader));
 				writer = new ObjectOutputStream(socket.getOutputStream());
 				writer.flush();
 				System.out.printf("Ready? %s\n",reader.available());
 				//will need to separate this later
-				String regKey = (String) reader.readObject();
+				String regKey = (String) reader.readObject();				
 				if(regKey.equals("reg"))//registration
 				{
 					System.out.println("Client has sent a valid registration key.");
-					newClient = new ClientObject((ClientObject)reader.readObject(), socket, reader, writer, buffer);
+					ClientObject copyOf = (ClientObject)reader.readObject();
+					socket.setSoTimeout(SOCKET_TIMEOUT);//1ms					
+					newClient = new ClientObject(copyOf, socket, reader, writer);
 					String clientName = newClient.getName();
 					System.out.printf("Client name is:%s\n",clientName);
 					if(clientMap.containsKey(clientName))

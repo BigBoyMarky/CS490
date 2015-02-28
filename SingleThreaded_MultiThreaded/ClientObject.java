@@ -8,7 +8,7 @@ public class ClientObject implements Serializable
 	private String username;
 	private String ipAddress;
 	private int port;
-	private long heartbeat;
+	volatile private long heartbeat;
 	private transient Socket socket;
 	private transient ObjectInputStream ois;
 	private transient ObjectOutputStream oos;
@@ -69,6 +69,7 @@ public class ClientObject implements Serializable
 	public void updateHeart(long timeStamp)
 	{
 		heartbeat = timeStamp;
+		//System.out.printf("Updating heart to %d.",timeStamp);
 	}
 	public void setName(String newName)
 	{

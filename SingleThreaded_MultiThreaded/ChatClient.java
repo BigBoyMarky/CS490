@@ -122,7 +122,7 @@ public class ChatClient implements Runnable
 					try
 					{
 						Thread.sleep(heartbeat_rate);//sleeps for heartrate
-						//System.out.println("sending hearts...D;");
+						System.out.println("sending hearts <3");
 						heart.writeObject("<3");//sends message, isn't it adorable
 						heart.flush();
 					}
