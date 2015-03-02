@@ -39,7 +39,8 @@ import java.io.InterruptedIOException;
 	5) Do NOT allow multiple clients with the same name. Right during the connection, the client will listen for a message. If
 		the message is "U", it will tell the user to change his/her username. (aka send "U" back if name is a repeat). The client
 		will also send a "get" so the user can know which usernames are still available
-	*/
+	*/ 
+
 public class ChatClient implements Runnable
 {
 	/**************************************************************************************************
@@ -196,7 +197,7 @@ public class ChatClient implements Runnable
 			//System.out.println("made otputstream");
 			heartListener = new ObjectInputStream(socket.getInputStream());
 			//System.out.println("made inputstream");				
-			new Thread(this).start();//create a new thread for sending messages
+		//`	new Thread(this).start();//create a new thread for sending messages
 			//System.out.println("made new thread");
 		}
 		catch(SocketException e)//exception for not being able to connect to server; attempt to try for 5 seconds then try again
@@ -232,6 +233,10 @@ public class ChatClient implements Runnable
 		{
 			System.out.println("Server is not responding. Will attempt to reconnect");
 			//reconnect here
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
 		}
 		/*
 		catch(UnknownHostException e)
@@ -269,7 +274,7 @@ public class ChatClient implements Runnable
 			//fatal error man
 			System.out.println("Oh my god.");
 		}
-		displayCommands();
+		//displayCommands();
 		//this.getAndDisplay();
 
 //	this.heartbeat(false);
@@ -417,11 +422,14 @@ public class ChatClient implements Runnable
 	/**************************************************************************************************
 	*								GRABBING CHAT FROM OTHER CLIENTS								*
 	**************************************************************************************************/
+	private ChatServer chat;
+
 	public ChatClient()
 	{
 		try
 		{
-			new Thread(new ChatServer()).start();//for waiting for other clients to connect and receiving messages					
+			//new Thread(new ChatServer()).start();//for waiting for other clients to connect and receiving messages
+			chat = new ChatServer();
 		}
 		catch(IOException e)
 		{
@@ -433,10 +441,13 @@ public class ChatClient implements Runnable
 	{
 		public ChatServer() throws IOException
 		{
-			serverSocket = new ServerSocket(0);//initializes serverSocket
-			serverSocket.setReuseAddress(true);
-			serverSocket.setSoTimeout(100);//sets a timeout for serverSocket.accept() so when WE initialize contact, we can continue on this thread
-			clientPort = serverSocket.getLocalPort();//clientPort is set up
+			if(false)
+			{
+				serverSocket = new ServerSocket(0);//initializes serverSocket
+				serverSocket.setReuseAddress(true);
+				serverSocket.setSoTimeout(100);//sets a timeout for serverSocket.accept() so when WE initialize contact, we can continue on this thread
+				clientPort = serverSocket.getLocalPort();//clientPort is set up
+			}
 		}
 		public void run()
 		{

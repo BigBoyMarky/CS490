@@ -14,7 +14,7 @@ public class SingleThreadedChatServer
 	*											FIELDS												*
 	**************************************************************************************************/	
 	private int SOCKET_TIMEOUT = 100;//in milliseconds
-	private long heartbeat_rate = 5000 + SOCKET_TIMEOUT;//in milliseconds
+	private long heartbeat_rate = 10000 + SOCKET_TIMEOUT;//in milliseconds
 	private static SingleThreadedChatServer server;	
 	private ServerSocket serverSocket;
 	private int port;//port
@@ -182,9 +182,13 @@ public class SingleThreadedChatServer
 				System.out.println("A new client has connected!");
 				socket.setSoTimeout(SOCKET_TIMEOUT);//for socket.getInputStream() reading purposes
 				reader = new ObjectInputStream(socket.getInputStream());
+				
 				writer = new ObjectOutputStream(socket.getOutputStream());
+			
 				writer.flush();//need to flush header for other side to start reading
+		
 				String regKey = (String) reader.readObject();
+
 				if(regKey.equals("reg"))//registration
 				{
 					System.out.println("Client has sent a valid registration key.");

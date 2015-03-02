@@ -133,7 +133,7 @@ public class MultiThreadedChatServer
 		{
 			try
 			{
-				System.out.printf("%s says:%s\n",client.getName(),message);
+				//System.out.printf("%s says:%s\n",client.getName(),message);
 				if(message.equals("get"))
 				{
 					try
@@ -228,13 +228,15 @@ public class MultiThreadedChatServer
 				}
 				}
 		}).start();
-
+		
+		//int numFiles = 0;
 		while(true)
 		{
 			try
 			{
-				socket =serverSocket.accept();//no timeout jk
-				System.out.println("A new client has connected!");
+				socket = serverSocket.accept();//no timeout jk
+				//numFiles++;
+				//System.out.println("A new client has connected!");
 				reader = new ObjectInputStream(socket.getInputStream());//so it reads from buffer
 				writer = new ObjectOutputStream(socket.getOutputStream());
 				writer.flush();
@@ -243,12 +245,12 @@ public class MultiThreadedChatServer
 				String regKey = (String) reader.readObject();				
 				if(regKey.equals("reg"))//registration
 				{
-					System.out.println("Client has sent a valid registration key.");
+					//System.out.println("Client has sent a valid registration key.");
 					ClientObject copyOf = (ClientObject)reader.readObject();
 					socket.setSoTimeout(SOCKET_TIMEOUT);//1ms					
 					newClient = new ClientObject(copyOf, socket, reader, writer);
 					String clientName = newClient.getName();
-					System.out.printf("Client name is:%s\n",clientName);
+					//System.out.printf("Client name is:%s\n",clientName);
 					if(clientMap.containsKey(clientName))
 					{
 						writer.writeObject("U");//invalid
@@ -275,7 +277,9 @@ public class MultiThreadedChatServer
 			}
 			catch(Exception e)
 			{
+				//System.out.printf("Num sockets opened:%d",numFiles);
 				e.printStackTrace();
+				break;
 			}
 		}
 	}
