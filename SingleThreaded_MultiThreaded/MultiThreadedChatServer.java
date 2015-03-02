@@ -69,7 +69,7 @@ public class MultiThreadedChatServer
 	**************************************************************************************************/
 	private int THREADPOOL_SIZE = 4;
 	private int SOCKET_TIMEOUT = 1;//in milliseconds
-	private long heartbeat_rate =1000;//in milliseconds
+	private long heartbeat_rate =500;//in milliseconds
 	private static MultiThreadedChatServer server;
 	private ServerSocket serverSocket;
 	private int port;//port
@@ -159,9 +159,9 @@ public class MultiThreadedChatServer
 				else
 				{
 					System.out.printf("Invalid message. Request from %s will be ignored.",client);
-				}
+				}System.out.println("before kicking clients if statement");
 				if(System.currentTimeMillis()-client.getHeart() > heartbeat_rate)
-				{
+				{System.out.println("5576423578243654783567821345782134");
 					System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN WORKER THREAD)\n",client);
 					clientMap.remove(client.getName());
 					keyList.remove(client);
@@ -217,11 +217,26 @@ public class MultiThreadedChatServer
 								--i;
 							}
 						}
+						catch(EOFException e) {
+							if ((System.currentTimeMillis() - currentClient.getHeart()) > heartbeat_rate)
+							{
+								System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN MANAGER THREAD)\n", currentClient.getName());
+								clientMap.remove(currentClient.getName());
+								keyList.remove(i);
+								numClients = keyList.size();
+								--i;
+							}
+						}
+						catch(NullPointerException e) {
+							System.out.println("Null Pointer");
+							e.printStackTrace();
+							System.exit(0);
+						}
 						catch(Exception e)
 						{
 							System.out.println("Unable to read input stream");
 							e.printStackTrace();
-							return;
+							System.exit(0);
 						}
 					}
 
