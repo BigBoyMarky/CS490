@@ -6,7 +6,7 @@
 
 Executor - receives message from any of the sockets, passes message to one of the ThreadPools for processing, resulting in up to n messages being processed
 
-MultiThreadedChatServer = 
+MultiThreadedChatServer =
 	1] Initialize server
 	2] Create Threadpool
 	3] 2 MAIN threads - serverSocket.accept() and ois.readObject()?
@@ -26,7 +26,7 @@ ExecutorService executor = Executors.newFixedThreadPool(10);
 
 while()
 {
-	
+
 }
 
 public class Runner() implements Runnable
@@ -66,15 +66,15 @@ public class MultiThreadedChatServer
 {
 	/**************************************************************************************************
 	*											FIELDS												*
-	**************************************************************************************************/	
+	**************************************************************************************************/
 	private int THREADPOOL_SIZE = 4;
 	private int SOCKET_TIMEOUT = 1;//in milliseconds
-	private long heartbeat_rate = 10000;//in milliseconds
-	private static MultiThreadedChatServer server;	
+	private long heartbeat_rate =1000;//in milliseconds
+	private static MultiThreadedChatServer server;
 	private ServerSocket serverSocket;
 	private int port;//port
 	private int numClients = -1;//keeps track of number of clients for ID'ing purposes
-	volatile private ArrayList<String> keyList = new ArrayList<String>();	
+	volatile private ArrayList<String> keyList = new ArrayList<String>();
 	volatile private ConcurrentHashMap<String,ClientObject> clientMap = new ConcurrentHashMap<String,ClientObject>();//hashmap used so we can check if there is a duplicate name easily
 	private long currentTime;
 	/**************************************************************************************************
@@ -103,7 +103,7 @@ public class MultiThreadedChatServer
 		}
 		else
 		{
-			server = new MultiThreadedChatServer(0);//if none was specified, uses 0, which locates default			
+			server = new MultiThreadedChatServer(0);//if none was specified, uses 0, which locates default
 			System.out.println("Port was not specified. Using free port " + server.serverSocket.getLocalPort());
 		}
 		System.out.println("Server Host Name:" + InetAddress.getLocalHost().getHostAddress());
@@ -120,7 +120,7 @@ public class MultiThreadedChatServer
 	}
 	/**************************************************************************************************
 	*								SEPARATE THREAD TO MANAGE CLIENTS								*
-	**************************************************************************************************/	
+	**************************************************************************************************/
 	public class Runner implements Runnable
 	{
 		private String message;
@@ -148,7 +148,7 @@ public class MultiThreadedChatServer
 						clientMap.remove(client.getName());
 						keyList.remove(client);
 						numClients = keyList.size();
-					}							
+					}
 					client.updateHeart(System.currentTimeMillis());//in case heartbeat sent same time
 					//System.out.printf("Get took %d milliseconds.\n",(System.currentTimeMillis()-currentTime));
 				}
@@ -176,7 +176,7 @@ public class MultiThreadedChatServer
 	}
 	/**************************************************************************************************
 	*								MAIN THREAD FOR CONNECTING NEW CLIENTS							*
-	**************************************************************************************************/	
+	**************************************************************************************************/
 	public void runServer()
 	{
 		Socket socket;
@@ -226,9 +226,9 @@ public class MultiThreadedChatServer
 					}
 
 				}
-				}
+			}
 		}).start();
-		
+
 		//int numFiles = 0;
 		while(true)
 		{
@@ -242,12 +242,12 @@ public class MultiThreadedChatServer
 				writer.flush();
 				//System.out.printf("Ready? %s\n",reader.available());
 				//will need to separate this later
-				String regKey = (String) reader.readObject();				
+				String regKey = (String) reader.readObject();
 				if(regKey.equals("reg"))//registration
 				{
 					//System.out.println("Client has sent a valid registration key.");
 					ClientObject copyOf = (ClientObject)reader.readObject();
-					socket.setSoTimeout(SOCKET_TIMEOUT);//1ms					
+					socket.setSoTimeout(SOCKET_TIMEOUT);//1ms
 					newClient = new ClientObject(copyOf, socket, reader, writer);
 					String clientName = newClient.getName();
 					//System.out.printf("Client name is:%s\n",clientName);

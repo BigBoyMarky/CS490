@@ -14,8 +14,7 @@ public class DummyClient implements Runnable
 	volatile static DummyClient dummyArray[] = new DummyClient[NUMBER_OF_CLIENTS];
 	private static long timeElapsed = 0;
 	private static String firstName = "a";
-
-
+	static long throughputSum = 0;
 	//local variables
 	private ChatClient client;
 	private String name;
@@ -53,13 +52,13 @@ public class DummyClient implements Runnable
 	}
 	public void run()
 	{
-		this.client.dummy(name,ip,port);
+		throughputSum+=this.client.dummy(name,ip,port);
 	}
 	public DummyClient(int n)
 	{
 		this.n = n;
 		name = firstName + n;
-		this.client = new ChatClient();		
-	
+		this.client = new ChatClient();
+
 	}
 }

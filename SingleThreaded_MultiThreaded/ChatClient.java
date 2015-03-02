@@ -27,10 +27,10 @@ import java.io.InterruptedIOException;
 	*									SPECIFICATIONS FOR SERVER SIDE								*
 	**************************************************************************************************/
 	/**
-	1) When it connects with the server, it will send 2 Strings: 
+	1) When it connects with the server, it will send 2 Strings:
 		1) "R"[username][spaces until 13 characters][local ipv4 address][space][port #], e.g.: RCharlie      127.0.0.1 42691
-		2) and "get". It will expect the server to send a list of users with the following format for each single user 
-			[length of name][username][local ipv4 address][space][port #], e.g.: 07Charlie127.0.0.1 42691. 
+		2) and "get". It will expect the server to send a list of users with the following format for each single user
+			[length of name][username][local ipv4 address][space][port #], e.g.: 07Charlie127.0.0.1 42691.
 			It will keep reading users and waiting until it sees "\\0", so be sure to println that after your for loop is done
 		3) If registration is valid, it expects a response. It can be any response, but if it's "U", it will disconnect.
 	2) It will continually send "<3" every heartbeat_rate. It's its heartbeat.
@@ -39,7 +39,7 @@ import java.io.InterruptedIOException;
 	5) Do NOT allow multiple clients with the same name. Right during the connection, the client will listen for a message. If
 		the message is "U", it will tell the user to change his/her username. (aka send "U" back if name is a repeat). The client
 		will also send a "get" so the user can know which usernames are still available
-	*/ 
+	*/
 
 public class ChatClient implements Runnable
 {
@@ -90,7 +90,7 @@ public class ChatClient implements Runnable
 		name = console.nextLine();
 		System.out.println("made client object");
 		long firstAttempt = System.currentTimeMillis();
-		long currentAttempt = System.currentTimeMillis();	
+		long currentAttempt = System.currentTimeMillis();
 		try
 		{
 			//System.out.println("in try loop");
@@ -100,12 +100,12 @@ public class ChatClient implements Runnable
 			heart.flush();
 			//System.out.println("made otputstream");
 			heartListener = new ObjectInputStream(socket.getInputStream());
-			//System.out.println("made inputstream");				
+			//System.out.println("made inputstream");
 			new Thread(this).start();//create a new thread for sending messages
 			//System.out.println("made new thread");
 		}
 		catch(SocketException e)//exception for not being able to connect to server; attempt to try for 5 seconds then try again
-		{				
+		{
 			System.out.print("Attempting connecting with server...\n");
 			//System.out.println(e);
 			currentAttempt = System.currentTimeMillis();
@@ -125,10 +125,10 @@ public class ChatClient implements Runnable
 		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
 		try
 		{
-			myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(), clientPort);			
-			heart.writeObject("reg");	
+			myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(), clientPort);
+			heart.writeObject("reg");
 			heart.flush();
-			System.out.println("sent reg");			
+			System.out.println("sent reg");
 			heart.writeObject(myClientObject);
 			heart.flush();
 			System.out.println("sent object");
@@ -180,7 +180,7 @@ public class ChatClient implements Runnable
 	}
 	/**********************************************************************************************
 	*											DUMMY CLIENT									*
-	***********************************************************************************************/	
+	***********************************************************************************************/
 	//No heartbeats because keeping heartbeats open means that we have to keep the sockets open.
 	public long dummy(String name, String ipAddress, int port)
 	{
@@ -195,7 +195,7 @@ public class ChatClient implements Runnable
 			heart.flush();
 			heartListener = new ObjectInputStream(socket.getInputStream());
 			myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(),DUMMY_PORT);
-			long latency = System.currentTimeMillis();//Starting timer right before the actual request		
+			long latency = System.currentTimeMillis();//Starting timer right before the actual request
 			heart.writeObject("reg");
 			heart.flush();
 			heart.writeObject(myClientObject);
@@ -206,18 +206,22 @@ public class ChatClient implements Runnable
 				System.out.printf("You sent a name that has already been used. You done goofed!");
 				return -1;//invalid, should abort test run
 			}
-			return System.currentTimeMillis()-latency;
+			latency = System.currentTimeMillis()-latency;
+			heart.close();
+			heartListener.close();
+			socket.close();
+			return latency;
 		}
 		catch(Exception e)//GOOD DOCUMENTATION PURPOSES!
 		{
 			System.out.printf("Server is unavailable. You done goofed!");
 			e.printStackTrace();
 			return -1;//invalid
-		}	
+		}
 	}
 	/**********************************************************************************************
 	*											HEARTBEAT									*
-	***********************************************************************************************/	
+	***********************************************************************************************/
 	public void heartbeat(boolean repeat)
 	{
 		do
@@ -243,12 +247,12 @@ public class ChatClient implements Runnable
 				continue;
 			}
 		}
-		while(repeat);	
+		while(repeat);
 		//exception for something else here
 	}
 	/**************************************************************************************************
 	*										GET AND DISPLAY											*
-	**************************************************************************************************/	
+	**************************************************************************************************/
 	public void getAndDisplay()
 	{
 		try
@@ -256,7 +260,7 @@ public class ChatClient implements Runnable
 			String user;
 			heart.writeObject("get");
 			heart.flush();
-			//System.out.println("sent get");			
+			//System.out.println("sent get");
 			//while(!heartListener.ready()){};
 			System.out.println("Current people online:");
 			//needs InvalidProtoclException
@@ -286,7 +290,7 @@ public class ChatClient implements Runnable
 	}
 	/**************************************************************************************************
 	*								PRINTING AVAILABLE COMMANDS										*
-	**************************************************************************************************/	
+	**************************************************************************************************/
 	public static void displayCommands()
 	{
 		System.out.println("Available commands:\nhi [user] = initiates chat session with [user]");
@@ -306,7 +310,7 @@ public class ChatClient implements Runnable
 			{
 				while(true)
 				{
-					message = console.nextLine();				
+					message = console.nextLine();
 					if(inChat)
 					{
 						//I'm surprised there's no structure for: action -> boolean -> action -> repeat based on boolean
@@ -328,7 +332,7 @@ public class ChatClient implements Runnable
 						{
 							ClientObject personYourChattingWith = listOfUsers.get(message.substring(3,message.length()));
 							currentChatSocket = new Socket(personYourChattingWith.getIpAddress(),personYourChattingWith.getPort());
-							System.out.println("Chatting with " + message.substring(2,message.length()) + "\nType in \\q to quit");					
+							System.out.println("Chatting with " + message.substring(2,message.length()) + "\nType in \\q to quit");
 						}
 						catch(NullPointerException e)
 						{
@@ -413,11 +417,11 @@ public class ChatClient implements Runnable
 					if(user.equals(""))//for when you initialize chat, the first message you'll receive is name (as seen above)
 						user = reader.readLine();
 					System.out.println(user + ":" + reader.readLine());//continue listening for messages
-				}			
+				}
 			}
 			catch(IOException e)
 			{
-				System.out.println(user + " has disconnected with you.");											
+				System.out.println(user + " has disconnected with you.");
 			}
 		}
 	}
