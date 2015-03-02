@@ -69,7 +69,7 @@ public class MultiThreadedChatServer
 	**************************************************************************************************/	
 	private int THREADPOOL_SIZE = 4;
 	private int SOCKET_TIMEOUT = 1;//in milliseconds
-	private long heartbeat_rate = 5000;//in milliseconds
+	private long heartbeat_rate = 10000;//in milliseconds
 	private static MultiThreadedChatServer server;	
 	private ServerSocket serverSocket;
 	private int port;//port
@@ -133,7 +133,7 @@ public class MultiThreadedChatServer
 		{
 			try
 			{
-				System.out.printf("%s has sent the following message:%s\n",client.getName(),message);
+				System.out.printf("%s says:%s\n",client.getName(),message);
 				if(message.equals("get"))
 				{
 					try
@@ -145,6 +145,9 @@ public class MultiThreadedChatServer
 					catch(IOException e)//exception thrown when reading/writing/closing
 					{
 						System.out.println("Unable to send clientMap...");
+						clientMap.remove(client.getName());
+						keyList.remove(client);
+						numClients = keyList.size();
 					}							
 					client.updateHeart(System.currentTimeMillis());//in case heartbeat sent same time
 					//System.out.printf("Get took %d milliseconds.\n",(System.currentTimeMillis()-currentTime));
@@ -207,7 +210,7 @@ public class MultiThreadedChatServer
 						{
 							if ((System.currentTimeMillis() - currentClient.getHeart()) > heartbeat_rate)
 							{
-								System.out.printf("%sBecause of lack of heartbeat, user %s has been terminated. (IN MANAGER THREAD)\n",new Date(), currentClient.getName());
+								System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN MANAGER THREAD)\n", currentClient.getName());
 								clientMap.remove(currentClient.getName());
 								keyList.remove(i);
 								numClients = keyList.size();
@@ -217,6 +220,8 @@ public class MultiThreadedChatServer
 						catch(Exception e)
 						{
 							System.out.println("Unable to read input stream");
+							e.printStackTrace();
+							return;
 						}
 					}
 
@@ -233,7 +238,7 @@ public class MultiThreadedChatServer
 				reader = new ObjectInputStream(socket.getInputStream());//so it reads from buffer
 				writer = new ObjectOutputStream(socket.getOutputStream());
 				writer.flush();
-				System.out.printf("Ready? %s\n",reader.available());
+				//System.out.printf("Ready? %s\n",reader.available());
 				//will need to separate this later
 				String regKey = (String) reader.readObject();				
 				if(regKey.equals("reg"))//registration
@@ -257,7 +262,7 @@ public class MultiThreadedChatServer
 						writer.flush();
 						clientMap.put(clientName,newClient);
 						keyList.add(clientName);
-						System.out.printf(keyList.get(0));
+						//System.out.printf(keyList.get(0));
 						newClient.updateHeart(System.currentTimeMillis());//for reg purposes
 						System.out.printf("%s has successfully registered.\n",clientName);
 					}

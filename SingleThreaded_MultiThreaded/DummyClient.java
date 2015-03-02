@@ -1,11 +1,16 @@
+import java.util.concurrent.*;
+
 /*
 THINGS LEFT TO DO: MAKE IT WORK
 */
 public class DummyClient implements Runnable
 {
+	static ExecutorService executor = Executors.newFixedThreadPool(5);
 	static String ip;
+	private ChatClient client;
 	static int port = 0;
-	volatile static ChatClient clientArray[] = new ChatClient[100000];	
+	//volatile static ChatClient clientArray[] = new ChatClient[15];
+	volatile static DummyClient dummyArray[] = new DummyClient[100];
 	private int n;
 	public static void main(String[] args)
 	{
@@ -19,35 +24,30 @@ public class DummyClient implements Runnable
 			System.out.println("Need to enter port of the server!");
 			System.exit(0);
 		}
-		for(int i = 0; i < clientArray.length; i++)
+		for(int i = 0; i < dummyArray.length; i++)
 		{
-			try
+			dummyArray[i] = new DummyClient(i);
+			executor.execute(dummyArray[i]);
+		}
+		while(true)
+		{
+			for(int i = 0; i < dummyArray.length; i++)
 			{
-				Thread.sleep(1000);//to prevent i from being blocked constantly				
+				executor.execute(dummyArray[i]);
 			}
-			catch(Exception e)
-			{
-				System.out.println("Thread was interrupted derr");
-			}
-			new Thread(new DummyClient(i)).start();
 		}
 	}
 	public void run()
 	{
-		try
-		{
-			System.out.printf("%dnth thread\n",n);
-			String name = "user " + n;
-			clientArray[n] = new ChatClient();		
-			clientArray[n].register(name,ip,port);			
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
+		this.client.heartbeat(false);
 	}
 	public DummyClient(int n)
 	{
 		this.n = n;
+		System.out.printf("%dth thread\n",n);
+		String name = "user " + n;
+		this.client = new ChatClient();		
+		this.client.register(name,ip,port);			
+	
 	}
 }
