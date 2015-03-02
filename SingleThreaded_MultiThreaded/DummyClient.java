@@ -1,20 +1,25 @@
-import java.util.concurrent.*;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 /*
 THINGS LEFT TO DO: MAKE IT WORK
 */
 public class DummyClient implements Runnable
 {
+	//static variables for everyone
 	static ExecutorService executor = Executors.newFixedThreadPool(50);
 	static String ip;
-	private ChatClient client;
 	static int port = 0;
-	//volatile static ChatClient clientArray[] = new ChatClient[15];
-	volatile static DummyClient dummyArray[] = new DummyClient[100000];
-	private int n;
+	static private final int NUMBER_OF_CLIENTS = 100000;
+	volatile static DummyClient dummyArray[] = new DummyClient[NUMBER_OF_CLIENTS];
 	private static long timeElapsed = 0;
-	private long heartbeatKeep = 0;
 	private static String firstName = "a";
+
+
+	//local variables
+	private ChatClient client;
+	private String name;
+	private int n;
 	public static void main(String[] args)
 	{
 		try
@@ -30,48 +35,31 @@ public class DummyClient implements Runnable
 		}
 		//Start time
 		timeElapsed = System.currentTimeMillis();
-		int j = 0;
-		int k = 0;
 		for(int i = 0; i < dummyArray.length; i++)
-		{
 			dummyArray[i] = new DummyClient(i);
+		timeElapsed = System.currentTimeMillis();//starting time now
+		for(int i = 0; i < dummyArray.length; i++)
 			executor.execute(dummyArray[i]);
-			while(j < i)
-			{
-				executor.execute(dummyArray[j]);
-				j++;
-				k++;
-				if(j == i)
-					j = 0;
-				if(k >= 25)
-				{
-					k= 0;
-					break;
-				}
-
-			}
+		try
+		{
+			executor.awaitTermination(1,TimeUnit.DAYS);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
 		}
 		timeElapsed = System.currentTimeMillis()-timeElapsed;
-		System.out.printf("Time taken:%d\n",timeElapsed);//for calculating throughput I guess
-	//	while(true)
-	//	{
-	//		for(int i = 0; i < dummyArray.length; i++)
-	//		{
-	//			executor.execute(dummyArray[i]);
-	//		}
-	//	}
+		System.out.printf("Throughput: %f processes per second\n ",(float)(NUMBER_OF_CLIENTS)/(timeElapsed*1000));
 	}
 	public void run()
 	{
-		this.client.heartbeat(false);
+		this.client.dummy(name,ip,port);
 	}
 	public DummyClient(int n)
 	{
 		this.n = n;
-		System.out.printf("%dth thread\n",n);
-		String name = firstName + n;
+		name = firstName + n;
 		this.client = new ChatClient();		
-		this.client.register(name,ip,port);			
 	
 	}
 }

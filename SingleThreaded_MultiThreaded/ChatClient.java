@@ -178,106 +178,42 @@ public class ChatClient implements Runnable
 
 		this.heartbeat(true);
 	}
-	public void register(String name, String ipAddress, int port)
+	/**********************************************************************************************
+	*											DUMMY CLIENT									*
+	***********************************************************************************************/	
+	//No heartbeats because keeping heartbeats open means that we have to keep the sockets open.
+	public long dummy(String name, String ipAddress, int port)
 	{
-		running = false;//for tsting purposes
-		long firstAttempt =  System.currentTimeMillis();
-
-		long currentAttempt = System.currentTimeMillis();
 		this.name = name;
-		host = ipAddress;
-		serverPort = port;
+		this.host = ipAddress;
+		this.serverPort = port;
+		final int DUMMY_PORT = 55555;
 		try
 		{
-			//System.out.println("in try loop");
 			Socket socket = new Socket(host,serverPort);
-			//System.out.println("made socket");
 			heart = new ObjectOutputStream(socket.getOutputStream());
 			heart.flush();
-			//System.out.println("made otputstream");
 			heartListener = new ObjectInputStream(socket.getInputStream());
-			//System.out.println("made inputstream");				
-		//`	new Thread(this).start();//create a new thread for sending messages
-			//System.out.println("made new thread");
-		}
-		catch(SocketException e)//exception for not being able to connect to server; attempt to try for 5 seconds then try again
-		{				
-			System.out.print("Attempting connecting with server...\n");
-			//System.out.println(e);
-			currentAttempt = System.currentTimeMillis();
-			if(currentAttempt-firstAttempt > 1000)//5 seconds too long
-			{
-				System.out.println("Server seems to be unavailable. Try again later?");
-				//chatThread.interrupt();
-				return;
-			}
-		}
-		catch(IOException e)
-		{
-			System.out.println("can't connect...");
-		}
-		//exception for something else here
-		//System.out.println("new thread created!");
-		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
-		try
-		{
-			myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(), clientPort);			
-			heart.writeObject("reg");	
+			myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(),DUMMY_PORT);
+			long latency = System.currentTimeMillis();//Starting timer right before the actual request		
+			heart.writeObject("reg");
 			heart.flush();
-			System.out.println("sent reg");			
 			heart.writeObject(myClientObject);
 			heart.flush();
-			System.out.println("sent object");
-		}
-		catch(IOException e)
-		{
-			System.out.println("Server is not responding. Will attempt to reconnect");
-			//reconnect here
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		/*
-		catch(UnknownHostException e)
-		{
-			System.out.println("This might be a problem. We can't identify your IP Address...");
-			System.exit(0);
-		}*/
-		try
-		{
 			String verification = (String) heartListener.readObject();//if receive "A" means good, if receive "U" means bad
-			while(verification.equals("U"))
+			if(verification.equals("U"))
 			{
-				System.out.println("Registration failed because you have the same name as another user");
-				Scanner console = new Scanner(System.in);
-				System.out.println("Enter your username again!");
-				myClientObject.setName(console.nextLine());
-				Socket socket = new Socket(host, serverPort);
-				heart = new ObjectOutputStream(socket.getOutputStream());
-				heart.flush();
-				heartListener = new ObjectInputStream(socket.getInputStream());
-				heart.writeObject("reg");
-				heart.flush();
-				heart.writeObject(myClientObject);
-				heart.flush();
-				verification = (String)heartListener.readObject();
+				System.out.printf("You sent a name that has already been used. You done goofed!");
+				return -1;//invalid, should abort test run
 			}
-			System.out.println("Verified!");
+			return System.currentTimeMillis()-latency;
 		}
-		catch(IOException e)
+		catch(Exception e)//GOOD DOCUMENTATION PURPOSES!
 		{
-			System.out.println("Could not read from server...");
-		}
-		catch(ClassNotFoundException e)
-		{
-			//fatal error man
-			System.out.println("Oh my god.");
-		}
-		//displayCommands();
-		//this.getAndDisplay();
-
-//	this.heartbeat(false);
+			System.out.printf("Server is unavailable. You done goofed!");
+			e.printStackTrace();
+			return -1;//invalid
+		}	
 	}
 	/**********************************************************************************************
 	*											HEARTBEAT									*

@@ -13,7 +13,7 @@ public class SingleThreadedChatServer
 	/**************************************************************************************************
 	*											FIELDS												*
 	**************************************************************************************************/	
-	private int SOCKET_TIMEOUT = 100;//in milliseconds
+	private int SOCKET_TIMEOUT = 10;//in milliseconds
 	private long heartbeat_rate = 10000 + SOCKET_TIMEOUT;//in milliseconds
 	private static SingleThreadedChatServer server;	
 	private ServerSocket serverSocket;
