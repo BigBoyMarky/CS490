@@ -3,7 +3,7 @@ TESTS TO DO
 1] SERVER CLOSES
 2] OTHER CLIENT CLOSES
 3] SERVER TERMINATES CLIENT
-
+testing git functionality on cs lab computers
 */
 import java.net.SocketException;
 import java.io.ObjectOutputStream;
