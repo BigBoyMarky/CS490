@@ -6,7 +6,7 @@
 
 Executor - receives message from any of the sockets, passes message to one of the ThreadPools for processing, resulting in up to n messages being processed
 
-MultiThreadedChatServer = 
+MultiThreadedChatServer =
 	1] Initialize server
 	2] Create Threadpool
 	3] 2 MAIN threads - serverSocket.accept() and ois.readObject()?
@@ -26,7 +26,7 @@ ExecutorService executor = Executors.newFixedThreadPool(10);
 
 while()
 {
-	
+
 }
 
 public class Runner() implements Runnable
@@ -66,7 +66,7 @@ public class MultiThreadedChatServer
 {
 	/**************************************************************************************************
 	*											FIELDS												*
-	**************************************************************************************************/	
+	**************************************************************************************************/
 	private int THREADPOOL_SIZE = 4;
 	private int SOCKET_TIMEOUT = 1;//in milliseconds
 	private long heartbeat_rate = 6000;//in milliseconds
@@ -74,7 +74,7 @@ public class MultiThreadedChatServer
 	private ServerSocket serverSocket;
 	private int port;//port
 	private int numClients = -1;//keeps track of number of clients for ID'ing purposes
-	volatile private ArrayList<String> keyList = new ArrayList<String>();	
+	volatile private ArrayList<String> keyList = new ArrayList<String>();
 	volatile private ConcurrentHashMap<String,ClientObject> clientMap = new ConcurrentHashMap<String,ClientObject>();//hashmap used so we can check if there is a duplicate name easily
 	private long currentTime;
 	/**************************************************************************************************
@@ -103,7 +103,7 @@ public class MultiThreadedChatServer
 		}
 		else
 		{
-			server = new MultiThreadedChatServer(0);//if none was specified, uses 0, which locates default			
+			server = new MultiThreadedChatServer(0);//if none was specified, uses 0, which locates default
 			System.out.println("Port was not specified. Using free port " + server.serverSocket.getLocalPort());
 		}
 		System.out.println("Server Host Name:" + InetAddress.getLocalHost().getHostAddress());
@@ -120,7 +120,7 @@ public class MultiThreadedChatServer
 	}
 	/**************************************************************************************************
 	*								SEPARATE THREAD TO MANAGE CLIENTS								*
-	**************************************************************************************************/	
+	**************************************************************************************************/
 	public class Runner implements Runnable
 	{
 		private String message;
@@ -133,7 +133,7 @@ public class MultiThreadedChatServer
 		{
 			try
 			{
-				System.out.printf("%s has sent the following message:%s\n",client.getName(),message);
+				//System.out.printf("%s says:%s\n",client.getName(),message);
 				if(message.equals("get"))
 				{
 					try
@@ -145,7 +145,10 @@ public class MultiThreadedChatServer
 					catch(IOException e)//exception thrown when reading/writing/closing
 					{
 						System.out.println("Unable to send clientMap...");
-					}							
+						clientMap.remove(client.getName());
+						keyList.remove(client);
+						numClients = keyList.size();
+					}
 					client.updateHeart(System.currentTimeMillis());//in case heartbeat sent same time
 					//System.out.printf("Get took %d milliseconds.\n",(System.currentTimeMillis()-currentTime));
 				}
@@ -156,9 +159,9 @@ public class MultiThreadedChatServer
 				else
 				{
 					System.out.printf("Invalid message. Request from %s will be ignored.",client);
-				}
+				}System.out.println("before kicking clients if statement");
 				if(System.currentTimeMillis()-client.getHeart() > heartbeat_rate)
-				{
+				{System.out.println("5576423578243654783567821345782134");
 					System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN WORKER THREAD)\n",client);
 					clientMap.remove(client.getName());
 					keyList.remove(client);
@@ -173,7 +176,7 @@ public class MultiThreadedChatServer
 	}
 	/**************************************************************************************************
 	*								MAIN THREAD FOR CONNECTING NEW CLIENTS							*
-	**************************************************************************************************/	
+	**************************************************************************************************/
 	public void runServer()
 	{
 		Socket socket;
@@ -207,12 +210,27 @@ public class MultiThreadedChatServer
 						{
 							if ((System.currentTimeMillis() - currentClient.getHeart()) > heartbeat_rate)
 							{
-								System.out.printf("%sBecause of lack of heartbeat, user %s has been terminated. (IN MANAGER THREAD)\n",new Date(), currentClient.getName());
+								System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN MANAGER THREAD)\n", currentClient.getName());
 								clientMap.remove(currentClient.getName());
 								keyList.remove(i);
 								numClients = keyList.size();
 								--i;
 							}
+						}
+						catch(EOFException e) {
+							if ((System.currentTimeMillis() - currentClient.getHeart()) > heartbeat_rate)
+							{
+								System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN MANAGER THREAD)\n", currentClient.getName());
+								clientMap.remove(currentClient.getName());
+								keyList.remove(i);
+								numClients = keyList.size();
+								--i;
+							}
+						}
+						catch(NullPointerException e) {
+							System.out.println("Null Pointer");
+							e.printStackTrace();
+							System.exit(0);
 						}
 						catch(Exception e)
 						{
@@ -222,34 +240,35 @@ public class MultiThreadedChatServer
 							keyList.remove(i);
 							numClients = keyList.size();
 							--i;
-
 						}
 					}
 
 				}
-				}
+			}
 		}).start();
 
+		//int numFiles = 0;
 		while(true)
 		{
 			try
 			{
-				socket =serverSocket.accept();//no timeout jk
-				System.out.println("A new client has connected!");
+				socket = serverSocket.accept();//no timeout jk
+				//numFiles++;
+				//System.out.println("A new client has connected!");
 				reader = new ObjectInputStream(socket.getInputStream());//so it reads from buffer
 				writer = new ObjectOutputStream(socket.getOutputStream());
 				writer.flush();
-				System.out.printf("Ready? %s\n",reader.available());
+				//System.out.printf("Ready? %s\n",reader.available());
 				//will need to separate this later
-				String regKey = (String) reader.readObject();				
+				String regKey = (String) reader.readObject();
 				if(regKey.equals("reg"))//registration
 				{
-					System.out.println("Client has sent a valid registration key.");
+					//System.out.println("Client has sent a valid registration key.");
 					ClientObject copyOf = (ClientObject)reader.readObject();
-					socket.setSoTimeout(SOCKET_TIMEOUT);//1ms					
+					socket.setSoTimeout(SOCKET_TIMEOUT);//1ms
 					newClient = new ClientObject(copyOf, socket, reader, writer);
 					String clientName = newClient.getName();
-					System.out.printf("Client name is:%s\n",clientName);
+					//System.out.printf("Client name is:%s\n",clientName);
 					if(clientMap.containsKey(clientName))
 					{
 						writer.writeObject("U");//invalid
@@ -263,7 +282,7 @@ public class MultiThreadedChatServer
 						writer.flush();
 						clientMap.put(clientName,newClient);
 						keyList.add(clientName);
-						System.out.printf(keyList.get(0));
+						//System.out.printf(keyList.get(0));
 						newClient.updateHeart(System.currentTimeMillis());//for reg purposes
 						System.out.printf("%s has successfully registered.\n",clientName);
 					}
@@ -276,7 +295,9 @@ public class MultiThreadedChatServer
 			}
 			catch(Exception e)
 			{
+				//System.out.printf("Num sockets opened:%d",numFiles);
 				e.printStackTrace();
+				break;
 			}
 		}
 	}
