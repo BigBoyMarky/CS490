@@ -69,7 +69,7 @@ public class MultiThreadedChatServer
 	**************************************************************************************************/	
 	private int THREADPOOL_SIZE = 4;
 	private int SOCKET_TIMEOUT = 1;//in milliseconds
-	private long heartbeat_rate = 5000;//in milliseconds
+	private long heartbeat_rate = 6000;//in milliseconds
 	private static MultiThreadedChatServer server;	
 	private ServerSocket serverSocket;
 	private int port;//port
@@ -216,7 +216,13 @@ public class MultiThreadedChatServer
 						}
 						catch(Exception e)
 						{
+							e.printStackTrace();
 							System.out.println("Unable to read input stream");
+							clientMap.remove(currentClient.getName());
+							keyList.remove(i);
+							numClients = keyList.size();
+							--i;
+
 						}
 					}
 
