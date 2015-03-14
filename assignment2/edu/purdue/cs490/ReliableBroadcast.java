@@ -1,3 +1,5 @@
+package edu.purdue.cs490;
+
 public interface ReliableBroadcast
 {
 	public void init(Process currentProcess, BroadcastReceiver br);

@@ -1,3 +1,5 @@
+package edu.purdue.cs490;
+
 /*
 TESTS TO DO
 1] SERVER CLOSES
@@ -50,6 +52,7 @@ public class ChatClient extends Process implements Runnable
 	private static long heartbeat_rate = 5000;
 	private String host;
 	private String name;//name of the Client
+	private String id;
 	private int serverPort;//port of the server it's going to connect to
 	private int clientPort;//port of the client's ServerSocket for chatting with other clients
 	private String ip;//ip of the client
@@ -72,14 +75,21 @@ public class ChatClient extends Process implements Runnable
 	**************************************************************************************************/
 	public static void main(String[] args)
 	{
-		ChatClient myChatClient = new ChatClient();
-		myChatClient.register();
+		try
+		{
+			ChatClient myChatClient = new ChatClient("-1",-1,"-1");//because of the fucking superclass's constructor requirements			
+			myChatClient.register();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		System.exit(0);
 	}
 	/************************************************************************************************
 	*											INITIALIZATION									*
 	*************************************************************************************************/
-	public void register()
+	public void register() throws Exception
 	{
 		System.out.print("Hostname of the server you want to connect to:");
 		Scanner console = new Scanner(System.in);
@@ -110,8 +120,8 @@ public class ChatClient extends Process implements Runnable
 			channel.toServer(myClientObject);
 			verification = (String)heartListener.readObject();
 		}
+		id = verification;
 		System.out.println("Verified!");
-		}
 		displayCommands();
 		this.heartbeat();
 	}
@@ -134,20 +144,28 @@ public class ChatClient extends Process implements Runnable
 	**************************************************************************************************/
 	public void getAndDisplay()
 	{
-		String user;
-		channel.toServer("get");
-		System.out.println("Current people online:");
-		//needs InvalidProtoclException
-		listOfUsers = (ConcurrentHashMap)heartListener.readObject();
-		//iterate through the hashmap
-		Iterator availableUsers = listOfUsers.entrySet().iterator();
-		int counter = 1;
-		while(availableUsers.hasNext())
+		try
+		{		
+			String user;
+			channel.toServer("get");
+			System.out.println("Current people online:");
+			//needs InvalidProtoclException
+			listOfUsers = (ConcurrentHashMap<String, ClientObject>)heartListener.readObject();			
+			//iterate through the hashmap
+			Iterator availableUsers = listOfUsers.entrySet().iterator();
+			int counter = 1;
+			while(availableUsers.hasNext())
+			{
+				Map.Entry pair = (Map.Entry)availableUsers.next();
+				System.out.printf("%d. %s\t",counter++,pair.getKey());
+			}
+			System.out.println("\n================================================================================");
+		}		
+		catch(Exception e)
 		{
-			Map.Entry pair = (Map.Entry)availableUsers.next();
-			System.out.printf("%d. %s\t",counter++,pair.getKey());
+			e.printStackTrace();
 		}
-		System.out.println("\n================================================================================");
+
 	}
 	/**************************************************************************************************
 	*								PRINTING AVAILABLE COMMANDS										*
@@ -164,12 +182,12 @@ public class ChatClient extends Process implements Runnable
 	/**************************************************************************************************
 	*								THREAD THAT THE USER INTERACTS WITH								*
 	**************************************************************************************************/
-	/*Checks if user inputted a command, then extracts it*/what is done 
+	/*Checks if user inputted a command, then extracts it*/
 	public String isCommand(String input)
 	{
 		for(int i = 0; i < commands.length; i++)
 		{
-			if(message.indexOf(commands[i]) == 0)//checks if it is a command
+			if(input.indexOf(commands[i]) == 0)//checks if it is a command
 				return commands[i];//if it is, return it
 		}
 		return "";//else return nothing
@@ -179,15 +197,13 @@ public class ChatClient extends Process implements Runnable
 	{
 		if(command.equals(commands[0]))
 		{//command == hey; initialize new socket and add to socketList
-			channel.initClient();
-			initialize(message);
 			currentInterlocuter = listOfUsers.get(message);
-			currentChatSocket = new Socket(personYourChattingWith.getIpAddress(),personYourChattingWith.getPort());
-			System.out.println("Chatting with " + message.substring(2,message.length()) + "\nType in \\q to quit");
+			channel.initClient(currentInterlocuter);
+			System.out.printf("Chatting with %s\n",message);
 		}
 		if(command.equals(commands[1]))
 		{//switch; switch socket to user
-			switchTo(message);
+			currentInterlocuter = listOfUsers.get(message);
 		}
 		if(command.equals(commands[2]))
 		{//list
@@ -195,7 +211,7 @@ public class ChatClient extends Process implements Runnable
 		}
 		if(command.equals(commands[3]))
 		{//everybody
-			currentInterlocuter = listOfUsers.get(message);
+			System.out.println("RB");
 		}
 		if(command.equals(commands[4]) || commands.equals(commands[5]))
 		{//help and ?
@@ -203,8 +219,8 @@ public class ChatClient extends Process implements Runnable
 		}
 		if(command.equals(""))
 		{//normal typing
-			if(currentInterlocuter != NULL)
-				whisper(currentInterlocuter,message);
+			if(currentInterlocuter != null)
+				channel.whisper(currentInterlocuter,message);
 			else
 			{
 				System.out.println("Unrecognized command!");
@@ -231,8 +247,9 @@ public class ChatClient extends Process implements Runnable
 	**************************************************************************************************/
 	private ChatServer chat;
 
-	public ChatClient()
+	public ChatClient(String tempIP, int tempPort, String tempID)
 	{
+		super(tempIP, tempPort, tempID);
 		try
 		{
 			new Thread(new ChatServer()).start();//for waiting for other clients to connect and receiving messages
@@ -258,8 +275,8 @@ public class ChatClient extends Process implements Runnable
 			String user = "";//user will be the name displayed when chatting e.g. Charlie: hi
 			while(true)
 			{
-				initInvitation();
-				System.out.printf("%s\n",fromClient());
+				channel.initInvitation(serverSocket);
+				System.out.printf("%s\n",(String)channel.fromClient());
 			}
 		}
 	}

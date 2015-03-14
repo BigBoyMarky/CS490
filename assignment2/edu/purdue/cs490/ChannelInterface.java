@@ -1,4 +1,7 @@
+package edu.purdue.cs490;
+
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.net.UnknownHostException;
@@ -16,10 +19,11 @@ public class ChannelInterface
 	/*To server*/
 	private ObjectOutputStream heart;//printer to server
 	private ObjectInputStream heartListener;
+	private Socket socket;
 	/*To client*/
 	private PrintWriter printer;//printer to client
 	private BufferedReader reader;//reader to client
-`	/*From client*/
+	/*From client*/
 	private ArrayList<Socket> socketList = new ArrayList<Socket>();//socketList of everyone chatting you
 	private ArrayList<ObjectInputStream> oisList = new ArrayList<ObjectInputStream>();
 	public ChannelInterface()
@@ -27,7 +31,7 @@ public class ChannelInterface
 	}
 
 	/*To server*/
-	public void initServer(String serverHost, String serverPort)
+	public void initServer(String serverHost, int serverPort)
 	{
 		try
 		{
@@ -35,7 +39,6 @@ public class ChannelInterface
 			heart = new ObjectOutputStream(socket.getOutputStream());//creates new oos
 			heart.flush();//flushes header
 			heartListener = new ObjectInputStream(socket.getInputStream());//creates new ois
-
 		}
 		catch(Exception e)
 		{
@@ -44,11 +47,19 @@ public class ChannelInterface
 	}
 	public void closeServer()
 	{
-		heart.writeObject("Close");
-		heart.flush();
-		socket.close();
-		heart.close();
-		heartListener.close();
+		try
+		{
+			heart.writeObject("Close");
+			heart.flush();
+			socket.close();
+			heart.close();
+			heartListener.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();//will fill it up later
+		}
+
 	}
 	public void toServer(Object message)
 	{
@@ -72,32 +83,54 @@ public class ChannelInterface
 		{
 			e.printStackTrace();//will fill it up later
 		}
+		return null;//if no message or there is an error
 	}
 
 	/*To client*/
 	public void initClient(ClientObject interlocutor)
 	{
-		Socket clientSocket = new Socket(interlocutor.getIpAddress(), interlocutor.getPort());
-		ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-		ObjectInputStream oos = new ObjectOutputStream(socket.getOutputStream());
-		oos.flush();
-		interlocutor = new ClientObject(interlocutor,clientSocket,ois,oos);
-		System.out.printf("Chatting with %s\n",interlocutor.getName());
+		try
+		{
+			Socket clientSocket = new Socket(interlocutor.getIpAddress(), interlocutor.getPort());
+			ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+			ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+			oos.flush();
+			interlocutor = new ClientObject(interlocutor,clientSocket,ois,oos);
+			System.out.printf("Chatting with %s\n",interlocutor.getName());
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();//will fill it up later
+		}		
 	}
 	public void whisper(ClientObject interlocutor, Object message)
 	{
 		if(!interlocutor.getInitState())
 			initClient(interlocutor);
-		interlocutor.getOut().writeObject(message);
+		try
+		{
+			interlocutor.getOut().writeObject(message);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();//will fill it up later
+		}		
 	}
 	/*From client*/
-	public Object initInvitation(Serversocket serverSocket)
+	public void initInvitation(ServerSocket serverSocket)
 	{
-		Socket newSocket = serverSocket.accept();
-		newSocket.setSoTimeout(50);
-		socketList.add(newSocket);
-		ObjectInputStream ois = ObjectInputStream(socket.getInputStream());
-		oisList.add(ois);
+		try
+		{
+			Socket newSocket = serverSocket.accept();
+			newSocket.setSoTimeout(50);
+			socketList.add(newSocket);
+			ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+			oisList.add(ois);			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();//will fill it up later
+		}		
 	}
 	public Object fromClient()
 	{
@@ -115,5 +148,6 @@ public class ChannelInterface
 			}
 
 		}
+		return null;//if no messages found, return nothing
 	}
 }

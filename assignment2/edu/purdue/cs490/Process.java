@@ -5,7 +5,7 @@ public class Process
 	String IP;
 	int port;
 	String ID;
-	public Node(String IP, int port, String ID)
+	public Process(String IP, int port, String ID)
 	{
 		this.IP = IP;
 		this.port = port;
