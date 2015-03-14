@@ -65,6 +65,7 @@ public class ChatClient extends Process implements Runnable
 	private ClientObject myClientObject;//object representing this specific client for server purposes
 	private ConcurrentHashMap<String,ClientObject> listOfUsers = new ConcurrentHashMap<String,ClientObject>();//hashmap of users for connecting to others
 	private String[] commands = {"\\hey","\\switch","\\list","\\everybody","\\help","?",};//list of available commands
+	private ClientObject currentInterlocuter;
 
 	/**************************************************************************************************
 	*											MAIN METHOD											*
@@ -159,7 +160,7 @@ public class ChatClient extends Process implements Runnable
 		System.out.println("\\everybody [message] = allow everyone to hear what you want to say");
 		System.out.println("\\help = shows available commands (same as \'?\')\n? = shows available commands (same as \'help\')");
 	}
-	
+
 	/**************************************************************************************************
 	*								THREAD THAT THE USER INTERACTS WITH								*
 	**************************************************************************************************/
@@ -178,6 +179,7 @@ public class ChatClient extends Process implements Runnable
 	{
 		if(command.equals(commands[0]))
 		{//command == hey; initialize new socket and add to socketList
+			channel.initClient();
 			initialize(message);
 			currentInterlocuter = listOfUsers.get(message);
 			currentChatSocket = new Socket(personYourChattingWith.getIpAddress(),personYourChattingWith.getPort());
@@ -193,11 +195,21 @@ public class ChatClient extends Process implements Runnable
 		}
 		if(command.equals(commands[3]))
 		{//everybody
-			rbroadcast(message);
+			currentInterlocuter = listOfUsers.get(message);
 		}
 		if(command.equals(commands[4]) || commands.equals(commands[5]))
 		{//help and ?
 			displayCommands();
+		}
+		if(command.equals(""))
+		{//normal typing
+			if(currentInterlocuter != NULL)
+				whisper(currentInterlocuter,message);
+			else
+			{
+				System.out.println("Unrecognized command!");
+				displayCommands();				
+			}
 		}
 
 	}
@@ -206,65 +218,12 @@ public class ChatClient extends Process implements Runnable
 		String message;//the message string we're going to be dealing with mainly
 		String command;//if it is a valid command, command!
 		Scanner console = new Scanner(System.in);
-		ClientObject currentInterlocuter;
-		try
+		while(true)
 		{
-			while(true)
-			{
-				message = console.nextLine();
-				command = isCommand(message);
-				if(message.length() >= command.length())
-				{
-					message = message.substring(command.length(),message.length());//keeps rest of message
-					//else wtf?
-					executeCommand(command,message);
-				}
-
-				if(inChat)
-				{
-					//I'm surprised there's no structure for: action -> boolean -> action -> repeat based on boolean
-					printer.println(message);
-					while(!(message = console.nextLine()).equals("\\q"))
-					{
-						//System.out.print("You:");
-						printer.println(message);
-					}
-					System.out.println("You have exited chat. Type in \'chatlist\' to see who else is online.");
-					inChat = false;
-					continue;
-				}
-				System.out.println("Your command was:" + message);
-				int size = message.length();
-				if(message.substring(0,(size<2?size:2)).equals("hi"))//ternary operators to prevent index out of bounds
-				{
-					try
-					{
-						ClientObject personYourChattingWith = listOfUsers.get(message.substring(3,message.length()));
-						currentChatSocket = new Socket(personYourChattingWith.getIpAddress(),personYourChattingWith.getPort());
-						System.out.println("Chatting with " + message.substring(2,message.length()) + "\nType in \\q to quit");
-					}
-					catch(NullPointerException e)
-					{
-						System.out.println("This user is not online. Check your spelling!");
-						continue;
-					}
-					inChat = true;
-					printer = new PrintWriter(currentChatSocket.getOutputStream(),true);
-					reader = new BufferedReader(new InputStreamReader(currentChatSocket.getInputStream()));
-					printer.println(name);
-				}
-				else if(message.substring(0,size<8?size:8).equals("chatlist"))
-					getAndDisplay();
-				else if(message.substring(0,size<1?size:1).equals("?") ||message.substring(0,size<4?size:4).equals("help") )
-					displayCommands();
-				else
-					System.out.println("Command not recognized. Type in \'?\' or \'help\' for a list of available commands.");
-			}
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-			System.out.println("Sorry. I'm terrible at catching exceptions. :(");
+			message = console.nextLine();
+			command = isCommand(message);
+			message = message.substring(command.length(),message.length());//keeps rest of message
+			executeCommand(command,message);
 		}
 	}
 	/**************************************************************************************************

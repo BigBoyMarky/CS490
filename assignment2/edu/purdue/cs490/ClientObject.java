@@ -13,6 +13,7 @@ public class ClientObject implements Serializable
 	private transient ObjectInputStream ois;
 	private transient ObjectOutputStream oos;
 	private transient BufferedReader buffer;
+	private boolean isSocketInit = false;
 	public ClientObject(String username, String ipAddress, int port)
 	{//information sent from the clientside
 		this.username = username;
@@ -27,6 +28,7 @@ public class ClientObject implements Serializable
 		this.socket = socket;
 		this.ois = ois;
 		this.oos = oos;
+		isSocketInit = true;
 	}
 	public ClientObject(ClientObject copy, Socket socket, ObjectInputStream ois, ObjectOutputStream oos, BufferedReader buffer)
 	{//for the sigle-threaded serverside
@@ -74,5 +76,9 @@ public class ClientObject implements Serializable
 	public void setName(String newName)
 	{
 		username = newName;
+	}
+	public boolean getInitState()
+	{
+		return isSocketInit;
 	}
 }

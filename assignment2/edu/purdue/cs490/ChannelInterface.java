@@ -25,6 +25,8 @@ public class ChannelInterface
 	private BufferedReader reader;//reader to client
 	private Socket currentChatSocket;//the current Socket you're chatting in right now
 	private boolean inChat;//once someone gets a message, they are forced in chat
+	private ArrayList<Socket> socketList = new ArrayList<Socket>();
+	private ArrayList<ObjectOutputStream> oosList = new ArrayList<ObjectOutputStream>();
 	public ChannelInterface()
 	{
 
@@ -77,10 +79,17 @@ public class ChannelInterface
 	}
 	public void initClient(ClientObject interlocutor)
 	{
-		socketList.add(new Socket(interlocutor.getIpAddress(),interlocutor.getPort()));
+		Socket clientSocket = new Socket(interlocutor.getIpAddress(), interlocutor.getPort());
+		ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+		ObjectInputStream oos = new ObjectOutputStream(socket.getOutputStream());
+		oos.flush();
+		interlocutor = new ClientObject(interlocutor,clientSocket,ois,oos);
+		System.out.printf("Chatting with %s\n",interlocutor.getName());
 	}
 	public void whisper(ClientObject interlocutor, Object message)
 	{
-		interlocutor.
+		if(!interlocutor.getInitState())
+			initClient(interlocutor);
+		interlocutor.getOut().writeObject(message);
 	}
 }
