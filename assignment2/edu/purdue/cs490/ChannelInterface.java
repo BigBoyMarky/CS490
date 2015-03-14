@@ -13,24 +13,20 @@ import java.io.InterruptedIOException;
 
 public class ChannelInterface
 {
-	private String host;
-	private String name;//name of the Client
-	private int serverPort;//port of the server it's going to connect to
-	private int clientPort;//port of the client's ServerSocket for chatting with other clients
-	private String ip;//ip of the client
+	/*To server*/
 	private ObjectOutputStream heart;//printer to server
 	private ObjectInputStream heartListener;
-	private Serversocket serverSocket;
+	/*To client*/
 	private PrintWriter printer;//printer to client
 	private BufferedReader reader;//reader to client
-	private Socket currentChatSocket;//the current Socket you're chatting in right now
-	private boolean inChat;//once someone gets a message, they are forced in chat
-	private ArrayList<Socket> socketList = new ArrayList<Socket>();
-	private ArrayList<ObjectOutputStream> oosList = new ArrayList<ObjectOutputStream>();
+`	/*From client*/
+	private ArrayList<Socket> socketList = new ArrayList<Socket>();//socketList of everyone chatting you
+	private ArrayList<ObjectInputStream> oisList = new ArrayList<ObjectInputStream>();
 	public ChannelInterface()
-	{
-
+	{//initialized all necessary things
 	}
+
+	/*To server*/
 	public void initServer(String serverHost, String serverPort)
 	{
 		try
@@ -77,6 +73,8 @@ public class ChannelInterface
 			e.printStackTrace();//will fill it up later
 		}
 	}
+
+	/*To client*/
 	public void initClient(ClientObject interlocutor)
 	{
 		Socket clientSocket = new Socket(interlocutor.getIpAddress(), interlocutor.getPort());
@@ -91,5 +89,31 @@ public class ChannelInterface
 		if(!interlocutor.getInitState())
 			initClient(interlocutor);
 		interlocutor.getOut().writeObject(message);
+	}
+	/*From client*/
+	public Object initInvitation(Serversocket serverSocket)
+	{
+		Socket newSocket = serverSocket.accept();
+		newSocket.setSoTimeout(50);
+		socketList.add(newSocket);
+		ObjectInputStream ois = ObjectInputStream(socket.getInputStream());
+		oisList.add(ois);
+	}
+	public Object fromClient()
+	{
+		int size = oisList.size();
+		for(int i = 0; i < size; i++)
+		{
+			try
+			{
+				Object message = oisList.get(i).readObject();
+				return message;
+			}
+			catch(Exception e)
+			{
+				continue;
+			}
+
+		}
 	}
 }

@@ -235,7 +235,7 @@ public class ChatClient extends Process implements Runnable
 	{
 		try
 		{
-			//new Thread(new ChatServer()).start();//for waiting for other clients to connect and receiving messages
+			new Thread(new ChatServer()).start();//for waiting for other clients to connect and receiving messages
 			chat = new ChatServer();
 		}
 		catch(IOException e)
@@ -248,47 +248,18 @@ public class ChatClient extends Process implements Runnable
 	{
 		public ChatServer() throws IOException
 		{
-			if(false)
-			{
-				serverSocket = new ServerSocket(0);//initializes serverSocket
-				serverSocket.setReuseAddress(true);
-				serverSocket.setSoTimeout(100);//sets a timeout for serverSocket.accept() so when WE initialize contact, we can continue on this thread
-				clientPort = serverSocket.getLocalPort();//clientPort is set up
-			}
+			serverSocket = new ServerSocket(0);//initializes serverSocket
+			serverSocket.setReuseAddress(true);
+			serverSocket.setSoTimeout(100);//sets a timeout for serverSocket.accept() so when WE initialize contact, we can continue on this thread
+			clientPort = serverSocket.getLocalPort();//clientPort is set up
 		}
 		public void run()
 		{
 			String user = "";//user will be the name displayed when chatting e.g. Charlie: hi
-			try
+			while(true)
 			{
-				while(true)
-				{
-					try
-					{
-						while(!inChat)//while you did not initialize chat, wait for a request
-						{
-							Socket socket = serverSocket.accept();
-							currentChatSocket = socket;//makes the socket universal so reader/printer can do it write
-							inChat = true;//you're now in chat, no longer focused on waiting for requests, only listening to messages
-							System.out.println("You have received a chat message!");
-							reader = new BufferedReader(new InputStreamReader(currentChatSocket.getInputStream()));
-							printer = new PrintWriter(currentChatSocket.getOutputStream(),true);
-							printer.println(name);//sends your name
-							user = reader.readLine(); //read for name
-						}
-					}
-					catch(InterruptedIOException e)
-					{
-						continue;
-					}
-					if(user.equals(""))//for when you initialize chat, the first message you'll receive is name (as seen above)
-						user = reader.readLine();
-					System.out.println(user + ":" + reader.readLine());//continue listening for messages
-				}
-			}
-			catch(IOException e)
-			{
-				System.out.println(user + " has disconnected with you.");
+				initInvitation();
+				System.out.printf("%s\n",fromClient());
 			}
 		}
 	}
