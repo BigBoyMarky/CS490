@@ -41,11 +41,12 @@ import java.io.InterruptedIOException;
 		will also send a "get" so the user can know which usernames are still available
 	*/
 
-public class ChatClient implements Runnable
+public class ChatClient extends Process implements Runnable
 {
 	/**************************************************************************************************
 	*											FIELDS												*
 	**************************************************************************************************/
+	private ChannelInterface channel;
 	private static long heartbeat_rate = 5000;
 	private String host;
 	private String name;//name of the Client
@@ -88,7 +89,7 @@ public class ChatClient implements Runnable
 		console.nextLine();
 		System.out.print("Enter your name:");
 		name = console.nextLine();
-		System.out.println("made client object");
+
 		long firstAttempt = System.currentTimeMillis();
 		long currentAttempt = System.currentTimeMillis();
 		try
@@ -138,12 +139,6 @@ public class ChatClient implements Runnable
 			System.out.println("Server is not responding. Will attempt to reconnect");
 			//reconnect here
 		}
-		/*
-		catch(UnknownHostException e)
-		{
-			System.out.println("This might be a problem. We can't identify your IP Address...");
-			System.exit(0);
-		}*/
 		try
 		{
 			String verification = (String) heartListener.readObject();//if receive "A" means good, if receive "U" means bad
