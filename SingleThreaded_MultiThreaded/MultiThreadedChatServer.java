@@ -217,6 +217,13 @@ public class MultiThreadedChatServer
 								--i;
 							}
 						}
+						catch(SocketException e)//user disconnected
+						{
+							clientMap.remove(currentClient.getName());
+							keyList.remove(i);
+							numClients = keyList.size();
+							--i;
+						}
 						catch(Exception e)
 						{
 							System.out.println("Unable to read input stream");
