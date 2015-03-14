@@ -6,4 +6,6 @@ public interface Message
 	void setMessageNumber(int messageNumber);
 	String getMessageContents();
 	void setMessageContents(String contents);
+	Process getSender();
+	void setSender(Process sender);
 }
