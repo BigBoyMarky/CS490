@@ -1,61 +1,3 @@
-/*
-1] ADD EXECUTOR THINGY THREADPOOL(LIMIT = WHATEVER)
-2] MOVE STUFF AROUND AND MAKE IT WORK
-3] UPDATE PROTOCOLS BASED ON SINGLETHREADED CHAT SERVER
-
-
-Executor - receives message from any of the sockets, passes message to one of the ThreadPools for processing, resulting in up to n messages being processed
-
-MultiThreadedChatServer =
-	1] Initialize server
-	2] Create Threadpool
-	3] 2 MAIN threads - serverSocket.accept() and ois.readObject()?
-	4] Once ios.readObject() returns true, pass the Socket and OIS to method that handles the rest of the grunt work
-
-which means we must minimize the steps in ois.hasMessage()
-
-ExecutorService executor = Executors.newFixedThreadPool(10);
-			Executors.newFixedThreadPool(4);
-			while(true)
-			{
-				Socket socket = serverSocket.accept();
-				socketList.add(socket);
-				readerList.add(new BufferedReader(new InputStreamReader(socket.getInputStream())));
-				++numClients;
-				executor.execute(new MultiThreadedChatServer());
-
-while()
-{
-
-}
-
-public class Runner() implements Runnable
-{
-	int id;
-	//or
-	String id;
-	public Runner(id)
-	{
-		this.id = id;
-
-	}
-	public void run()
-	{
-		//goes through a single iteration checking for messages
-		//what about checking heartbeats?
-		//have it scheduled so it'll automatically run every 5 seconds?
-	}
-}
-*/
-
-
-//Create a server based on command line input, DONE
-//server waits for clients to connect, DONE
-//once the clients connect, it sends acknowledgement back, adds clinet to a list.
-//it then sends an update to all previously connectd clients about the new user
-//it regularly checks for heartbeats. If heartbeat not received, it will assume it's dead and remove it from the list.
-//the client can initiate a chat with another client
-
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.*;
@@ -217,13 +159,6 @@ public class MultiThreadedChatServer
 								--i;
 							}
 						}
-						catch(SocketException e)//user disconnected
-						{
-							clientMap.remove(currentClient.getName());
-							keyList.remove(i);
-							numClients = keyList.size();
-							--i;
-						}
 						catch(EOFException e) {
 							if ((System.currentTimeMillis() - currentClient.getHeart()) > heartbeat_rate)
 							{
@@ -233,6 +168,11 @@ public class MultiThreadedChatServer
 								numClients = keyList.size();
 								--i;
 							}
+						}
+						catch(NullPointerException e) {
+							System.out.println("Null Pointer");
+							e.printStackTrace();
+							System.exit(0);
 						}
 						catch(Exception e)
 						{

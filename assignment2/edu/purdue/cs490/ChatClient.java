@@ -1,11 +1,4 @@
 /*
-1. If you register with a name already used, it goes into an infinite while loop too//fixed!!!
-
-2. If multiple people try to chat the same person, only the first person to connect actaully sends the message
-3. If multiple people try to chat the same person, then the victim gets infinite null loop when one guy disconnects
-4. Make it less thread-heavy
-5. Make it mdoular:
-
 TESTS TO DO
 1] SERVER CLOSES
 2] OTHER CLIENT CLOSES
@@ -48,11 +41,12 @@ import java.io.InterruptedIOException;
 		will also send a "get" so the user can know which usernames are still available
 	*/
 
-public class ChatClient implements Runnable
+public class ChatClient extends Process implements Runnable
 {
 	/**************************************************************************************************
 	*											FIELDS												*
 	**************************************************************************************************/
+	private ChannelInterface channel;
 	private static long heartbeat_rate = 5000;
 	private String host;
 	private String name;//name of the Client
@@ -95,7 +89,7 @@ public class ChatClient implements Runnable
 		console.nextLine();
 		System.out.print("Enter your name:");
 		name = console.nextLine();
-		System.out.println("made client object");
+
 		long firstAttempt = System.currentTimeMillis();
 		long currentAttempt = System.currentTimeMillis();
 		try
@@ -145,12 +139,6 @@ public class ChatClient implements Runnable
 			System.out.println("Server is not responding. Will attempt to reconnect");
 			//reconnect here
 		}
-		/*
-		catch(UnknownHostException e)
-		{
-			System.out.println("This might be a problem. We can't identify your IP Address...");
-			System.exit(0);
-		}*/
 		try
 		{
 			String verification = (String) heartListener.readObject();//if receive "A" means good, if receive "U" means bad
@@ -180,13 +168,8 @@ public class ChatClient implements Runnable
 			//fatal error man
 			System.out.println("Oh my god.");
 		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
 		displayCommands();
 		//this.getAndDisplay();
-		new Thread(this).start();//create a new thread for sending messages
 
 		this.heartbeat(true);
 	}
@@ -333,7 +316,6 @@ public class ChatClient implements Runnable
 							printer.println(message);
 						}
 						System.out.println("You have exited chat. Type in \'chatlist\' to see who else is online.");
-						printer.close();//closes outputstream
 						inChat = false;
 						continue;
 					}
@@ -381,7 +363,7 @@ public class ChatClient implements Runnable
 	{
 		try
 		{
-			new Thread(new ChatServer()).start();//for waiting for other clients to connect and receiving messages
+			//new Thread(new ChatServer()).start();//for waiting for other clients to connect and receiving messages
 			chat = new ChatServer();
 		}
 		catch(IOException e)
@@ -394,10 +376,13 @@ public class ChatClient implements Runnable
 	{
 		public ChatServer() throws IOException
 		{
-			serverSocket = new ServerSocket(0);//initializes serverSocket
-			serverSocket.setReuseAddress(true);
-			serverSocket.setSoTimeout(100);//sets a timeout for serverSocket.accept() so when WE initialize contact, we can continue on this thread
-			clientPort = serverSocket.getLocalPort();//clientPort is set up
+			if(false)
+			{
+				serverSocket = new ServerSocket(0);//initializes serverSocket
+				serverSocket.setReuseAddress(true);
+				serverSocket.setSoTimeout(100);//sets a timeout for serverSocket.accept() so when WE initialize contact, we can continue on this thread
+				clientPort = serverSocket.getLocalPort();//clientPort is set up
+			}
 		}
 		public void run()
 		{
@@ -423,8 +408,6 @@ public class ChatClient implements Runnable
 					catch(InterruptedIOException e)
 					{
 						continue;
-					//	System.out.println("erorrrr");
-						//System.exit(1);
 					}
 					if(user.equals(""))//for when you initialize chat, the first message you'll receive is name (as seen above)
 						user = reader.readLine();
@@ -434,11 +417,6 @@ public class ChatClient implements Runnable
 			catch(IOException e)
 			{
 				System.out.println(user + " has disconnected with you.");
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-				System.exit(0);
 			}
 		}
 	}
