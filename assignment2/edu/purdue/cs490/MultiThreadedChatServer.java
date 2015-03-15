@@ -103,9 +103,9 @@ public class MultiThreadedChatServer
 				else
 				{
 					System.out.printf("Invalid message. Request from %s will be ignored.",client);
-				}System.out.println("before kicking clients if statement");
+				}
 				if(System.currentTimeMillis()-client.getHeart() > heartbeat_rate)
-				{System.out.println("5576423578243654783567821345782134");
+				{
 					System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN WORKER THREAD)\n",client);
 					clientMap.remove(client.getName());
 					keyList.remove(client);
