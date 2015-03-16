@@ -16,6 +16,8 @@ import java.io.InterruptedIOException;
 
 public class ChannelInterface
 {
+	/*Unique to self*/
+	private String name;
 	/*To server*/
 	private ObjectOutputStream heart;//printer to server
 	private ObjectInputStream heartListener;
@@ -25,10 +27,12 @@ public class ChannelInterface
 	private BufferedReader reader;//reader to client
 	/*From client*/
 	private ArrayList<Socket> socketList = new ArrayList<Socket>();//socketList of everyone chatting you
+	private ArrayList<ObjectOutputStream> oosList = new ArrayList<ObjectOutputStream>();
 	private ArrayList<ObjectInputStream> oisList = new ArrayList<ObjectInputStream>();
 	private ArrayList<String> nameList = new ArrayList<String>();
-	public ChannelInterface()
+	public ChannelInterface(String name)
 	{//initialized all necessary things
+		this.name = name;
 	}
 
 	/*To server*/
@@ -88,40 +92,42 @@ public class ChannelInterface
 	}
 
 	/*To client*/
-	public ClientObject initClient(ClientObject interlocutor)
+	public void initClient(ClientObject interlocuter)
 	{
 		try
 		{
-			System.out.printf("In initClient\n");
-			Socket clientSocket = new Socket(interlocutor.getIpAddress(), interlocutor.getPort());
-			System.out.printf("IP:%s\tPort:%d\tSocket made\n",interlocutor.getIpAddress(),interlocutor.getPort());
-			ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
-			System.out.printf("oos made\n");						
-			oos.flush();
-			ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());//waiting for dat flush huh
-			System.out.printf("ois made\n");
-			oos.writeObject(interlocutor.getName());
-			interlocutor = new ClientObject(interlocutor,clientSocket,ois,oos);
-			//doesn't work bc pass by value, so I return it
-			return interlocutor;
+			if(!interlocuter.getInitState())//if not initialized
+			{
+				Socket clientSocket = new Socket(interlocuter.getIpAddress(), interlocuter.getPort());
+				ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
+				oos.flush();
+				ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());//waiting for dat flush huh
+				oos.writeObject(name);//sneds name over
+				//don't want to send name of guy you're communicating with!
+				socketList.add(clientSocket);
+				nameList.add(interlocuter.getName());
+				oisList.add(ois);
+				oosList.add(oos);
+			}
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();//will fill it up later
 		}
-		return null;
 	}
-	public void whisper(ClientObject interlocutor, Object message)
+	public void whisper(ClientObject interlocuter, Object message)
 	{
-		if(!interlocutor.getInitState())
-			interlocutor = initClient(interlocutor);
+		int index = nameList.indexOf(interlocuter.getName());
+		if(index == -1)
+		{
+			this.initClient(interlocuter);
+			index = nameList.indexOf(interlocuter.getName());//initiailizes it
+		}
+		ObjectOutputStream stream = oosList.get(index);
 		try
 		{
-			//System.out.printf("in whisper\n");
-			System.out.printf("whispering:%s",message);
-			interlocutor.getOut().writeObject(message);
-			interlocutor.getOut().flush();//does flushing fix it?
-			//System.out.printf("sent message\n");			
+			oosList.get(index).writeObject(message);
+			oosList.get(index).flush();//does flushing fix it?
 		}
 		catch(Exception e)
 		{
@@ -129,18 +135,13 @@ public class ChannelInterface
 		}		
 	}
 	/*From client*/
-	public void initInvitation(ServerSocket serverSocket) throws SocketException, IOException, SocketTimeoutException
+	public String initInvitation(ServerSocket serverSocket) throws SocketException, IOException, SocketTimeoutException
 	{
 			Socket newSocket = serverSocket.accept();
-			System.out.printf("initInvitation inited!");
 			newSocket.setSoTimeout(50);
-			socketList.add(newSocket);
-			System.out.printf("added new socket!\n");			
 			ObjectOutputStream oos = new ObjectOutputStream(newSocket.getOutputStream());
 			oos.flush();//needs to flush
-			System.out.printf("added new oos!\n");			
 			ObjectInputStream ois = new ObjectInputStream(newSocket.getInputStream());
-			System.out.printf("added new ois!\n");
 			String name = "";
 			try
 			{
@@ -150,28 +151,28 @@ public class ChannelInterface
 			{
 				e.printStackTrace();
 			}
+			socketList.add(newSocket);			
 			oisList.add(ois);
+			oosList.add(oos);
 			nameList.add(name);
+			return name;
 	}
-	public void fromClient()
+	public String fromClient()
 	{
 		int size = oisList.size();
-/*		if(size > 0)
-		{
-			System.out.printf("oisList size = %d\n",size);
-		}
-*/		for(int i = 0; i < size; i++)
+		for(int i = 0; i < size; i++)
 		{
 			try
 			{
 				String name =  nameList.get(i);
 				String message = (String)oisList.get(i).readObject();//does this work now?
-				System.out.printf("%s:%s\n",name,message);
+				return name+":"+message+"\n";//string to return
 			}
 			catch(Exception e)
 			{
 				continue;
 			}
 		}
+		return "";//if no message to print, then print nothing
 	}
 }

@@ -30,7 +30,7 @@ public class ClientObject implements Serializable
 		this.socket = socket;
 		this.ois = ois;
 		this.oos = oos;
-		isSocketInit = true;
+		//isSocketInit = true;
 	}
 	public ClientObject(ClientObject copy, Socket socket, ObjectInputStream ois, ObjectOutputStream oos, BufferedReader buffer)
 	{//for the sigle-threaded serverside
@@ -41,7 +41,7 @@ public class ClientObject implements Serializable
 		this.ois = ois;
 		this.oos = oos;
 		this.buffer = buffer;
-	}	
+	}
 	public String getName()
 	{
 		return username;
@@ -83,4 +83,11 @@ public class ClientObject implements Serializable
 	{
 		return isSocketInit;
 	}
+	public void flipInitState()
+	{
+		isSocketInit = !isSocketInit;
+		System.out.printf("Flipped!, right now %s's isSockeInit = %s", username, isSocketInit);
+
+	}
+
 }

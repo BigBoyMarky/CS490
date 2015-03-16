@@ -1,11 +1,5 @@
 package edu.purdue.cs490;
 
-/*
-TESTS TO DO
-1] SERVER CLOSES
-2] OTHER CLIENT CLOSES
-3] SERVER TERMINATES CLIENT
-*/
 import java.net.SocketException;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
@@ -69,7 +63,7 @@ public class ChatClient extends Process implements Runnable
 	private ConcurrentHashMap<String,ClientObject> listOfUsers = new ConcurrentHashMap<String,ClientObject>();//hashmap of users for connecting to others
 	private String[] commands = {"\\hey","\\switch","\\list","\\everybody","\\help","?"};//list of available commands
 	private ClientObject currentInterlocuter;
-
+	private int numInterlocuters = 0;
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -101,7 +95,7 @@ public class ChatClient extends Process implements Runnable
 		console.nextLine();
 		System.out.print("Enter your name:");
 		name = console.nextLine();
-		channel = new ChannelInterface();		
+		channel = new ChannelInterface(name);		
 		channel.initServer(host,serverPort);
 		new Thread(this).start();
 		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
@@ -199,12 +193,10 @@ public class ChatClient extends Process implements Runnable
 			currentInterlocuter = listOfUsers.get(message);
 			if(currentInterlocuter != null)
 			{
-				ClientObject temp = channel.initClient(currentInterlocuter);
-				if(temp != null)//initClient returns null if something goes wrong
-					currentInterlocuter = temp;
-				else
+				if(!currentInterlocuter.getInitState())//if not already initiailized
 				{
-					System.out.printf("That user disconnected!\n");//insert debugging stuff here					
+					channel.initClient(currentInterlocuter);//stuck in here
+					currentInterlocuter.flipInitState();//what happens if initClient fails?
 				}
 				System.out.printf("Chatting with %s\n",message);				
 			}
@@ -240,7 +232,6 @@ public class ChatClient extends Process implements Runnable
 			else
 				System.out.println("Unrecognized command! Enter \'?\' or \'\\help\' for a list of commands.");
 		}
-
 	}
 	public void run()
 	{
@@ -293,18 +284,30 @@ public class ChatClient extends Process implements Runnable
 		}
 		public void run()
 		{
-			String user = "";//user will be the name displayed when chatting e.g. Charlie: hi
+			String name = null;
 			String message = null;
 			while(channel == null){};
 			while(true)
 			{
 				try
 				{
-					channel.initInvitation(serverSocket);
+					if(numInterlocuters == 0)
+					{
+						name = channel.initInvitation(serverSocket);
+						getAndDisplay();
+						currentInterlocuter =listOfUsers.get(name);
+						numInterlocuters++;
+						listOfUsers.get(name).flipInitState();//wtf
+					}//I seriously wish we can say "delete this statement, so you don't need to check in the future anymore..." It's only 1 time use bro..
+					else
+					{
+						name = channel.initInvitation(serverSocket);
+						listOfUsers.get(name).flipInitState();//is flipping safe? Will we ever get a new socket request from something that's already made?
+					}
 				}
 				catch(SocketTimeoutException e)
 				{
-					channel.fromClient();
+					System.out.printf(channel.fromClient());
 				}
 				catch(Exception e)
 				{
