@@ -86,8 +86,6 @@ public class ClientObject implements Serializable
 	public void flipInitState()
 	{
 		isSocketInit = !isSocketInit;
-		System.out.printf("Flipped!, right now %s's isSockeInit = %s", username, isSocketInit);
-
 	}
 
 }

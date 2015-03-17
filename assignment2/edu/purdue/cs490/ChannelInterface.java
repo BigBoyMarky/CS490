@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.net.UnknownHostException;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.ServerSocket;
@@ -23,8 +21,6 @@ public class ChannelInterface
 	private ObjectInputStream heartListener;
 	private Socket socket;
 	/*To client*/
-	private PrintWriter printer;//printer to client
-	private BufferedReader reader;//reader to client
 	/*From client*/
 	private ArrayList<Socket> socketList = new ArrayList<Socket>();//socketList of everyone chatting you
 	private ArrayList<ObjectOutputStream> oosList = new ArrayList<ObjectOutputStream>();
@@ -99,10 +95,12 @@ public class ChannelInterface
 			if(!interlocuter.getInitState())//if not initialized
 			{
 				Socket clientSocket = new Socket(interlocuter.getIpAddress(), interlocuter.getPort());
+				clientSocket.setSoTimeout(50);//don't forget this guy needs sotimeouttoo!
 				ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
 				oos.flush();
-				ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());//waiting for dat flush huh
 				oos.writeObject(name);//sneds name over
+				oos.flush();
+				ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());//waiting for dat flush huh
 				//don't want to send name of guy you're communicating with!
 				socketList.add(clientSocket);
 				nameList.add(interlocuter.getName());
@@ -168,9 +166,13 @@ public class ChannelInterface
 				String message = (String)oisList.get(i).readObject();//does this work now?
 				return name+":"+message+"\n";//string to return
 			}
-			catch(Exception e)
+			catch(SocketTimeoutException e)
 			{
 				continue;
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
 			}
 		}
 		return "";//if no message to print, then print nothing

@@ -9,10 +9,8 @@ import java.util.Map;
 import java.util.Iterator;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.ServerSocket;
@@ -54,14 +52,12 @@ public class ChatClient extends Process implements Runnable
 	private ServerSocket serverSocket;//for connecting to other users directly???
 	private ObjectOutputStream heart;//printer to server
 	private ObjectInputStream heartListener;//reader to server
-	private PrintWriter printer;//printer to client
-	private BufferedReader reader;//reader to client
 	private Socket currentChatSocket;//the current Socket you're chatting in right now
 	private boolean inChat;//once someone gets a message, they are forced in chat
 	private long heartbeat = 0;
 	private ClientObject myClientObject;//object representing this specific client for server purposes
 	private ConcurrentHashMap<String,ClientObject> listOfUsers = new ConcurrentHashMap<String,ClientObject>();//hashmap of users for connecting to others
-	private String[] commands = {"\\hey","\\switch","\\list","\\everybody","\\help","?"};//list of available commands
+	private String[] commands = {"\\hey","\\switch","\\list","\\everybody","\\help"};//list of available commands
 	private ClientObject currentInterlocuter;
 	private int numInterlocuters = 0;
 	/**************************************************************************************************
@@ -221,7 +217,7 @@ public class ChatClient extends Process implements Runnable
 		{//everybody
 			System.out.println("RB");
 		}
-		if(command.equals(commands[4]) || command.equals(commands[5]))
+		if(command.equals(commands[4]))
 		{//help and ?
 			displayCommands();
 		}
@@ -230,7 +226,7 @@ public class ChatClient extends Process implements Runnable
 			if(currentInterlocuter != null)
 				channel.whisper(currentInterlocuter,message);
 			else
-				System.out.println("Unrecognized command! Enter \'?\' or \'\\help\' for a list of commands.");
+				System.out.println("Unrecognized command! Enter \'\\help\' for a list of commands.");
 		}
 	}
 	public void run()
