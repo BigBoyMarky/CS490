@@ -165,7 +165,7 @@ public class ChatClient extends Process implements Runnable
 		System.out.println("\\switch [user] = switches to another user to send messages to");
 		System.out.println("\\list = shows you the list of all available users on this server");
 		System.out.println("\\everybody [message] = allow everyone to hear what you want to say");
-		System.out.println("\\help = shows available commands (same as \'?\')\n? = shows available commands (same as \'help\')");
+		System.out.println("\\help = shows available commands");
 	}
 
 	/**************************************************************************************************
