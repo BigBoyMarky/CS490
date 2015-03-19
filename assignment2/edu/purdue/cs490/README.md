@@ -1,6 +1,48 @@
+How to Make
+============
+Stay in this directory, and type in "make" into the command line. The bash script should run automatically and compile all the Java files into the bin folder.
+
+How to Run
+============
+
+MultiThreadedChatServer
+-----------------------
+Call "java MultiThreadedChatServer"
+That's it. If you want to specify a port number, you can specify it as an argument (e.g. "java MultiThreadedChatServer 4200") in the command line. The server will print out its port and IPv4 Address so you can connect clients to it from other computers.
+
+ChatClient
+-----------
+Call "java ChatClient". 
+1] The program will prompt for Hostname of the server. Look at "Server Host Name: " on the server's command line and copy that. 
+2] The program will prompt for the server's port. Enter the port of the server. 
+3] The program will prompt for a username, any name is valid. (note: if you're running multiple clients, you cannot have multiple clients sharing the same name. The client will prompt you to re-enter if the name you entered is a duplicate). 
+Note: If you make a mistake, don't worry, entering incorrect information will cause the program to prompt for the Hostname/port/username again. (you can't change your name though)
+
+How to Use
+============
+
+MultiThreadedChatServer
+-----------------------
+Once you run it, it does everything automatically :P
+
+ChatClient
+----------
+1] Type in '\help' for a list of all commands.
+2] When you connect with someone, entering anything that is not a command will send that String to the person you're connecting with.
+3] Type in '\switch' to switch to another person to message.
+//4] Type in '\everybody' to reliable broadcast.
+//5] Type in '\fifo' to fifo broadcast.
+
+
 Fixed Log
 =================
 Fixed Log is transferred to the commit messages every commit.
+1] Removed or commented on magic numbers.
+2] Client to Server connection is not robust, if the server terminates, the ChatClient keeps repeating (java.net.SocketException: connection reset). What SHOULD happen is if the server disconnects, the client notifies the user about it (e.g. "The main server has disconnected; however, the other clients are still online. What this means is that we can no longer add new people to the chatroom, but you can still continue to chat with those that are already in. We suggest you to search for a new server."). Exception is thrown @ line 69 from ChannelInterface, @ line 138 from ChatClient
+	a] If server crashes during Registration
+	b] If server crashes during heartbeat
+	c] If server crashes during getAndDisplay()
+3] Chatting with other clients, upon disconnecting, nothing is done.//Now it notifies user that other client is offline, and removes it from the getAndDisplay list (if the server disconnects as well)
 
 Issues:
 ================
@@ -8,12 +50,7 @@ Issues:
 ChatClient
 ----------------
 //logis is that any message typed into Scanner will be delivered to the socket that the Client is currently connected to. If no sockets are connected, the chat client will just print "Unrecognized command!, Type ? to get a list of commands!"
-1] Client to Server connection is not robust, if the server terminates, the ChatClient keeps repeating (java.net.SocketException: connection reset). What SHOULD happen is if the server disconnects, the client notifies the user about it (e.g. "The main server has disconnected; however, the other clients are still online. What this means is that we can no longer add new people to the chatroom, but you can still continue to chat with those that are already in. We suggest you to search for a new server."). Exception is thrown @ line 69 from ChannelInterface, @ line 138 from ChatClient
-2] Able to chat with yourself, not sure if should support this//for broadcasts, should remove self
-3] Magic number on line 133 in ChannelInterface, remove all the magic numbers!
-4] Chatting with other clients, upon disconnecting, nothing is done.
-5] What happens if cannot connect to server bc invalid inputs?
-
+1] Able to chat with yourself, not sure if should support this//for broadcasts, should remove self
 
 MultiThreadedChatServer
 ----------------------- 

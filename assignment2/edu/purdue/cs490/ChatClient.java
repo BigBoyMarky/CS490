@@ -44,6 +44,7 @@ public class ChatClient extends Process implements Runnable
 	**************************************************************************************************/
 	private ChannelInterface channel;
 	private static long heartbeat_rate = 5000;
+	private static int SOCKET_TIMEOUT = 100;//socket SOCKET_TIMEOUT
 	private String host;
 	private String name;//name of the Client
 	private String id;
@@ -62,6 +63,7 @@ public class ChatClient extends Process implements Runnable
 	private String[] commands = {"\\hey","\\switch","\\list","\\everybody","\\help"};//list of available commands
 	private ClientObject currentInterlocuter;
 	private int numInterlocuters = 0;
+	private boolean firstCrashReport = true;
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -76,7 +78,6 @@ public class ChatClient extends Process implements Runnable
 		{
 			e.printStackTrace();
 		}
-		System.exit(0);
 	}
 	/************************************************************************************************
 	*											INITIALIZATION									*
@@ -118,53 +119,122 @@ public class ChatClient extends Process implements Runnable
 		}
 		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
 		myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(), clientPort);
-		channel.toServer("reg");
-		channel.toServer(myClientObject);
-		String verification = (String) channel.fromServer();
-		while(verification.equals("U"))
+		try
 		{
-			System.out.println("Registration failed because you have the same name as another user");
-			System.out.println("Enter your username again!");
-			myClientObject.setName(console.nextLine());
-			channel.closeServer();
-			channel.initServer(host,serverPort);
 			channel.toServer("reg");
 			channel.toServer(myClientObject);
-			verification = (String)channel.fromServer();
+			String verification = (String) channel.fromServer();
+			while(verification.equals("U"))
+			{
+				System.out.println("Registration failed because you have the same name as another user");
+				System.out.println("Enter your username again!");
+				myClientObject.setName(console.nextLine());
+				channel.closeServer();
+				channel.initServer(host,serverPort);
+				channel.toServer("reg");
+				channel.toServer(myClientObject);
+				verification = (String)channel.fromServer();
+			}
+			id = verification;
+			new Thread(this).start();		
+			System.out.println("Verified!");
+			displayCommands();
+			this.heartbeat();
 		}
-		id = verification;
-		new Thread(this).start();		
-		System.out.println("Verified!");
-		displayCommands();
-		this.heartbeat();
+		catch(SocketException e)
+		{
+			System.out.printf("The server you were trying to register with has crashed.\n");
+			System.out.printf("I'd recommend restarting this program and finding a new, active server\n");
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 	/**********************************************************************************************
 	*											HEARTBEAT									*
 	***********************************************************************************************/
 	public void heartbeat()
 	{
-		while(true)
+		try
 		{
-			if(System.currentTimeMillis()-heartbeat > heartbeat_rate)
+			while(true)
 			{
-				heartbeat = System.currentTimeMillis();
-				channel.toServer("<3");
+				if(System.currentTimeMillis()-heartbeat > heartbeat_rate)
+				{
+					heartbeat = System.currentTimeMillis();
+					channel.toServer("<3");
+				}
 			}
 		}
+		catch(SocketException e)
+		{
+			if(firstCrashReport)
+			{
+				System.out.printf("The server has crashed.\nYou can check your current list of clients to see who else is still online.\n");
+				//System.out.printf("However, the following clients are still online:\n");
+				//list all online clients
+				/*
+				Iterator availableUsers = listOfUsers.entrySet().iterator();
+				int counter = 1;
+				while(availableUsers.hasNext())
+				{
+					try
+					{
+						Map.Entry pair = (Map.Entry)availableUsers.next();
+						//check if online by sending an empty message
+						channel.whisper((ClientObject)pair.getValue(),"");//sends nothing? hope it works :o
+						System.out.printf("%d. %s\t",counter++,pair.getKey());
+					}
+					catch(SocketException f)
+					{
+						continue;
+					}
+				}
+				*/
+				System.out.printf("But I'd recommend restarting this program and finding a new, active server\n");				
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+
 	}
 	/**************************************************************************************************
 	*										GET AND DISPLAY											*
 	**************************************************************************************************/
 	public void getAndDisplay()
 	{
+		get();
+		display();
+	}
+	public void get()
+	{
 		try
 		{		
-			String user;
+			String user;			
 			channel.toServer("get");
 			System.out.println("Current people online:");
 			//needs InvalidProtoclException
 			listOfUsers = (ConcurrentHashMap<String, ClientObject>)channel.fromServer();			
-			//iterate through the hashmap
+		}		
+		catch(SocketException e)
+		{
+			if(firstCrashReport)
+			{
+				System.out.printf("The server has crashed. I was unable to get the list of clients. Look at the last updated list for potential chatmates.");
+				System.out.printf("I'd recommend restarting this program and finding a new, active server\n");
+				firstCrashReport = false;
+			}
+		}		
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	public void display()
+	{
 			Iterator availableUsers = listOfUsers.entrySet().iterator();
 			int counter = 1;
 			while(availableUsers.hasNext())
@@ -173,11 +243,6 @@ public class ChatClient extends Process implements Runnable
 				System.out.printf("%d. %s\t",counter++,pair.getKey());
 			}
 			System.out.println("\n================================================================================");
-		}		
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
 	}
 	/**************************************************************************************************
 	*								PRINTING AVAILABLE COMMANDS										*
@@ -214,8 +279,15 @@ public class ChatClient extends Process implements Runnable
 			{
 				if(!currentInterlocuter.getInitState())//if not already initiailized
 				{
-					channel.initClient(currentInterlocuter);//stuck in here
-					currentInterlocuter.flipInitState();//what happens if initClient fails?
+					try
+					{
+						channel.initClient(currentInterlocuter);//stuck in here
+						currentInterlocuter.flipInitState();//what happens if initClient fails?						
+					}
+					catch(ConnectException e)
+					{
+						System.out.printf("Looks like the client is offline! Unable to invite %s to chat!\n",currentInterlocuter.getName());
+					}
 				}
 				System.out.printf("Chatting with %s\n",message);				
 			}
@@ -234,7 +306,13 @@ public class ChatClient extends Process implements Runnable
 		}
 		if(command.equals(commands[2]))
 		{//list
-			getAndDisplay();
+			if(firstCrashReport)
+				getAndDisplay();
+			else
+			{
+				System.out.printf("Server is offline.\nThis is the last list retrieved:\n");
+				display();
+			}
 		}
 		if(command.equals(commands[3]))
 		{//everybody
@@ -246,10 +324,25 @@ public class ChatClient extends Process implements Runnable
 		}
 		if(command.equals(""))
 		{//normal typing
-			if(currentInterlocuter != null)
-				channel.whisper(currentInterlocuter,message);
-			else
-				System.out.println("Unrecognized command! Enter \'\\help\' for a list of commands.");
+			try
+			{
+				if(currentInterlocuter != null)
+				{
+					if(listOfUsers.containsValue(currentInterlocuter))
+						channel.whisper(currentInterlocuter,message);					
+					else
+					{
+						System.out.printf("%s is offline! Look for someone new to chat with\n",currentInterlocuter.getName());
+						currentInterlocuter = null;//turns to null for you!						
+					}
+				}
+				else
+					System.out.println("Unrecognized command! Enter \'\\help\' for a list of commands.");				
+			}
+			catch(SocketException e)
+			{
+				System.out.printf("%s cannot be reached!\n",currentInterlocuter.getName());
+			}
 		}
 	}
 	public void run()
@@ -298,7 +391,7 @@ public class ChatClient extends Process implements Runnable
 		{
 			serverSocket = new ServerSocket(0);//initializes serverSocket
 			serverSocket.setReuseAddress(true);
-			serverSocket.setSoTimeout(100);//sets a timeout for serverSocket.accept() so when WE initialize contact, we can continue on this thread
+			serverSocket.setSoTimeout(SOCKET_TIMEOUT);//sets a SOCKET_TIMEOUT for serverSocket.accept() so when WE initialize contact, we can continue on this thread
 			clientPort = serverSocket.getLocalPort();//clientPort is set up
 		}
 		public void run()
@@ -313,7 +406,7 @@ public class ChatClient extends Process implements Runnable
 					if(numInterlocuters == 0)
 					{
 						name = channel.initInvitation(serverSocket);
-						getAndDisplay();
+						get();
 						currentInterlocuter =listOfUsers.get(name);
 						numInterlocuters++;
 						listOfUsers.get(name).flipInitState();//wtf
@@ -326,7 +419,11 @@ public class ChatClient extends Process implements Runnable
 				}
 				catch(SocketTimeoutException e)
 				{
-					System.out.printf(channel.fromClient());
+					message = channel.fromClient();
+					if(message.length() > 0 && message.substring(0,1).equals("\\"))//returns \\name if SocketException was thrown in .fromClient(), therefore we have to remove it!
+						listOfUsers.remove(message.substring(1,message.length()));
+					else
+						System.out.printf(message);
 				}
 				catch(Exception e)
 				{
