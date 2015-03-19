@@ -1,5 +1,7 @@
 package edu.purdue.cs490;
 
+import java.net.ConnectException;
+import java.util.InputMismatchException;
 import java.net.SocketException;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
@@ -81,19 +83,39 @@ public class ChatClient extends Process implements Runnable
 	*************************************************************************************************/
 	public void register() throws Exception
 	{
-		System.out.print("Hostname of the server you want to connect to:");
 		Scanner console = new Scanner(System.in);
-		host = console.next();
-		//check validity
-		System.out.print("Port of the server to connect to:");
-		//check validity
-		serverPort = console.nextInt();
-		console.nextLine();
-		System.out.print("Enter your name:");
-		name = console.nextLine();
-		channel = new ChannelInterface(name);		
-		channel.initServer(host,serverPort);
-		new Thread(this).start();
+		while(true)
+		{
+			System.out.print("Hostname of the server you want to connect to:");
+			this.host = console.next();
+			//check validity
+			System.out.print("Port of the server to connect to:");
+			while(true)//checking validity
+			{
+				try
+				{
+					this.serverPort = console.nextInt();
+					if(this.serverPort >= 1025 && serverPort <= 65535)
+						break;
+					else
+						System.out.printf("Invalid port number! Ports are between 1025 and 65535.\n");
+				}
+				catch(InputMismatchException e)//if input is not a number
+				{
+					System.out.printf("We use integers for our ports. Enter one between 1025 and 65535.\n");
+					console.nextLine();
+					//catching doesn't get rid of the exception?
+				}
+			}
+			console.nextLine();
+			System.out.print("Enter your name:");//no need to check for validity bc any name is valid here :)
+			name = console.nextLine();
+			channel = new ChannelInterface(name);
+			if(channel.initServer(host,serverPort))
+				break;
+			else
+				System.out.printf("Connection refused. Are you sure you entered the correct information? Please try again!\n");
+		}
 		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
 		myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(), clientPort);
 		channel.toServer("reg");
@@ -111,6 +133,7 @@ public class ChatClient extends Process implements Runnable
 			verification = (String)channel.fromServer();
 		}
 		id = verification;
+		new Thread(this).start();		
 		System.out.println("Verified!");
 		displayCommands();
 		this.heartbeat();

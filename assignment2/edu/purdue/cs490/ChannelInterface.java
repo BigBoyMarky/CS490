@@ -1,5 +1,5 @@
 package edu.purdue.cs490;
-
+import java.net.ConnectException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.io.ObjectOutputStream;
@@ -32,19 +32,26 @@ public class ChannelInterface
 	}
 
 	/*To server*/
-	public void initServer(String serverHost, int serverPort)
+	public boolean initServer(String serverHost, int serverPort)
 	{
+		boolean success = false;
 		try
 		{
 			socket = new Socket(serverHost,serverPort);//creates socket to server
 			heart = new ObjectOutputStream(socket.getOutputStream());//creates new oos
 			heart.flush();//flushes header
 			heartListener = new ObjectInputStream(socket.getInputStream());//creates new ois
+			return !success;
+		}
+		catch(ConnectException e)
+		{
+			return success;
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();//will fill it up later
 		}
+		return success;
 	}
 	public void closeServer()
 	{
