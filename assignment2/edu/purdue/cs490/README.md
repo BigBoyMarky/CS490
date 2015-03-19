@@ -1,8 +1,6 @@
 Fixed Log
 =================
 Fixed Log is transferred to the commit messages every commit.
-1] Enter your username again requires two \n please fix that
-2] Input is robust (checks for port number validity)
 
 Issues:
 ================
@@ -23,8 +21,8 @@ No issues so far..
 
 ReliableBroadcast
 ------------------
-1] Well, we know that a ChatClient is a Process.
+* Well, we know that a ChatClient is a Process.
 
-2] Might need to change the parameters of ChannelInterface's methods to fit Message
+* Might need to change the parameters of ChannelInterface's methods to fit Message
 
 BroadcastReceiver = receives broadcasts, makes sure that they are delivered according to specifications
