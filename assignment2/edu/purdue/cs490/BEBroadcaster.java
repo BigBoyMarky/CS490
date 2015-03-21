@@ -6,23 +6,13 @@ import java.io.ObjectOutputStream;
 
 public BEBroadcaster
 {
-	private ArrayList<Socket> socketList;
-	private int socketListSize;
-	public BEBroadcaster(ArrayList<Socket> socketList)
+	private ChannelInterface channel;
+	public BEBroadcaster(ChannelInterface channel)
 	{
-		this.socketList = socketList;
-		this.socketListSize = socketList.size();
+		this.channel = channel;
 	}
-	public void BEBroadcast(String m)
+	public void BEBroadcast(Message m)
 	{
-		ObjectOutputStream writer;
-		for(int i = 0; i < socketListSize; i++)
-		{
-			writer = new ObjectOutputStream(socketList.get(i));
-			writer.flush();
-			writer.writeObject(m);
-			writer.flush();
-		}
 	}
 	public void init(Process thisProcess, BroadcastReceiver br)
 	{

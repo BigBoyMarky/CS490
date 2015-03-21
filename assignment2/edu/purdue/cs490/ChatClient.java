@@ -37,7 +37,7 @@ import java.io.InterruptedIOException;
 		will also send a "get" so the user can know which usernames are still available
 	*/
 
-public class ChatClient extends Process implements Runnable
+public class ChatClient implements Runnable, BroadcastReceiver
 {
 	/**************************************************************************************************
 	*											FIELDS												*
@@ -71,7 +71,7 @@ public class ChatClient extends Process implements Runnable
 	{
 		try
 		{
-			ChatClient myChatClient = new ChatClient("-1",-1,"-1");//because of the fucking superclass's constructor requirements			
+			ChatClient myChatClient = new ChatClient(/*"-1",-1,"-1"*/);//because of the fucking superclass's constructor requirements			
 			myChatClient.register();
 		}
 		catch(Exception e)
@@ -286,7 +286,7 @@ public class ChatClient extends Process implements Runnable
 					}
 					catch(ConnectException e)
 					{
-						System.out.printf("Looks like the client is offline! Unable to invite %s to chat!\n",currentInterlocuter.getName());
+						System.out.printf("Looks like the client is offline! Unable to invite %s to chat!\n",currentInterlocuter.getID());
 					}
 				}
 				System.out.printf("Chatting with %s\n",message);				
@@ -332,7 +332,7 @@ public class ChatClient extends Process implements Runnable
 						channel.whisper(currentInterlocuter,message);					
 					else
 					{
-						System.out.printf("%s is offline! Look for someone new to chat with\n",currentInterlocuter.getName());
+						System.out.printf("%s is offline! Look for someone new to chat with\n",currentInterlocuter.getID());
 						currentInterlocuter = null;//turns to null for you!						
 					}
 				}
@@ -341,7 +341,7 @@ public class ChatClient extends Process implements Runnable
 			}
 			catch(SocketException e)
 			{
-				System.out.printf("%s cannot be reached!\n",currentInterlocuter.getName());
+				System.out.printf("%s cannot be reached!\n",currentInterlocuter.getID());
 			}
 		}
 	}
@@ -371,9 +371,9 @@ public class ChatClient extends Process implements Runnable
 	**************************************************************************************************/
 	private ChatServer chat;
 
-	public ChatClient(String tempIP, int tempPort, String tempID)
+	public ChatClient(/*String tempIP, int tempPort, String tempID*/)
 	{
-		super(tempIP, tempPort, tempID);
+		//super(tempIP, tempPort, tempID);
 		try
 		{
 			new Thread(new ChatServer()).start();//for waiting for other clients to connect and receiving messages
@@ -431,5 +431,12 @@ public class ChatClient extends Process implements Runnable
 				}
 			}
 		}
+	}
+	/**************************************************************************************************
+	*								BROADCASTRECEIVER IMPLEMENTATION HERE							*
+	**************************************************************************************************/
+	public void receive(Message m)
+	{
+
 	}
 }

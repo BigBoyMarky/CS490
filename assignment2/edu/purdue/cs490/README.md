@@ -37,6 +37,15 @@ ChatClient
 Fixed Log
 =================
 Fixed Log is transferred to the commit messages every commit.
+2. ChatClient no longer extends Process. ClientObject is now the class that extends Process. Both classes have been updated based on their new ancestries.
+3. Created ChatClientMessage.java. ChatClientMessage implements Message.
+
+
+THINGS TO FIX:
+1. Created BEBroadcaster.java. This is our BEBroadcaster and can be used by ReliableBroadcaster to BEBroadcast.
+4. ChannelInterface and MultiThreadedChatServer have been updated to send ChatClientMessages instead of Strings.
+5. ChatClient now implements BroadcastReceiver as according to assignment specifications.
+6. 
 
 Issues:
 ================
@@ -52,6 +61,55 @@ No issues so far..
 
 ReliableBroadcast
 ------------------
+According to the assignment, we're supposed to have a class that implements ReliableBroadcast that pushes notifications to the Client.
+
+The ChatClient must implement the BroadcastReceiver interface, and should not poll the channel for messages. Instead, once the ReliableBroadcast object rbdelivers, the ChatClient calls the receive() method and displays it to the users.
+
+Messages must be converted from String to Message objects...
+
+
+public class ReliableBroadcaster implements ReliableBroadcast
+{
+	public void init(Process currentProcess, BroadcastReceiver br)
+	{
+		/*
+		how do I init a process? What do you want me to initiailize?
+		well since my ChatClient is both my process and receiver, there's no need for 2 separate parameters...
+		but what do I initialize?
+		well, what do I need in a Reliabelbroadcast
+		I need a data structure, 
+		*/
+	}
+	public void addMember(Process member)
+	{
+	}
+	public void removeMember(Process member)
+	{
+	}
+	public void rbroadcast(Message m)
+	{
+	}
+}
+public class BestEffortBroadcaster
+{
+	ChannelInterface channel;
+	public BestEffortBroadcaster()
+	{
+
+	}
+	public void bebroadcast(Message m)
+	{
+		for(int i = 0; i < )
+	}
+}
+
+void receive message m()
+{
+}
+
+
+
+
 * Well, we know that a ChatClient is a Process.
 
 * Might need to change the parameters of ChannelInterface's methods to fit Message
