@@ -1,6 +1,6 @@
 How to Make
 ============
-Stay in this directory, and type in "make" into the command line. The bash script should run automatically and compile all the Java files into the bin folder.
+Stay in this directory, and type in "make" into the command line, because Unix.
 
 How to Run
 ============
@@ -37,12 +37,6 @@ ChatClient
 Fixed Log
 =================
 Fixed Log is transferred to the commit messages every commit.
-1] Removed or commented on magic numbers.
-2] Client to Server connection is not robust, if the server terminates, the ChatClient keeps repeating (java.net.SocketException: connection reset). What SHOULD happen is if the server disconnects, the client notifies the user about it (e.g. "The main server has disconnected; however, the other clients are still online. What this means is that we can no longer add new people to the chatroom, but you can still continue to chat with those that are already in. We suggest you to search for a new server."). Exception is thrown @ line 69 from ChannelInterface, @ line 138 from ChatClient
-	a] If server crashes during Registration
-	b] If server crashes during heartbeat
-	c] If server crashes during getAndDisplay()
-3] Chatting with other clients, upon disconnecting, nothing is done.//Now it notifies user that other client is offline, and removes it from the getAndDisplay list (if the server disconnects as well)
 
 Issues:
 ================
