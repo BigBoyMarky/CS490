@@ -12,9 +12,10 @@ public class Caster
 {
 	private ChannelInterface channel;
 	private ClientObject self;
+	private ArrayList<BroadcastReceiver> receiverList;
 	//private int broadcastCount = 0;
 
-	public Caster(ClientObject self, ChannelInterface channel)
+	public Caster(ClientObject self, ChannelInterface channel, ArrayList<BroadcastReceiver> receiverList)
 	{
 		this.self = self;
 		this.channel = channel;

@@ -66,6 +66,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private boolean firstCrashReport = true;
 	//private ReliableBroadcaster rb;
 	//private FIFOBroadcaster fifo;
+	//private BEBroadcaster beb;
 	private int messageCounter = 0;//for fun
 	private int broadcastCounter = 0;//only useful one for our purposes
 	/**************************************************************************************************
@@ -409,6 +410,21 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		}
 		public void run()
 		{
+			//
+			/*
+			beb.deliver(Message m)
+			{
+				if(m.type == 0)
+					client.deliver(m);
+				else
+					rb.deliver(m);
+			}
+
+			rb.deliver(Message m)
+			{
+				
+			}
+			*/
 			String name = null;
 			String message = null;
 			/*
@@ -425,6 +441,8 @@ public class ChatClient implements Runnable, BroadcastReceiver
 				1 = Reliable
 				2 = FIFO Reliable
 				3 = ?
+
+			multicast(int type, Arra)
 				multicast(int type, ArrayList<ClientObject> receiverList, String m)
 				{
 					int listSize = receiverList.size();
@@ -481,6 +499,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	**************************************************************************************************/
 	public void receive(Message m)
 	{
-		//
+		//prints out message
+		System.out.printf("%s:%s\n",m.getSender(),m.getMessageContents());
 	}
 }

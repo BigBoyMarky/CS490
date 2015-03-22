@@ -28,7 +28,7 @@ public class ChannelInterface
 	private ArrayList<ObjectInputStream> oisList = new ArrayList<ObjectInputStream>();
 	private ArrayList<String> nameList = new ArrayList<String>();
 	/*for Broadcasts only*/
-	
+
 	public ChannelInterface(String name)
 	{//initialized all necessary things
 		this.name = name;
@@ -181,7 +181,7 @@ public class ChannelInterface
 		nameList.add(name);
 		return name;
 	}
-	public String fromClient()
+	public void fromClient()
 	{
 		int size = oisList.size();
 		for(int i = 0; i < size; i++)
@@ -189,6 +189,7 @@ public class ChannelInterface
 			String name = nameList.get(i);
 			try
 			{
+
 				String message = (String)oisList.get(i).readObject();//does this work now?
 				return name+":"+message+"\n";//string to return
 			}
