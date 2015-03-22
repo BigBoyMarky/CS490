@@ -3,44 +3,25 @@ package edu.purdue.cs490;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-public class FIFOReliableBroadCast implements BroadcastReceiver{
+public class FIFOReliableBroadCaster{
 	
 	private Process currentProcess;
 	private BroadcastReceiver receiver;
 	private ConcurrentSkipListSet<Message> pending;
 	private ConcurrentSkipListSet<Process> members;
-	private ReliableBroadcast rblayer;
+	private ReliableBroadcaster rblayer;
+	private HashMap<Process, Integer> delivered;
 	private int seq;
 	
-	public FIFOReliableBroadCast(Process currentProcess, BroadcastReceiver br){
+	public FIFOReliableBroadCaster(Process currentProcess, BroadcastReceiver br){
 		init(currentProcess, br);
-		new Thread(new Runnable() {
-			HashMap<Process, Integer> delivered = new HashMap<Process,Integer>();
-			
-			public void run() {
-				while(!pending.isEmpty()){
-					for(Message m: pending){
-						// register if not yet
-						Process sender = m.getSender();
-						if( !delivered.containsKey(sender) ){
-							delivered.put(sender, 0);
-						}
-						if( delivered.get(sender)==m.getMessageNumber()){
-							receiver.receive(m);
-							delivered.put(sender, delivered.get(sender)+1);
-						}
-					}
-				}
-				pending.add(null);
-			}
-
-		}).start();
+		delivered = new HashMap<Process,Integer>();
 	}
 	
 	public void init(Process currentProcess, BroadcastReceiver br){
 		this.currentProcess = currentProcess;
 		this.receiver = br;
-		rblayer = new ReliableBroadcast(currentProcess, this);
+		rblayer = new ReliableBroadcaster(currentProcess, br);
 		pending = new ConcurrentSkipListSet<Message>();
 		seq = 0;
 	}
@@ -59,13 +40,43 @@ public class FIFOReliableBroadCast implements BroadcastReceiver{
 		rblayer.rbroadcast(m);
 	}
 
-	public void receive(Message m) {
+	public Message receive(Message pre) {
+		
+		Message m = rblayer.receive(pre);
+		
+		if(m==null)
+			return null;
+		
 		Process sender = m.getSender();
 		if(!pending.contains(sender)){
 			addMember(sender);
+			delivered.put(sender, 0);
 		}
 		
-		// put the message in the pending set
-		pending.add(m);
+		if( delivered.get(sender)==m.getMessageNumber() ){
+			
+			delivered.put(sender, delivered.get(sender)+1);
+			pending.remove(m);
+			
+			boolean sent = true;
+			while(sent){
+				sent = false;
+				for(Message s: pending){
+					if( s.getSender() == sender && delivered.get(sender)==s.getMessageNumber() ){
+						pending.remove(s);
+						sent = true;
+						m.setMessageContents(m.getMessageContents().concat(s.getMessageContents()));
+						delivered.put(sender, delivered.get(sender)+1);
+					}
+				}
+			}
+			
+			return m;
+		}
+		else{
+			pending.add(m);
+			return null;
+		}
+		
 	}
 }
