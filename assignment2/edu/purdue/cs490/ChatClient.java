@@ -64,8 +64,8 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private ClientObject currentInterlocuter;
 	private int numInterlocuters = 0;
 	private boolean firstCrashReport = true;
-	private ReliableBroadcaster rb;
-	private FIFOBroadcaster fifo;
+	//private ReliableBroadcaster rb;
+	//private FIFOBroadcaster fifo;
 	private int messageCounter = 0;//for fun
 	private int broadcastCounter = 0;//only useful one for our purposes
 	/**************************************************************************************************
@@ -321,8 +321,9 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		}
 		if(command.equals(commands[3]))
 		{//everybody
-			rb.broadcast(message);
-			
+			//rb.broadcast(message);
+			//rb.broadcast attaches type 1 to ChatClientMessage, if receiver receives it, then saves one
+			System.out.printf("RB");
 		}
 		if(command.equals(commands[4]))
 		{//help and ?
@@ -330,7 +331,9 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		}
 		if(command.equals(commands[5]))
 		{//fifo
-			fifo.broadcast(message);
+			//fifo.broadcast(message);
+			//attaches type 2 to ChatClientMessage, if reciever receives it, does something else with it
+			System.out.printf("FIFO");
 		}
 		if(command.equals(""))
 		{//normal typing
@@ -459,6 +462,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 				}
 				catch(SocketTimeoutException e)
 				{
+					//receive()
 					message = channel.fromClient();
 					if(message.length() > 0 && message.substring(0,1).equals("\\"))//returns \\name if SocketException was thrown in .fromClient(), therefore we have to remove it!
 						listOfUsers.remove(message.substring(1,message.length()));
