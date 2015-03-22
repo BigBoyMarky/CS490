@@ -7,12 +7,12 @@ How to Run
 
 MultiThreadedChatServer
 -----------------------
-Call "java MultiThreadedChatServer"
+Call "java edu/purdue/cs490/MultiThreadedChatServer"
 That's it. If you want to specify a port number, you can specify it as an argument (e.g. "java MultiThreadedChatServer 4200") in the command line. The server will print out its port and IPv4 Address so you can connect clients to it from other computers.
 
 ChatClient
 -----------
-Call "java ChatClient". 
+Call "java edu/purdue/cs490/ChatClient". 
 1] The program will prompt for Hostname of the server. Look at "Server Host Name: " on the server's command line and copy that. 
 2] The program will prompt for the server's port. Enter the port of the server. 
 3] The program will prompt for a username, any name is valid. (note: if you're running multiple clients, you cannot have multiple clients sharing the same name. The client will prompt you to re-enter if the name you entered is a duplicate). 
