@@ -39,13 +39,30 @@ Fixed Log
 Fixed Log is transferred to the commit messages every commit.
 2. ChatClient no longer extends Process. ClientObject is now the class that extends Process. Both classes have been updated based on their new ancestries.
 3. Created ChatClientMessage.java. ChatClientMessage implements Message.
+1. Created Caster.java. This is our universal caster. It multicasts. You feed in the Hashmap of ClientObjects it needs to send to, along with your message, and the type of casting you want, and it does it for you. If you want to unicast, have a hashmap of size 1, if you have to broadcast, have a hashmap of all users.
 
+Types:
+0 = Best Effort
+1 = Reliable
+2 = FIFO
 
+Very easy to update, simply add a new Receiver that reads the type, update your ChatClient to include that type, and you're good to go. Better than all the API interface mess we're given.
+4. Only Caster sends ChatClientMessages. 
 THINGS TO FIX:
-1. Created BEBroadcaster.java. This is our BEBroadcaster and can be used by ReliableBroadcaster to BEBroadcast.
-4. ChannelInterface and MultiThreadedChatServer have been updated to send ChatClientMessages instead of Strings.
-5. ChatClient now implements BroadcastReceiver as according to assignment specifications.
-6. 
+4. Need to update Receiver to process ChatClientMessages based on their type.
+2. ChatClient now implements BroadcastReceiver as according to assignment specifications.
+3. Removed Reciever.java (receive just calls deliver())
+
+//if we could, we should remove Process P, and just get ID, seriously...
+
+We stopped following the interface and implemented it the following way.
+
+Instead of having a ReliableBroadcaster, a FIFOBroadcaster, and so on, we decided to just have 1 universal Caster.
+
+The Caster sends the message, with the ID of the sender, along with 
+
+We kept BroadcastCount outside of the Caster class because of ReliableBroadcast and rebroadcasting same messages.
+
 
 Issues:
 ================

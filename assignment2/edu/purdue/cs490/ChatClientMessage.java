@@ -5,11 +5,24 @@ public class ChatClientMessage implements Message
 	private String contents;
 	private Process sender;
 	private int messageNumber;
-	public ChatClientMessage(Process sender, int messageNumber, String contents)
+	private int type;
+	//0 = BEB, 1 = Reliable, 2 = FIFO
+	//if type == 0
+		//print normally
+	//if type == 1
+		//keep copy, print normally
+	//if type == 2
+		//do something
+	public ChatClientMessage(Process sender, int messageNumber, String contents, int type)
 	{
 		this.setSender(sender);
 		this.setMessageNumber(messageNumber);
 		this.setMessageContents(contents);
+		this.type = type;
+	}
+	public int getType()
+	{
+		return type;
 	}
 	public int getMessageNumber()
 	{

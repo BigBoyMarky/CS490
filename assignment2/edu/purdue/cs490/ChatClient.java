@@ -60,10 +60,14 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private long heartbeat = 0;
 	private ClientObject myClientObject;//object representing this specific client for server purposes
 	private ConcurrentHashMap<String,ClientObject> listOfUsers = new ConcurrentHashMap<String,ClientObject>();//hashmap of users for connecting to others
-	private String[] commands = {"\\hey","\\switch","\\list","\\everybody","\\help"};//list of available commands
+	private String[] commands = {"\\hey","\\switch","\\list","\\everybody","\\help", "\\fifo"};//list of available commands
 	private ClientObject currentInterlocuter;
 	private int numInterlocuters = 0;
 	private boolean firstCrashReport = true;
+	private ReliableBroadcaster rb;
+	private FIFOBroadcaster fifo;
+	private int messageCounter = 0;//for fun
+	private int broadcastCounter = 0;//only useful one for our purposes
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -253,6 +257,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		System.out.println("\\switch [user] = switches to another user to send messages to");
 		System.out.println("\\list = shows you the list of all available users on this server");
 		System.out.println("\\everybody [message] = allow everyone to hear what you want to say");
+		System.out.println("\\fifo [message] = allow everyone to hear what you want to say in FIFO guaranteed order");
 		System.out.println("\\help = shows available commands");
 	}
 
@@ -316,11 +321,16 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		}
 		if(command.equals(commands[3]))
 		{//everybody
-			System.out.println("RB");
+			rb.broadcast(message);
+			
 		}
 		if(command.equals(commands[4]))
 		{//help and ?
 			displayCommands();
+		}
+		if(command.equals(commands[5]))
+		{//fifo
+			fifo.broadcast(message);
 		}
 		if(command.equals(""))
 		{//normal typing
@@ -398,6 +408,36 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		{
 			String name = null;
 			String message = null;
+			/*
+			1] Remove all channel instances
+			2] Jk don't remove all Channel instances
+			3] Keep channel, but only for sending
+			4] Keep channel for server as well
+			5] Do not keep channel for receiving
+
+
+			1] We could have multicast, that's my preferred way of implementation
+			and just have 
+				0 = BEB
+				1 = Reliable
+				2 = FIFO Reliable
+				3 = ?
+				multicast(int type, ArrayList<ClientObject> receiverList, String m)
+				{
+					int listSize = receiverList.size();
+					ChatClientMessage message = new ChatClientMessage(type, m);
+					for(int i = 0; i < listSize; i++)
+						channel.whisper(receiverList.get(i),message);
+				}
+
+			Instead of channel here, you create a FIFO and RBroadcaster here
+			Check if they released any messages.
+			If they did, print them out
+
+			They release messages only when:
+			a] it's not a broadcast (released immediately)
+			b] it's a broadcast and all properties of the broadcast have been adhered to
+			*/
 			while(channel == null){};
 			while(true)
 			{
@@ -437,6 +477,6 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	**************************************************************************************************/
 	public void receive(Message m)
 	{
-
+		//
 	}
 }

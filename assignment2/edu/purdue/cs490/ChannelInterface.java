@@ -27,6 +27,8 @@ public class ChannelInterface
 	private ArrayList<ObjectOutputStream> oosList = new ArrayList<ObjectOutputStream>();
 	private ArrayList<ObjectInputStream> oisList = new ArrayList<ObjectInputStream>();
 	private ArrayList<String> nameList = new ArrayList<String>();
+	/*for Broadcasts only*/
+	
 	public ChannelInterface(String name)
 	{//initialized all necessary things
 		this.name = name;
@@ -106,7 +108,7 @@ public class ChannelInterface
 		{
 			if(!interlocuter.getInitState())//if not initialized
 			{
-				Socket clientSocket = new Socket(interlocuter.getIpAddress(), interlocuter.getPort());
+				Socket clientSocket = new Socket(interlocuter.getIP(), interlocuter.getPort());
 				clientSocket.setSoTimeout(SOCKET_TIMEOUT);//don't forget this guy needs sotimeouttoo!
 				ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
 				oos.flush();
@@ -115,7 +117,7 @@ public class ChannelInterface
 				ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());//waiting for dat flush huh
 				//don't want to send name of guy you're communicating with!
 				socketList.add(clientSocket);
-				nameList.add(interlocuter.getName());
+				nameList.add(interlocuter.getID());
 				oisList.add(ois);
 				oosList.add(oos);
 			}
@@ -133,11 +135,11 @@ public class ChannelInterface
 	{
 		try
 		{
-			int index = nameList.indexOf(interlocuter.getName());
+			int index = nameList.indexOf(interlocuter.getID());
 			if(index == -1)
 			{
 				this.initClient(interlocuter);
-				index = nameList.indexOf(interlocuter.getName());//initiailizes it
+				index = nameList.indexOf(interlocuter.getID());//initiailizes it
 			}
 			ObjectOutputStream stream = oosList.get(index);
 			oosList.get(index).writeObject(message);
@@ -145,11 +147,11 @@ public class ChannelInterface
 		}
 		catch(ConnectException e)
 		{
-			System.out.printf("%s has disconnected. Try refreshing and seeing if s/he returns!\n", interlocuter.getName());
+			System.out.printf("%s has disconnected. Try refreshing and seeing if s/he returns!\n", interlocuter.getID());
 		}
 		catch(SocketException e)
 		{
-			System.out.printf("Looks like the client is offline! Unable to send message to %s\n", interlocuter.getName());
+			System.out.printf("Looks like the client is offline! Unable to send message to %s\n", interlocuter.getID());
 		}
 		catch(Exception e)
 		{
@@ -159,25 +161,25 @@ public class ChannelInterface
 	/*From client*/
 	public String initInvitation(ServerSocket serverSocket) throws SocketException, IOException, SocketTimeoutException
 	{
-			Socket newSocket = serverSocket.accept();
-			newSocket.setSoTimeout(SOCKET_TIMEOUT);
-			ObjectOutputStream oos = new ObjectOutputStream(newSocket.getOutputStream());
-			oos.flush();//needs to flush
-			ObjectInputStream ois = new ObjectInputStream(newSocket.getInputStream());
-			String name = "";
-			try
-			{
-				name = (String) ois.readObject();
-			}
-			catch(ClassNotFoundException e)	
-			{
-				e.printStackTrace();
-			}
-			socketList.add(newSocket);			
-			oisList.add(ois);
-			oosList.add(oos);
-			nameList.add(name);
-			return name;
+		Socket newSocket = serverSocket.accept();
+		newSocket.setSoTimeout(SOCKET_TIMEOUT);
+		ObjectOutputStream oos = new ObjectOutputStream(newSocket.getOutputStream());
+		oos.flush();//needs to flush
+		ObjectInputStream ois = new ObjectInputStream(newSocket.getInputStream());
+		String name = "";
+		try
+		{
+			name = (String) ois.readObject();
+		}
+		catch(ClassNotFoundException e)	
+		{
+			e.printStackTrace();
+		}
+		socketList.add(newSocket);			
+		oisList.add(ois);
+		oosList.add(oos);
+		nameList.add(name);
+		return name;
 	}
 	public String fromClient()
 	{
