@@ -43,13 +43,18 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 		return null;
 	}
 
-	public void failHandler(List<Process> lostmembers){
+	public void failHandler(List<Process> members){
 		for(Message m : receivedMessage){
-			for(Process lost: lostmembers ){
-				if(m.getSender()==lost){
-					Message newMessage = new ChatClientMessage(currentProcess, 0, m.getMessageContents(), 1);
-					rbroadcast(newMessage);
+			boolean found = false;
+			for(Process mem: members ){
+				if(m.getSender()==mem){
+					found = true;
+					break;
 				}
+			}
+			if(!found){
+				Message newMessage = new ChatClientMessage(currentProcess, 0, m.getMessageContents(), 1);
+				rbroadcast(newMessage);
 			}
 		}
 	}
