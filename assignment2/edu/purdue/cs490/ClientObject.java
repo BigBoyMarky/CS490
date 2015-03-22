@@ -24,7 +24,8 @@ public class ClientObject extends Process implements Serializable
 		/*
 		this.ID = username;
 		this.IP = ipAddress;
-		this.port = port;*/
+		this.port = port;
+		*/
 	}
 	public ClientObject(ClientObject copy, Socket socket, ObjectInputStream ois, ObjectOutputStream oos)
 	{//for the sigle-threaded serverside

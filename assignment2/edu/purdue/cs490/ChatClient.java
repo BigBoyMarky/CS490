@@ -116,13 +116,14 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			console.nextLine();
 			System.out.print("Enter your name:");//no need to check for validity bc any name is valid here :)
 			name = console.nextLine();
-			channel = new ChannelInterface(name);
+			channel = new ChannelInterface(this, name);
+			clientPort = channel.getClientPort();
 			if(channel.initServer(host,serverPort))
 				break;
 			else
 				System.out.printf("Connection refused. Are you sure you entered the correct information? Please try again!\n");
 		}
-		while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
+		//while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
 		myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(), clientPort);
 		try
 		{
@@ -222,7 +223,8 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			channel.toServer("get");
 			System.out.println("Current people online:");
 			//needs InvalidProtoclException
-			listOfUsers = (ConcurrentHashMap<String, ClientObject>)channel.fromServer();			
+			listOfUsers = (ConcurrentHashMap<String, ClientObject>)channel.fromServer();
+			channel.updateHashmap(listOfUsers);
 		}		
 		catch(SocketException e)
 		{
@@ -343,7 +345,10 @@ public class ChatClient implements Runnable, BroadcastReceiver
 				if(currentInterlocuter != null)
 				{
 					if(listOfUsers.containsValue(currentInterlocuter))
-						channel.whisper(currentInterlocuter,message);					
+					{
+						ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,0);
+						channel.whisper(currentInterlocuter,myM);						
+					}
 					else
 					{
 						System.out.printf("%s is offline! Look for someone new to chat with\n",currentInterlocuter.getID());
@@ -383,116 +388,8 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	/**************************************************************************************************
 	*								GRABBING CHAT FROM OTHER CLIENTS								*
 	**************************************************************************************************/
-	private ChatServer chat;
-
-	public ChatClient(/*String tempIP, int tempPort, String tempID*/)
+	public ChatClient()
 	{
-		//super(tempIP, tempPort, tempID);
-		try
-		{
-			new Thread(new ChatServer()).start();//for waiting for other clients to connect and receiving messages
-			chat = new ChatServer();
-		}
-		catch(IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	public class ChatServer implements Runnable//ChatClient creates a ChatServer, which means two threads are started in main
-	{
-		public ChatServer() throws IOException
-		{
-			serverSocket = new ServerSocket(0);//initializes serverSocket
-			serverSocket.setReuseAddress(true);
-			serverSocket.setSoTimeout(SOCKET_TIMEOUT);//sets a SOCKET_TIMEOUT for serverSocket.accept() so when WE initialize contact, we can continue on this thread
-			clientPort = serverSocket.getLocalPort();//clientPort is set up
-		}
-		public void run()
-		{
-			//
-			/*
-			beb.deliver(Message m)
-			{
-				if(m.type == 0)
-					client.deliver(m);
-				else
-					rb.deliver(m);
-			}
-
-			rb.deliver(Message m)
-			{
-				
-			}
-			*/
-			String name = null;
-			String message = null;
-			/*
-			1] Remove all channel instances
-			2] Jk don't remove all Channel instances
-			3] Keep channel, but only for sending
-			4] Keep channel for server as well
-			5] Do not keep channel for receiving
-
-
-			1] We could have multicast, that's my preferred way of implementation
-			and just have 
-				0 = BEB
-				1 = Reliable
-				2 = FIFO Reliable
-				3 = ?
-
-			multicast(int type, Arra)
-				multicast(int type, ArrayList<ClientObject> receiverList, String m)
-				{
-					int listSize = receiverList.size();
-					ChatClientMessage message = new ChatClientMessage(type, m);
-					for(int i = 0; i < listSize; i++)
-						channel.whisper(receiverList.get(i),message);
-				}
-
-			Instead of channel here, you create a FIFO and RBroadcaster here
-			Check if they released any messages.
-			If they did, print them out
-
-			They release messages only when:
-			a] it's not a broadcast (released immediately)
-			b] it's a broadcast and all properties of the broadcast have been adhered to
-			*/
-			while(channel == null){};
-			while(true)
-			{
-				try
-				{
-					if(numInterlocuters == 0)
-					{
-						name = channel.initInvitation(serverSocket);
-						get();
-						currentInterlocuter =listOfUsers.get(name);
-						numInterlocuters++;
-						listOfUsers.get(name).flipInitState();//wtf
-					}//I seriously wish we can say "delete this statement, so you don't need to check in the future anymore..." It's only 1 time use bro..
-					else
-					{
-						name = channel.initInvitation(serverSocket);
-						listOfUsers.get(name).flipInitState();//is flipping safe? Will we ever get a new socket request from something that's already made?
-					}
-				}
-				catch(SocketTimeoutException e)
-				{
-					//receive()
-					message = channel.fromClient();
-					if(message.length() > 0 && message.substring(0,1).equals("\\"))//returns \\name if SocketException was thrown in .fromClient(), therefore we have to remove it!
-						listOfUsers.remove(message.substring(1,message.length()));
-					else
-						System.out.printf(message);
-				}
-				catch(Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 	/**************************************************************************************************
 	*								BROADCASTRECEIVER IMPLEMENTATION HERE							*
@@ -501,5 +398,13 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	{
 		//prints out message
 		System.out.printf("%s:%s\n",m.getSender(),m.getMessageContents());
+	}
+	public ConcurrentHashMap<String, ClientObject> getHashmap()
+	{
+		return listOfUsers;
+	}
+	public void setInterlocuter(ClientObject interlocuter)
+	{
+		currentInterlocuter = interlocuter;
 	}
 }

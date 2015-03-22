@@ -1,6 +1,8 @@
 package edu.purdue.cs490;
 
-public class ChatClientMessage implements Message
+import java.io.Serializable;
+
+public class ChatClientMessage implements Message, Serializable
 {
 	private String contents;
 	private Process sender;

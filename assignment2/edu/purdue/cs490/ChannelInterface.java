@@ -1,4 +1,5 @@
 package edu.purdue.cs490;
+import java.util.concurrent.ConcurrentHashMap;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -12,10 +13,13 @@ import java.net.SocketTimeoutException;
 import java.net.ServerSocket;
 import java.io.InterruptedIOException;
 
-public class ChannelInterface
+public class ChannelInterface implements Runnable
 {
 	/*Unique to self*/
 	private String name;
+	private ChatClient self;
+	private ConcurrentHashMap<String, ClientObject> listOfUsers;
+	private int numInterlocuters = 0;
 	private static int SOCKET_TIMEOUT = 50;
 	/*To server*/
 	private ObjectOutputStream heart;//printer to server
@@ -27,13 +31,23 @@ public class ChannelInterface
 	private ArrayList<ObjectOutputStream> oosList = new ArrayList<ObjectOutputStream>();
 	private ArrayList<ObjectInputStream> oisList = new ArrayList<ObjectInputStream>();
 	private ArrayList<String> nameList = new ArrayList<String>();
+	private ServerSocket serverSocket;
 	/*for Broadcasts only*/
 
-	public ChannelInterface(String name)
+	public ChannelInterface(ChatClient self, String name) throws IOException
 	{//initialized all necessary things
 		this.name = name;
+		this.self = self;
+		listOfUsers = self.getHashmap();
+		serverSocket = new ServerSocket(0);//initializes serverSocket
+		serverSocket.setReuseAddress(true);
+		serverSocket.setSoTimeout(SOCKET_TIMEOUT);//sets a SOCKET_TIMEOUT for serverSocket.accept() so when WE initialize contact, we can continue on this thread
+		new Thread(this).start();
 	}
-
+	public int getClientPort()
+	{
+		return serverSocket.getLocalPort();//clientPort is set up		
+	}
 	/*To server*/
 	public boolean initServer(String serverHost, int serverPort)
 	{
@@ -158,10 +172,42 @@ public class ChannelInterface
 			e.printStackTrace();//will fill it up later
 		}		
 	}
+	public void run()
+	{
+		String name = null;
+		while(true)
+		{
+			try
+			{
+				if(numInterlocuters == 0)
+				{
+					name = this.initInvitation();
+					self.get();
+					self.setInterlocuter(listOfUsers.get(name));
+					numInterlocuters++;
+					listOfUsers.get(name).flipInitState();//wtf
+				}//I seriously wish we can say "delete this statement, so you don't need to check in the future anymore..." It's only 1 time use bro..
+				else
+				{
+					name = this.initInvitation();
+					listOfUsers.get(name).flipInitState();//is flipping safe? Will we ever get a new socket request from something that's already made?
+				}
+			}
+			catch(SocketTimeoutException e)
+			{
+				this.fromClient();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}		
+	}
 	/*From client*/
-	public String initInvitation(ServerSocket serverSocket) throws SocketException, IOException, SocketTimeoutException
+	public String initInvitation() throws SocketException, IOException, SocketTimeoutException
 	{
 		Socket newSocket = serverSocket.accept();
+		System.out.printf("In initinivation!\n");
 		newSocket.setSoTimeout(SOCKET_TIMEOUT);
 		ObjectOutputStream oos = new ObjectOutputStream(newSocket.getOutputStream());
 		oos.flush();//needs to flush
@@ -189,9 +235,9 @@ public class ChannelInterface
 			String name = nameList.get(i);
 			try
 			{
-
-				String message = (String)oisList.get(i).readObject();//does this work now?
-				return name+":"+message+"\n";//string to return
+				ChatClientMessage message = (ChatClientMessage)oisList.get(i).readObject();
+				System.out.printf("fifo\n");
+				//fifo.receive(message);
 			}
 			catch(SocketTimeoutException e)
 			{
@@ -203,7 +249,7 @@ public class ChannelInterface
 				oisList.remove(i);//remove from list
 				nameList.remove(i);
 				oosList.remove(i);
-				return "\\" + name;//\\ are reserved, so no way user can mistype this
+				//return "\\" + name;//\\ are reserved, so no way user can mistype this
 			}
 			catch(IndexOutOfBoundsException e)
 			{
@@ -215,6 +261,10 @@ public class ChannelInterface
 				e.printStackTrace();
 			}
 		}
-		return "";//if no message to print, then print nothing
+		//return "";//if no message to print, then print nothing
+	}
+	public void updateHashmap(ConcurrentHashMap<String, ClientObject> newMap)
+	{
+		listOfUsers = newMap;
 	}
 }
