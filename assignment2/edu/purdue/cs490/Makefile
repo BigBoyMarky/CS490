@@ -1,9 +1,35 @@
-JCC = javac
-default: ChatClient.class MultiThreadedChatServer.class
+all: ChatClient.class
 
-ChatClient.class: ChatClient.java ChannelInterface.java ClientObject.java
-	$(JCC) ClientObject.java $(JCC) ChannelInterface.java $(JCC) ChatClient.java
-#add Broadcasts here
-MultiThreadedChatServer.class: MultiThreadedChatServer.java ClientObject.java
-	$(JCC) MultiThreadedChatServer.java
-#add DummyClients2 here
+#ChatClientMessage.class: ChatClientMessage.java
+#	javac ChatClientMessage.java
+#Process.class: Process.java
+#	javac Process.java
+#BroadcastReceiver.class: BroadcastReceiver.java
+#	javac Message.java ChannelInterface.java ClientObject.java Process.java ChatClientMessage.java BroadcastReceiver.java
+#ClientObject.class: ClientObject.java
+#	javac Process.java ClientObject.java
+#Receiver.class: Receiver.java
+#	javac BroadcastReceiver.java Receiver.java
+#BroadcastReceiver.class: BroadcastReceiver.java
+#	javac Message.java BroadcastReceiver.java
+ChatClient.class: ChatClient.java
+	javac \
+		Message.java \
+		BroadcastReceiver.java \
+		Process.java \
+		ClientObject.java \
+		ChannelInterface.java \
+		ChatClient.java \
+		ChatClientMessage.java \
+		ReliableBroadcast.java \
+		Caster.java
+
+#FIFOReliableBroadCast.java MultiThreadedChatServer.java Receiver.java
+#Caster.class: Caster.java
+#	javac Message.java ChannelInterface.java ClientObject.java Process.java ChatClientMessage.java Caster.java
+#ChannelInterface.class: ChannelInterface.java
+#	javac ChannelInterface.java
+#Message.class: Message.java
+#	javac Message.java
+clean:
+	rm -f *.class
