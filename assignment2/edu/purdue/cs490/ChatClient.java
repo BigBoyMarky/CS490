@@ -386,7 +386,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		if(commands.equal(commands[8]))
 		{
 			//for emergency cases if messages were lost
-			
+			channel.forcePrint();
 		}
 		if(command.equals(""))
 		{//normal typing
