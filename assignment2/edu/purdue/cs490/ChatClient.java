@@ -383,7 +383,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		{
 			this.tenThousandsBroadcast(2);
 		}
-		if(commands.equal(commands[8]))
+		if(commands.equals(commands[8]))
 		{
 			//for emergency cases if messages were lost
 			channel.forcePrint();
