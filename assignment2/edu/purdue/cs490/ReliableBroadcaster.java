@@ -20,7 +20,7 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 	public void init(Process currentProcess, BroadcastReceiver br){
 		this.currentProcess = currentProcess;
 		this.receiver = br;
-		beblayer = new BEBroadcaster(currentProcess, this);
+		beblayer = new BEBroadcaster(currentProcess, br);
 	}
 	
 	public void addMember(Process member){
