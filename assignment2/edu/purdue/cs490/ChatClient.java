@@ -60,7 +60,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private long heartbeat = 0;
 	private ClientObject myClientObject;//object representing this specific client for server purposes
 	private ConcurrentHashMap<String,ClientObject> listOfUsers = new ConcurrentHashMap<String,ClientObject>();//hashmap of users for connecting to others
-	private String[] commands = {"\\hey","\\switch","\\list","\\everybody","\\help", "\\fifo"};//list of available commands
+	private String[] commands = {"\\hey","\\switch","\\list","\\everybody","\\help", "\\fifo", "\\beb"};//list of available commands
 	private ClientObject currentInterlocuter;
 	private int numInterlocuters = 0;
 	private boolean firstCrashReport = true;
@@ -264,6 +264,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		System.out.println("\\list = shows you the list of all available users on this server");
 		System.out.println("\\everybody [message] = allow everyone to hear what you want to say");
 		System.out.println("\\fifo [message] = allow everyone to hear what you want to say in FIFO guaranteed order");
+		System.out.println("\\beb [message] = bebdeliver everyone!");
 		System.out.println("\\help = shows available commands");
 	}
 
@@ -344,6 +345,12 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			//fifo.broadcast(message);
 			//attaches type 2 to ChatClientMessage, if reciever receives it, does something else with it
 			System.out.printf("FIFO");
+		}
+		if(command.equals(commands[6]))
+		{
+			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,2);
+			beb.BEBroadcast(myM);
+			System.out.printf("BEB\n");
 		}
 		if(command.equals(""))
 		{//normal typing
