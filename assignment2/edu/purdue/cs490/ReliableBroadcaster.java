@@ -57,11 +57,12 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 	}
 	
 	public Message receive(Message pre) {
+		System.out.printf("IN RELIABLEBROADCASTER\n");
 		Message m = beblayer.receive(pre);
 		if(m!=null)
 			receivedMessage.add(m);
 
-		if(m.getType()==1){
+		if(((ChatClientMessage)m).getType()==1){
 			receiver.receive(m);
 			return null;
 		}

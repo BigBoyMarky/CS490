@@ -59,13 +59,13 @@ public class FIFOReliableBroadcaster implements FIFOReliableBroadcast{
 	}
 
 	public Message receive(Message pre) {
-		
+		System.out.printf("In FIFO BROADCASTER\n");
 		Message m = rblayer.receive(pre);
 		
 		if(m==null)
 			return null;
 		
-		if(m.getType()==2){
+		if(((ChatClientMessage)m).getType()==2){
 			receiver.receive(m);
 			return null;
 		}
