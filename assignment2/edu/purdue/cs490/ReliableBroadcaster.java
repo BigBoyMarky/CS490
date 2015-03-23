@@ -43,7 +43,7 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 		return null;
 	}
 
-	public void failHandler(List<Process> members){
+	public void failHandler(Collection<Process> members){
 		for(Message m : receivedMessage){
 			boolean found = false;
 			for(Process mem: members ){
