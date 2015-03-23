@@ -17,9 +17,9 @@ public class BEBroadcaster
 	{
 		this.self = self;
 		this.client = client;
-		this.channel = self.getChannel();
+		this.channel = ((ChatClient)client).getChannel();
 	}
-	public void BEBroadcast(ChatClientMessage message)//sending to everyone = broadcast, so just multicasting to everyone, including self :P
+	public void BEBroadcast(Message message)//sending to everyone = broadcast, so just multicasting to everyone, including self :P
 	{
 		//ChatClientMessage message = new ChatClientMessage(self, type, m, broadcastCount);//converts String to message
 		ConcurrentHashMap<String,ClientObject> listOfUsers = ((ChatClient) client).getHashmap();
@@ -40,7 +40,7 @@ public class BEBroadcaster
 
 	public Message receive(Message m)
 	{
-		if(m.getType() == 0)
+		if(((ChatClientMessage) m).getType() == 0)
 		{
 			client.receive(m);
 			return null;			

@@ -328,7 +328,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		if(command.equals(commands[3]))
 		{//everybody
 			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,1);
-			rb.rbroadcast();
+			rb.rbroadcast(myM);
 			//rb.broadcast(message);
 			//rb.broadcast attaches type 1 to ChatClientMessage, if receiver receives it, then saves one
 			System.out.printf("RB");
@@ -340,7 +340,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		if(command.equals(commands[5]))
 		{//fifo
 			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,2);
-			fifo.FIFOBroadcast();
+			fifo.FIFOBroadcast(myM);
 			//fifo.broadcast(message);
 			//attaches type 2 to ChatClientMessage, if reciever receives it, does something else with it
 			System.out.printf("FIFO");
