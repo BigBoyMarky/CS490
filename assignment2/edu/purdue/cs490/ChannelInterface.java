@@ -257,8 +257,8 @@ public class ChannelInterface implements Runnable
 				self.getFIFO().receive(message);
 				count++;
 				totaltime += System.currentTimeMillis() - start;
-				if(count == 5000){
-					System.out.println("AVG.THROUGHPUT: " + totaltime/5000);
+				if(count == 2000){
+					System.out.println("AVG.THROUGHPUT: " + totaltime/count);
 				}
 			}
 			catch(SocketTimeoutException e)
@@ -293,6 +293,6 @@ public class ChannelInterface implements Runnable
 	}
 	public void forcePrint()
 	{
-		System.out.printF("FORCED EXIT AT %d\nAVG. THROUGHPUT: %d\n", count, (totaltime/count));
+		System.out.printf("FORCED EXIT AT %d\nAVG. THROUGHPUT: %d\n", count, (totaltime/count));
 	}
 }
