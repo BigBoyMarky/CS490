@@ -232,7 +232,16 @@ public class ChannelInterface implements Runnable
 		int size = oisList.size();
 		for(int i = 0; i < size; i++)
 		{
-			String name = nameList.get(i);
+			String name = "";
+			try
+			{
+				name = nameList.get(i);
+			}
+			catch(IndexOutOfBoundsException e)
+			{
+				size = oisList.size();
+				i = 0;
+			}			
 			try
 			{
 				ChatClientMessage message = (ChatClientMessage)oisList.get(i).readObject();
@@ -250,11 +259,6 @@ public class ChannelInterface implements Runnable
 				nameList.remove(i);
 				oosList.remove(i);
 				//return "\\" + name;//\\ are reserved, so no way user can mistype this
-			}
-			catch(IndexOutOfBoundsException e)
-			{
-				size = oisList.size();
-				i = 0;
 			}
 			catch(Exception e)
 			{
