@@ -428,7 +428,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 
 	public void tenThousandsBroadcast(int type){
 		for(int i=0;i<30;i++){
-			Message m = new ChatClientMessage(myClientObject, i, i+name, type);
+			Message m = new ChatClientMessage(myClientObject, i, Integer.toString(i), type);
 			if(type==1){
 				rb.rbroadcast(m);
 			}
