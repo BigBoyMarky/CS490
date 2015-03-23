@@ -29,7 +29,6 @@ public class BEBroadcaster
 			try
 			{
 				Map.Entry pair = (Map.Entry)availableUsers.next();
-				System.out.printf("In BEB right now\n");
 				channel.whisper((ClientObject)pair.getValue(),message);
 			}
 			catch(SocketException e)
@@ -41,11 +40,8 @@ public class BEBroadcaster
 
 	public Message receive(Message m)
 	{
-		System.out.printf("IN BEBROADCASTER\n");
-		System.out.printf("m type = %d",((ChatClientMessage) m).getType());
 		if(((ChatClientMessage) m).getType() == 0)
 		{
-			System.out.printf("client.receive\n");
 			client.receive(m);
 			return null;
 		}

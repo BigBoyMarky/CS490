@@ -60,7 +60,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private long heartbeat = 0;
 	private ClientObject myClientObject;//object representing this specific client for server purposes
 	private ConcurrentHashMap<String,ClientObject> listOfUsers = new ConcurrentHashMap<String,ClientObject>();//hashmap of users for connecting to others
-	private String[] commands = {"\\hey","\\switch","\\list","\\everybody","\\help", "\\fifo", "\\beb"};//list of available commands
+	private String[] commands = {"\\hey","\\switch","\\list","\\rb","\\help", "\\fifo", "\\beb", "\\OVER9000"};//list of available commands
 	private ClientObject currentInterlocuter;
 	private int numInterlocuters = 0;
 	private boolean firstCrashReport = true;
@@ -262,7 +262,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		System.out.println("Available commands:\n\\hey [user] = initiates chat session with [user]");
 		System.out.println("\\switch [user] = switches to another user to send messages to");
 		System.out.println("\\list = shows you the list of all available users on this server");
-		System.out.println("\\everybody [message] = allow everyone to hear what you want to say");
+		System.out.println("\\rb [message] = allow everyone to hear what you want to say");
 		System.out.println("\\fifo [message] = allow everyone to hear what you want to say in FIFO guaranteed order");
 		System.out.println("\\beb [message] = bebdeliver everyone!");
 		System.out.println("\\help = shows available commands");
@@ -332,7 +332,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			rb.rbroadcast(myM);
 			//rb.broadcast(message);
 			//rb.broadcast attaches type 1 to ChatClientMessage, if receiver receives it, then saves one
-			System.out.printf("RB");
+			//System.out.printf("RB");
 		}
 		if(command.equals(commands[4]))
 		{//help and ?
@@ -344,13 +344,17 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			fifo.FIFOBroadcast(myM);
 			//fifo.broadcast(message);
 			//attaches type 2 to ChatClientMessage, if reciever receives it, does something else with it
-			System.out.printf("FIFO");
+			//System.out.printf("FIFO");
 		}
 		if(command.equals(commands[6]))
 		{
 			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,0);
 			beb.BEBroadcast(myM);
-			System.out.printf("BEB\n");
+			//System.out.printf("BEB\n");
+		}
+		if(command.equals(commands[7]))
+		{
+			this.tenThousandsBroadcast(2);
 		}
 		if(command.equals(""))
 		{//normal typing
@@ -423,7 +427,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	}
 
 	public void tenThousandsBroadcast(int type){
-		for(int i=0;i<10000;i++){
+		for(int i=0;i<30;i++){
 			Message m = new ChatClientMessage(myClientObject, i, i+name, type);
 			if(type==1){
 				rb.rbroadcast(m);

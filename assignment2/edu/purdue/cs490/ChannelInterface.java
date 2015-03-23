@@ -156,11 +156,8 @@ public class ChannelInterface implements Runnable
 				index = nameList.indexOf(interlocuter.getID());//initiailizes it
 			}
 			ObjectOutputStream stream = oosList.get(index);
-			System.out.printf("In whisper created stream\n");
 			oosList.get(index).writeObject(message);
-			System.out.printf("Fuck!\n");			
 			oosList.get(index).flush();//does flushing fix it?
-			System.out.printf("this shit!\n");						
 		}
 		catch(ConnectException e)
 		{
@@ -173,7 +170,7 @@ public class ChannelInterface implements Runnable
 		catch(Exception e)
 		{
 			e.printStackTrace();//will fill it up later
-		}		
+		}
 	}
 	public void run()
 	{
