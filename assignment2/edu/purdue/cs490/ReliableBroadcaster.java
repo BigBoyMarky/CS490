@@ -21,6 +21,14 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 		 		return o1.getID().compareTo(o2.getID());
 		 }
 	} 
+
+	class MessageComparator implements Comparator<Message> {
+
+		 @Override 
+		 public int compare(Message o1, Message o2) {
+		 		return o1.getMessageContents().compareTo(o2.getMessageContents());
+		 }
+	}
 	
 	public ReliableBroadcaster(Process currentProcess, BroadcastReceiver br){
 		init(currentProcess, br);
@@ -31,7 +39,7 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 		this.currentProcess = currentProcess;
 		this.receiver = br;
 		beblayer = new BEBroadcaster(currentProcess, br);
-		receivedMessage = new ConcurrentSkipListSet<Message>();
+		receivedMessage = new ConcurrentSkipListSet<Message>(new MessageComparator());
 		members = new ConcurrentSkipListSet<Process>(new ProcessComparator());
 	}
 	
