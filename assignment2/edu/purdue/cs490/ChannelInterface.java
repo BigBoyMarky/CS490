@@ -257,7 +257,7 @@ public class ChannelInterface implements Runnable
 				self.getFIFO().receive(message);
 				count++;
 				totaltime += System.currentTimeMillis() - start;
-				if(count == 2000){
+				if(count == 100000){//100,000 total messages received
 					System.out.println("AVG.THROUGHPUT: " + totaltime/count);
 				}
 			}
