@@ -13,6 +13,22 @@ public class FIFOReliableBroadcaster implements FIFOReliableBroadcast{
 	private HashMap<Process, Integer> delivered;
 	private int seq;
 	
+	class ProcessComparator implements Comparator<Process> {
+
+		 @Override 
+		 public int compare(Process o1, Process o2) {
+		 		return o1.getID().compareTo(o2.getID());
+		 }
+	} 
+
+	class MessageComparator implements Comparator<Message> {
+
+		 @Override 
+		 public int compare(Message o1, Message o2) {
+		 		return o1.getMessageContents().compareTo(o2.getMessageContents());
+		 }
+	}
+	
 	public FIFOReliableBroadcaster(Process currentProcess, BroadcastReceiver br){
 		init(currentProcess, br);
 		delivered = new HashMap<Process,Integer>();
@@ -22,7 +38,8 @@ public class FIFOReliableBroadcaster implements FIFOReliableBroadcast{
 		this.currentProcess = currentProcess;
 		this.receiver = br;
 		rblayer = new ReliableBroadcaster(currentProcess, br);
-		pending = new ConcurrentSkipListSet<Message>();
+		pending = new ConcurrentSkipListSet<Message>(new MessageComparator());
+		members = new ConcurrentSkipListSet<Process>(new ProcessComparator());
 		seq = 0;
 	}
 	
