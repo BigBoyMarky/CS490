@@ -76,8 +76,8 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 		ConcurrentSkipListSet<Message> removed = new ConcurrentSkipListSet<Message>();
 		for(Message m : receivedMessage){
 			boolean found = false;
-			for(Process mem: members ){
-				if(m.getSender()==mem){
+			for(ClientObject mem: members ){
+				if( (ClientObject)m.getSender() == mem){
 					found = true;
 					break;
 				}

@@ -26,7 +26,7 @@ ChatClient.class: ChatClient.java
 		ReliableBroadcaster.java \
 		BEBroadcaster.java \
 		FIFOReliableBroadcast.java \
-		FIFOReliableBroadCaster.java
+		FIFOReliableBroadcaster.java
 
 #FIFOReliableBroadCast.java
 #Caster.class: Caster.java
