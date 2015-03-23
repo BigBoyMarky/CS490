@@ -64,9 +64,9 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private ClientObject currentInterlocuter;
 	private int numInterlocuters = 0;
 	private boolean firstCrashReport = true;
-	//private ReliableBroadcaster rb;
-	//private FIFOBroadcaster fifo;
-	//private BEBroadcaster beb;
+	private ReliableBroadcaster rb;
+	private FIFOReliableBroadcaster fifo;
+	private BEBroadcaster beb;
 	private int messageCounter = 0;//for fun
 	private int broadcastCounter = 0;//only useful one for our purposes
 	/**************************************************************************************************
@@ -125,6 +125,9 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		}
 		//while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
 		myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(), clientPort);
+		beb = new BEBroadcaster(myClientObject, this);
+		rb = new ReliableBroadcaster(myClientObject, this);
+		fifo = new FIFOReliableBroadcaster(myClientObject, this);
 		try
 		{
 			channel.toServer("reg");
@@ -324,6 +327,8 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		}
 		if(command.equals(commands[3]))
 		{//everybody
+			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,1);
+			rb.rbroadcast();
 			//rb.broadcast(message);
 			//rb.broadcast attaches type 1 to ChatClientMessage, if receiver receives it, then saves one
 			System.out.printf("RB");
@@ -334,6 +339,8 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		}
 		if(command.equals(commands[5]))
 		{//fifo
+			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,2);
+			fifo.FIFOBroadcast();
 			//fifo.broadcast(message);
 			//attaches type 2 to ChatClientMessage, if reciever receives it, does something else with it
 			System.out.printf("FIFO");
@@ -406,5 +413,9 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	public void setInterlocuter(ClientObject interlocuter)
 	{
 		currentInterlocuter = interlocuter;
+	}
+	public ChannelInterface getChannel()
+	{
+		return channel;
 	}
 }

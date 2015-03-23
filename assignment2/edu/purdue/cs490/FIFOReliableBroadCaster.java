@@ -3,7 +3,7 @@ package edu.purdue.cs490;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-public class FIFOReliableBroadCaster{
+public class FIFOReliableBroadcaster implements FIFOReliableBroadcast{
 	
 	private Process currentProcess;
 	private BroadcastReceiver receiver;
@@ -13,7 +13,7 @@ public class FIFOReliableBroadCaster{
 	private HashMap<Process, Integer> delivered;
 	private int seq;
 	
-	public FIFOReliableBroadCaster(Process currentProcess, BroadcastReceiver br){
+	public FIFOReliableBroadcaster(Process currentProcess, BroadcastReceiver br){
 		init(currentProcess, br);
 		delivered = new HashMap<Process,Integer>();
 	}
