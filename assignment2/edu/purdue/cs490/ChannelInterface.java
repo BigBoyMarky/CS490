@@ -21,7 +21,7 @@ public class ChannelInterface implements Runnable
 	private ChatClient self;
 	private ConcurrentHashMap<String, ClientObject> listOfUsers;
 	private int numInterlocuters = 0;
-	private static int SOCKET_TIMEOUT = 50;
+	private static int SOCKET_TIMEOUT = 100;
 	/*To server*/
 	private ObjectOutputStream heart;//printer to server
 	private ObjectInputStream heartListener;
