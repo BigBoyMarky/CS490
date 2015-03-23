@@ -22,8 +22,11 @@ ChatClient.class: ChatClient.java
 		ChatClient.java \
 		ChatClientMessage.java \
 		ReliableBroadcast.java \
-		Caster.java \
-		MultiThreadedChatServer.java
+		MultiThreadedChatServer.java \
+		ReliableBroadcaster.java \
+		BEBroadcaster.java \
+		FIFOReliableBroadcast.java \
+		FIFOReliableBroadCaster.java
 
 #FIFOReliableBroadCast.java
 #Caster.class: Caster.java
