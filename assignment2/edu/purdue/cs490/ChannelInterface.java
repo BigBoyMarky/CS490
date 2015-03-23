@@ -36,8 +36,8 @@ public class ChannelInterface implements Runnable
 	private ServerSocket serverSocket;
 	/*for Broadcasts only*/
 
-	private long totaltime;
-	private int count;
+	private double totaltime;
+	private double count;
 
 	public ChannelInterface(ChatClient self, String name) throws IOException
 	{//initialized all necessary things
