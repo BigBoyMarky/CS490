@@ -61,7 +61,12 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 		Message m = beblayer.receive(pre);
 		if(m!=null)
 			receivedMessage.add(m);
-		return null;
+
+		if(m.getBroadcastMethod()==1){
+			br.receive(m);
+			return null;
+		}
+		return m;
 	}
 
 	public void failHandler(Collection<Process> members){
