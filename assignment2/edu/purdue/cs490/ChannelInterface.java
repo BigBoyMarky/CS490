@@ -35,11 +35,16 @@ public class ChannelInterface implements Runnable
 	private ServerSocket serverSocket;
 	/*for Broadcasts only*/
 
+	private long totaltime;
+	private int count;
+
 	public ChannelInterface(ChatClient self, String name) throws IOException
 	{//initialized all necessary things
 		this.name = name;
 		this.self = self;
 		listOfUsers = self.getHashmap();
+		totaltime = 0;
+		count = 0;
 		serverSocket = new ServerSocket(0);//initializes serverSocket
 		serverSocket.setReuseAddress(true);
 		serverSocket.setSoTimeout(SOCKET_TIMEOUT);//sets a SOCKET_TIMEOUT for serverSocket.accept() so when WE initialize contact, we can continue on this thread
@@ -247,7 +252,13 @@ public class ChannelInterface implements Runnable
 			try
 			{
 				ChatClientMessage message = (ChatClientMessage)oisList.get(i).readObject();
+				long start = System.currentTimeMillis();
 				self.getFIFO().receive(message);
+				count++;
+				totaltime += System.currentTimeMillis() - start;
+				if(count == 100000){
+					System.out.println("AVG.THROUGHPUT: " + totaltime/100000);
+				}
 			}
 			catch(SocketTimeoutException e)
 			{
