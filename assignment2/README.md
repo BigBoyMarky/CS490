@@ -30,9 +30,16 @@ ChatClient
 1] Type in '\help' for a list of all commands.
 2] When you connect with someone, entering anything that is not a command will send that String to the person you're connecting with.
 3] Type in '\switch' to switch to another person to message.
-//4] Type in '\everybody' to reliable broadcast.
-//5] Type in '\fifo' to fifo broadcast.
-
+4] Type in '\beb' to be broadcast.
+5] Type in '\rb' to reliable broadcast.
+6] Type in '\fifo' to fifo broadcast.
+ 
+How to test
+-----------
+1] when every client is up and ready, make sure you do '\list' for every client.
+2] For each client, call '\OVER9000'.
+3] When 100,000 messages are received, the throughput will be printed.
+4] If you want to know the throughput when you don't have 100,000 messages, do '\print'
 
 Fixed Log
 =================
