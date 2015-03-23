@@ -29,7 +29,7 @@ public class BEBroadcaster
 			try
 			{
 				Map.Entry pair = (Map.Entry)availableUsers.next();
-				channel.whisper(((ClientObject)pair).getValue(),message);
+				channel.whisper((ClientObject)pair.getValue(),message);
 			}
 			catch(SocketException e)
 			{
