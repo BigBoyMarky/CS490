@@ -61,8 +61,8 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 		if(m!=null)
 			receivedMessage.add(m);
 
-		if(m.getBroadcastMethod()==1){
-			br.receive(m);
+		if(m.getType()==1){
+			receiver.receive(m);
 			return null;
 		}
 		return m;

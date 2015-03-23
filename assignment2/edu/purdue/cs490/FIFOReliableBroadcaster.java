@@ -65,6 +65,11 @@ public class FIFOReliableBroadcaster implements FIFOReliableBroadcast{
 		if(m==null)
 			return null;
 		
+		if(m.getType()==2){
+			receiver.receive(m);
+			return null;
+		}
+
 		Process sender = m.getSender();
 		if(!pending.contains(sender)){
 			addMember(sender);
