@@ -257,8 +257,8 @@ public class ChannelInterface implements Runnable
 				self.getFIFO().receive(message);
 				count++;
 				totaltime += System.currentTimeMillis() - start;
-				if(count == 100000){
-					System.out.println("AVG.THROUGHPUT: " + totaltime/100000);
+				if(count == 5000){
+					System.out.println("AVG.THROUGHPUT: " + totaltime/5000);
 				}
 			}
 			catch(SocketTimeoutException e)
