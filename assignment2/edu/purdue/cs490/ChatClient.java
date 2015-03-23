@@ -38,6 +38,7 @@ import java.io.InterruptedIOException;
 		will also send a "get" so the user can know which usernames are still available
 	*/
 //should make currentInterlocuter back to normal after broadcasting
+//printing on sender's side is a bit slow...actually really slow...not sure why.
 public class ChatClient implements Runnable, BroadcastReceiver
 {
 	/**************************************************************************************************
@@ -61,7 +62,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private long heartbeat = 0;
 	private ClientObject myClientObject;//object representing this specific client for server purposes
 	private ConcurrentHashMap<String,ClientObject> listOfUsers = new ConcurrentHashMap<String,ClientObject>();//hashmap of users for connecting to others
-	private String[] commands = {"\\hey","\\switch","\\list","\\rb","\\help", "\\fifo", "\\beb", "\\OVER9000"};//list of available commands
+	private String[] commands = {"\\hey","\\switch","\\list","\\rb","\\help", "\\fifo", "\\beb", "\\OVER9000", "\\print"};//list of available commands
 	private ClientObject currentInterlocuter;
 	private int numInterlocuters = 0;
 	private boolean firstCrashReport = true;
@@ -377,9 +378,15 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			beb.BEBroadcast(myM);
 			//System.out.printf("BEB\n");
 		}
+		//SECRET COMMANDS FOR MASTER USERS ONLY :D
 		if(command.equals(commands[7]))
 		{
 			this.tenThousandsBroadcast(2);
+		}
+		if(commands.equal(commands[8]))
+		{
+			//for emergency cases if messages were lost
+			
 		}
 		if(command.equals(""))
 		{//normal typing

@@ -1,3 +1,4 @@
+//128.10.25.121
 package edu.purdue.cs490;
 import java.util.concurrent.ConcurrentHashMap;
 import java.net.ConnectException;
@@ -247,7 +248,11 @@ public class ChannelInterface implements Runnable
 			try
 			{
 				ChatClientMessage message = (ChatClientMessage)oisList.get(i).readObject();
+				//start timer
 				self.getFIFO().receive(message);
+				//end timer
+				//put time into an array of 10,000
+				//do your std stuff
 			}
 			catch(SocketTimeoutException e)
 			{
