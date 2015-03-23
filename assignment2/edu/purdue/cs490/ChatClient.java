@@ -404,7 +404,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	public void receive(Message m)
 	{
 		//prints out message
-		System.out.printf("%s:%s\n",m.getSender(),m.getMessageContents());
+		System.out.printf("%s:%s\n",m.getSender().getID(),m.getMessageContents());
 	}
 	public ConcurrentHashMap<String, ClientObject> getHashmap()
 	{
@@ -417,5 +417,9 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	public ChannelInterface getChannel()
 	{
 		return channel;
+	}
+	public FIFOReliableBroadcaster getFIFO()
+	{
+		return fifo;
 	}
 }

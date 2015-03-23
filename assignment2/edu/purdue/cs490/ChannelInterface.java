@@ -236,8 +236,8 @@ public class ChannelInterface implements Runnable
 			try
 			{
 				ChatClientMessage message = (ChatClientMessage)oisList.get(i).readObject();
-				System.out.printf("fifo\n");
-				//fifo.receive(message);
+				//System.out.printf("fifo\n");
+				self.getFIFO().receive(message);
 			}
 			catch(SocketTimeoutException e)
 			{
