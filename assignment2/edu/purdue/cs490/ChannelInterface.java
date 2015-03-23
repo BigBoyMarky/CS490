@@ -226,6 +226,7 @@ public class ChannelInterface implements Runnable
 		oisList.add(ois);
 		oosList.add(oos);
 		nameList.add(name);
+		System.out.printf("Registered %s\n",name);
 		return name;
 	}
 	public void fromClient()
