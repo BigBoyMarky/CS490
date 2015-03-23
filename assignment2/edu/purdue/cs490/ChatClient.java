@@ -9,6 +9,7 @@ import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.Collection;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.io.IOException;
@@ -148,6 +149,24 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			new Thread(this).start();		
 			System.out.println("Verified!");
 			displayCommands();
+			new Thread(new Runnable() {
+
+				public void run(){
+
+					ConcurrentHashMap<String, ClientObject> members = (ConcurrentHashMap<String, ClientObject>) channel.fromServer();
+
+					rb.failHandler(members.values());
+
+					try{
+						Thread.sleep(4000);
+					}
+					catch(Exception e){
+						e.printStackTrace();
+					}
+				}
+
+			}).start();
+			
 			this.heartbeat();
 		}
 		catch(SocketException e)
