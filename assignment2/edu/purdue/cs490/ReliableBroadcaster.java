@@ -22,6 +22,8 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 		this.currentProcess = currentProcess;
 		this.receiver = br;
 		beblayer = new BEBroadcaster(currentProcess, br);
+		receivedMessage = new ConcurrentSkipListSet<Message>();
+		members = new ConcurrentSkipListSet<Process>();
 	}
 	
 	public void addMember(Process member){
@@ -45,6 +47,7 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 	}
 
 	public void failHandler(Collection<Process> members){
+		ConcurrentSkipListSet<Message> removed = new ConcurrentSkipListSet<Message>();
 		for(Message m : receivedMessage){
 			boolean found = false;
 			for(Process mem: members ){
@@ -56,7 +59,10 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 			if(!found){
 				Message newMessage = new ChatClientMessage(currentProcess, 0, m.getMessageContents(), 1);
 				rbroadcast(newMessage);
+				removed.add(m);
 			}
 		}
+		for(Message m: removed)
+			receivedMessage.remove(m);
 	}
 }
