@@ -62,7 +62,7 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 		if(m!=null)
 			receivedMessage.add(m);
 
-		if(m.getBroadcastMethod()==1){
+		if(((ChatClientMessage)m).getType()==1){
 			br.receive(m);
 			return null;
 		}
