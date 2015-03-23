@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.ServerSocket;
 import java.io.InterruptedIOException;
+import java.io.EOFException;
 
 public class ChannelInterface implements Runnable
 {
@@ -207,7 +208,7 @@ public class ChannelInterface implements Runnable
 	public String initInvitation() throws SocketException, IOException, SocketTimeoutException
 	{
 		Socket newSocket = serverSocket.accept();
-		System.out.printf("In initinivation!\n");
+		//System.out.printf("In initinivation!\n");
 		newSocket.setSoTimeout(SOCKET_TIMEOUT);
 		ObjectOutputStream oos = new ObjectOutputStream(newSocket.getOutputStream());
 		oos.flush();//needs to flush
@@ -245,7 +246,6 @@ public class ChannelInterface implements Runnable
 			try
 			{
 				ChatClientMessage message = (ChatClientMessage)oisList.get(i).readObject();
-				//System.out.printf("fifo\n");
 				self.getFIFO().receive(message);
 			}
 			catch(SocketTimeoutException e)
@@ -259,6 +259,13 @@ public class ChannelInterface implements Runnable
 				nameList.remove(i);
 				oosList.remove(i);
 				//return "\\" + name;//\\ are reserved, so no way user can mistype this
+			}
+			catch(EOFException e)
+			{
+				System.out.printf("%s is unreachable!\n",name);
+				oisList.remove(i);//remove from list
+				nameList.remove(i);
+				oosList.remove(i);				
 			}
 			catch(Exception e)
 			{

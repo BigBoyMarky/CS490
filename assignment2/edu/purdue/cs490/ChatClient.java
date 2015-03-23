@@ -37,7 +37,7 @@ import java.io.InterruptedIOException;
 		the message is "U", it will tell the user to change his/her username. (aka send "U" back if name is a repeat). The client
 		will also send a "get" so the user can know which usernames are still available
 	*/
-
+//should make currentInterlocuter back to normal after broadcasting
 public class ChatClient implements Runnable, BroadcastReceiver
 {
 	/**************************************************************************************************
