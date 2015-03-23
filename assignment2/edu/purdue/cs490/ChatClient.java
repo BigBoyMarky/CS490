@@ -414,6 +414,19 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	{
 		currentInterlocuter = interlocuter;
 	}
+
+	public void tenThousandsBroadcast(int type){
+		for(int i=0;i<10000;i++){
+			Message m = new ChatClientMessage(currentProcess, i, i+name, type);
+			if(type==1){
+				rb.rbroadcast(m);
+			}
+			else{
+				fifo.FIFOBroadcast(m);
+			}
+		}
+	}
+
 	public ChannelInterface getChannel()
 	{
 		return channel;
