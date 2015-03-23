@@ -59,7 +59,7 @@ public class FIFOReliableBroadcaster implements FIFOReliableBroadcast{
 	}
 
 	public Message receive(Message pre) {
-		
+		System.out.printf("In FIFO BROADCASTER\n");
 		Message m = rblayer.receive(pre);
 		
 		if(m==null)

@@ -348,7 +348,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		}
 		if(command.equals(commands[6]))
 		{
-			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,2);
+			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,0);
 			beb.BEBroadcast(myM);
 			System.out.printf("BEB\n");
 		}
