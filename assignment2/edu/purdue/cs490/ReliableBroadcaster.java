@@ -77,7 +77,7 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 		for(Message m : receivedMessage){
 			boolean found = false;
 			for(ClientObject mem: members ){
-				if(m.getSender()== (ClientObject)mem){
+				if( (ClientObject)m.getSender() == mem){
 					found = true;
 					break;
 				}
