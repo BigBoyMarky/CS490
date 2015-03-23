@@ -153,6 +153,8 @@ public class ChatClient implements Runnable, BroadcastReceiver
 
 				public void run(){
 
+					channel.toServer("get");
+
 					ConcurrentHashMap<String, ClientObject> members = (ConcurrentHashMap<String, ClientObject>) channel.fromServer();
 
 					rb.failHandler(members.values());
