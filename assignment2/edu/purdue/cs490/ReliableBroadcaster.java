@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.Comparator;
 
 public class ReliableBroadcaster implements ReliableBroadcast {
 	
@@ -12,6 +13,22 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 	private ConcurrentSkipListSet<Process> members;
 	private BEBroadcaster beblayer;
 	private ConcurrentSkipListSet<Message> receivedMessage;
+	
+	class ProcessComparator implements Comparator<Process> {
+
+		 @Override 
+		 public int compare(Process o1, Process o2) {
+		 		return o1.getID().compareTo(o2.getID());
+		 }
+	} 
+
+	class MessageComparator implements Comparator<Message> {
+
+		 @Override 
+		 public int compare(Message o1, Message o2) {
+		 		return o1.getMessageContents().compareTo(o2.getMessageContents());
+		 }
+	}
 	
 	public ReliableBroadcaster(Process currentProcess, BroadcastReceiver br){
 		init(currentProcess, br);
@@ -22,8 +39,8 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 		this.currentProcess = currentProcess;
 		this.receiver = br;
 		beblayer = new BEBroadcaster(currentProcess, br);
-		receivedMessage = new ConcurrentSkipListSet<Message>();
-		members = new ConcurrentSkipListSet<Process>();
+		receivedMessage = new ConcurrentSkipListSet<Message>(new MessageComparator());
+		members = new ConcurrentSkipListSet<Process>(new ProcessComparator());
 	}
 	
 	public void addMember(Process member){
