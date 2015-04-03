@@ -141,7 +141,7 @@ public class ChannelInterface implements Runnable
 				nameList.add(interlocuter.getID());
 				oisList.add(ois);
 				oosList.add(oos);
-			}
+			}System.out.println(interlocuter.getID());
 		}
 		catch(ConnectException e)
 		{
@@ -176,6 +176,7 @@ public class ChannelInterface implements Runnable
 		}
 		catch(Exception e)
 		{
+
 			e.printStackTrace();//will fill it up later
 		}
 	}
@@ -197,6 +198,7 @@ public class ChannelInterface implements Runnable
 				else
 				{
 					name = this.initInvitation();
+					//null pointer exception is thrown at line 200. 
 					listOfUsers.get(name).flipInitState();//is flipping safe? Will we ever get a new socket request from something that's already made?
 				}
 			}
@@ -233,6 +235,10 @@ public class ChannelInterface implements Runnable
 		oosList.add(oos);
 		nameList.add(name);
 		System.out.printf("Registered %s\n",name);
+		/*NEW CODE HERE, ELIMINATE IF RUN OUT OF TIME*/
+		this.toServer("list");
+		listOfUsers =  (ConcurrentHashMap<String, ClientObject>) this.fromServer();
+		/*END*/
 		return name;
 	}
 	public void fromClient()
