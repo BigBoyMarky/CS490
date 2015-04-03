@@ -22,20 +22,27 @@ public class BEBroadcaster
 	public void BEBroadcast(Message message)//sending to everyone = broadcast, so just multicasting to everyone, including self :P
 	{
 		//ChatClientMessage message = new ChatClientMessage(self, type, m, broadcastCount);//converts String to message
-		channel.toServer("get");
-		ConcurrentHashMap<String,ClientObject> listOfUsers = (ConcurrentHashMap<String,ClientObject>) channel.fromServer();//((ChatClient) client).getHashmap();
-		Iterator availableUsers = listOfUsers.entrySet().iterator();//iterates through hashmap
-		while(availableUsers.hasNext())
+		try
 		{
-			try
+			channel.toServer("get");
+			ConcurrentHashMap<String,ClientObject> listOfUsers = (ConcurrentHashMap<String,ClientObject>) channel.fromServer();//((ChatClient) client).getHashmap();
+			Iterator availableUsers = listOfUsers.entrySet().iterator();//iterates through hashmap
+			while(availableUsers.hasNext())
 			{
+			//try
+			//{
 				Map.Entry pair = (Map.Entry)availableUsers.next();
 				channel.whisper((ClientObject)pair.getValue(),message);
+			//}
+			//catch(SocketException e)
+			//{
+			//	continue;
+			//}
 			}
-			catch(SocketException e)
-			{
-				continue;
-			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 
