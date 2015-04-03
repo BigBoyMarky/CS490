@@ -236,7 +236,7 @@ public class ChannelInterface implements Runnable
 		nameList.add(name);
 		System.out.printf("Registered %s\n",name);
 		/*NEW CODE HERE, ELIMINATE IF RUN OUT OF TIME*/
-		this.toServer("list");
+		this.toServer("get");
 		listOfUsers =  (ConcurrentHashMap<String, ClientObject>) this.fromServer();
 		/*END*/
 		return name;
