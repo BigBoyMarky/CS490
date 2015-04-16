@@ -381,7 +381,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		//SECRET COMMANDS FOR MASTER USERS ONLY :D
 		if(command.equals(commands[7]))
 		{
-			this.tenThousandsBroadcast(1);
+			this.tenThousandsBroadcast(0);
 		}
 		if(commands.equals(commands[8]))
 		{
