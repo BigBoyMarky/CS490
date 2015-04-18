@@ -8,13 +8,17 @@ public class ChatClientMessage implements Message, Serializable
 	private Process sender;
 	private int messageNumber;
 	private int type;
-	//0 = BEB, 1 = Reliable, 2 = FIFO
+	private VectorClock myVectorClock;
+	//0 = BEB, 1 = Reliable, 2 = FIFO, 3 = Causal
 	//if type == 0
 		//print normally
 	//if type == 1
 		//keep copy, print normally
 	//if type == 2
 		//do something
+	//if type == 3
+		//initiailize VectorClock
+	
 	public ChatClientMessage(Process sender, int messageNumber, String contents, int type)
 	{
 		this.setSender(sender);
@@ -49,5 +53,13 @@ public class ChatClientMessage implements Message, Serializable
 	public void setSender(Process sender)
 	{
 		this.sender = sender;
+	}
+	public VectorClock getVectorClock()
+	{
+		return myVectorClock;
+	}
+	public VectorClock incrementVectorClock()
+	{
+		
 	}
 }
