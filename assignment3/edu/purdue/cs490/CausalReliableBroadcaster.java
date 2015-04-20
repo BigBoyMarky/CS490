@@ -44,8 +44,9 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	}
 	public void crbroadcast(Message m)
 	{
-		m.setSender(self);
+		m.setSender(self);	// set sender 
 		((ChatClientMessage)m).setType(3);
+		((ChatClientMessage)m).setVectorClock(this.time); // set the clock
 		rb.rbroadcast(m);
 	}
 	public Message receive(Message throwItDownTheHole)
