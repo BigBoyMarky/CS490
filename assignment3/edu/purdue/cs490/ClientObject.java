@@ -15,7 +15,7 @@ public class ClientObject extends Process implements Serializable
 	private transient BufferedReader buffer;
 	private VectorClock myVectorClock;
 	private boolean isSocketInit = false;
-	public ClientObject(String username, String ipAddress, int port, ConcurrentHashMap<String,ClientObject> listOfPeople )
+	public ClientObject(String username, String ipAddress, int port, ConcurrentHashMap<String,ClientObject> listOfPeople)
 	{
 		super(ipAddress, port, username);
 		myVectorClock = new VectorClock(listOfPeople);
@@ -71,5 +71,9 @@ public class ClientObject extends Process implements Serializable
 	public VectorClock getVectorClock()
 	{
 		return myVectorClock;
+	}
+	public void setID(String id)
+	{
+		
 	}
 }

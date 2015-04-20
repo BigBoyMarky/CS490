@@ -6,7 +6,7 @@ public class Process implements Serializable
 {
 	String IP;
 	int port;
-	String ID;
+	String ID;//username
 	public Process(String IP, int port, String ID)
 	{
 		this.IP = IP;
