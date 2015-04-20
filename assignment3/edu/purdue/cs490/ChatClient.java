@@ -293,6 +293,8 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		System.out.println("\\fifo [message] = allow everyone to hear what you want to say in FIFO guaranteed order");
 		System.out.println("\\beb [message] = bebdeliver everyone!");
 		System.out.println("\\help = shows available commands");
+		System.out.println("\\causal = use causal");
+		System.out.println("\\THERE'S A SECRET COMMAND");
 	}
 
 	/**************************************************************************************************
@@ -378,7 +380,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		//SECRET COMMANDS FOR MASTER USERS ONLY :D
 		if(command.equals(commands[7]))
 		{
-			this.tenThousandsBroadcast(0);
+			this.tenThousandsBroadcast(3);
 		}
 		if(commands.equals(commands[8]))
 		{
@@ -474,23 +476,20 @@ public class ChatClient implements Runnable, BroadcastReceiver
 
 	public void tenThousandsBroadcast(int type)
 	{
-
 		for(int i=0;i<10000;i++)
 		{
-
-			if(type == 2)
+			if(type == 3)
 			{
 				Message m = new ChatClientMessage(myClientObject, Integer.toString(i));
-				crb.crbroadcast(m);
+				crb.crbroadcast(m);				
 			}
-			else {
+			else 
+			{
 				Message m = new ChatClientMessage(myClientObject, Integer.toString(i));
-				if(type==1){
+				if(type==1)
 					rb.rbroadcast(m);
-				}
-				else{
+				else
 					fifo.FIFOBroadcast(m);
-				}
 			}
 		}
 	}
