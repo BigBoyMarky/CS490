@@ -157,7 +157,8 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			}
 			System.out.println(uuu);
 			id = Long.valueOf(uuu);
-			System.out.print("Your ID = " + id + "\n");
+			myClientObject.setRealID(id);
+			//System.out.print("Your ID = " + id + "\n");
 			new Thread(this).start();
 			System.out.println("Verified!");
 			displayCommands();
