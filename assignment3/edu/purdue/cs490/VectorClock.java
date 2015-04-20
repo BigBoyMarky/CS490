@@ -12,7 +12,8 @@ public class VectorClock implements Serializable
 {
     private ConcurrentHashMap<String, Integer> clock;
 
-    public VectorClock(ConcurrentHashMap<String, ClientObject> listOfUsers){
+    public VectorClock(ConcurrentHashMap<String, ClientObject> listOfUsers)
+    {
         // create an empty clock with those process names
         Iterator availableUsers = listOfUsers.entrySet().iterator();
         while(availableUsers.hasNext())
@@ -23,7 +24,8 @@ public class VectorClock implements Serializable
     }
     // 0,0,0
 
-    public VectorClock(VectorClock old, String name){
+    public VectorClock(VectorClock old, String name)
+    {
         // create a clock that chronologically follows the old clock
         this.clock = new ConcurrentHashMap<String, Integer>();
         for(String s : old.getClock().keySet()){
@@ -32,7 +34,8 @@ public class VectorClock implements Serializable
         this.clock.put(name, this.clock.get(name)+1);
     }
 
-    public VectorClock(VectorClock v1, VectorClock v2, String name){
+    public VectorClock(VectorClock v1, VectorClock v2, String name)
+    {
         this.clock = new ConcurrentHashMap<String, Integer>();
         Set<String> allkeys = union(v1.getClock().keySet(), v2.getClock().keySet());
         for(String s : allkeys){
@@ -41,21 +44,25 @@ public class VectorClock implements Serializable
         this.clock.put(name, this.clock.get(name)+1);
     }
 
-    public void set(String name, int time){
+    public void set(String name, int time)
+    {
         this.clock.put(name,time);
     }
 
-    public void remove(String name){
+    public void remove(String name)
+    {
         this.clock.remove(name);
     }
 
-    public ConcurrentHashMap<String, Integer> getClock(){
+    public ConcurrentHashMap<String, Integer> getClock()
+    {
         return this.clock;
     }
 
     public int getTime(String name)
     {
-        if(!this.clock.containsKey(name)){
+        if(!this.clock.containsKey(name))
+        {
             this.set(name,0);
         }
         return this.clock.get(name);

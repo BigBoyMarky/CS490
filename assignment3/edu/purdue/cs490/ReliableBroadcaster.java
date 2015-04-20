@@ -81,7 +81,8 @@ public class ReliableBroadcaster implements ReliableBroadcast
 		return m;
 	}
 
-	public void failHandler(Collection<ClientObject> members){
+	public void failHandler(Collection<ClientObject> members)
+	{
 		ConcurrentSkipListSet<Message> removed = new ConcurrentSkipListSet<Message>();
 		for(Message m : receivedMessage){
 			boolean found = false;
@@ -91,7 +92,8 @@ public class ReliableBroadcaster implements ReliableBroadcast
 					break;
 				}
 			}
-			if(!found){
+			if(!found)
+			{
 				System.out.println("NOTFOUND!");
 				Message newMessage = new ChatClientMessage(currentProcess, m.getMessageContents());
 				newMessage.setMessageNumber(0);

@@ -71,9 +71,6 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private FIFOReliableBroadcaster fifo;
 	private BEBroadcaster beb;
 	private CausalReliableBroadcaster crb;
-	private int messageCounter = 0;//for fun
-	private int broadcastCounter = 0;//only useful one for our purposes
-	private VectorClock myVectorClock;
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/

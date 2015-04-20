@@ -1,5 +1,4 @@
 package edu.purdue.cs490;
-//import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.Set;
@@ -42,6 +41,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	public void addMember(Process member)
 	{
 		//when you add a new Process, you'll have to update the VectorClock
+		time.set(member.getID(),member.getVectorClock().getTime(member.getID()));
 	}
 	public void removeMember(Process member)
 	{
@@ -53,13 +53,12 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	public void crbroadcast(Message m)
 	{
 		m.setSender(self);// set sender 
-		((ChatClientMessage)m).setType(CAUSAL_ID);
-		((ChatClientMessage)m).setVectorClock(this.time); // set the clock
-		client.receive(m); //auto delivery
+		m.setType(CAUSAL_ID);
+		m.setVectorClock(this.time);// set the clock
+		client.receive(m);//auto delivery
 		rb.rbroadcast(m);
 		this.time.incrementVectorClock(self.getID());// increment the clock (coz auto delivery)		
 	}
-	//
 	public Message receive(Message throwItDownTheHole)
 	{
 		Message pre = rb.receive(throwItDownTheHole);
@@ -82,7 +81,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		}
 		return null;
 	}
-
+	//just delivering to chat client
 	public void deliver()
 	{
 		boolean more = true;
@@ -94,7 +93,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 				if(s.getVectorClock().isBefore(this.time))
 				{// if there is the message that has the earlier vector clock than the process
 					pendingMessage.remove(s);
-					client.receive(s);// deliver that shit
+					client.receive(s);// deliver that sh@t
 					this.time.incrementVectorClock(s.getSender().getID());//update the clock only upon successful delivery
 					more = true;// might be more comrades
 				}
