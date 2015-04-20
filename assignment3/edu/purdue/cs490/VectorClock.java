@@ -17,6 +17,8 @@ public class VectorClock {
         }
     }
 
+    // 0,0,0
+
     public VectorClock(VectorClock old, String name){
         // create a clock that chronologically follows the old clock
         this.clock = new ConcurrentHashMap<String, Integer>();
@@ -37,6 +39,10 @@ public class VectorClock {
 
     public void set(String name, int time){
         this.clock.put(name,time);
+    }
+
+    public void remove(String name){
+        this.clock.remove(name);
     }
 
     public ConcurrentMap<String, Integer> getClock(){
