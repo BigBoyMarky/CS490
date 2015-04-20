@@ -69,4 +69,7 @@ public class ChatClientMessage implements Message, Serializable
 	{
 		return myVectorClock;
 	}
+	public void setVectorClock(VectorClock v){
+		this.myVectorClock = v;
+	}
 }

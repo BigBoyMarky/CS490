@@ -133,6 +133,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		beb = new BEBroadcaster(myClientObject, this);
 		rb = new ReliableBroadcaster(myClientObject, this);
 		fifo = new FIFOReliableBroadcaster(myClientObject, this);
+		cob = new CausalReliableBroadcaster(myClientObject, this);
 		try
 		{
 			channel.toServer("reg");
