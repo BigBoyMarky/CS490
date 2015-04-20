@@ -25,6 +25,7 @@ public class ClientObject extends Process implements Serializable
 	public ClientObject(ClientObject copy, Socket socket, ObjectInputStream ois, ObjectOutputStream oos)
 	{//for the single-threaded serverside
 		super(copy.getIP(),copy.getPort(),copy.getID());
+		this.username = copy.getName();
 		this.socket = socket;
 		this.ois = ois;
 		this.oos = oos;
@@ -33,6 +34,7 @@ public class ClientObject extends Process implements Serializable
 	public ClientObject(ClientObject copy, Socket socket, ObjectInputStream ois, ObjectOutputStream oos, BufferedReader buffer)
 	{//for the single-threaded serverside
 		super(copy.getIP(),copy.getPort(),copy.getID());
+		this.username = copy.getName();		
 		this.socket = socket;
 		this.ois = ois;
 		this.oos = oos;

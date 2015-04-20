@@ -227,6 +227,7 @@ public class MultiThreadedChatServer
 					socket.setSoTimeout(SOCKET_TIMEOUT);//1ms
 					newClient = new ClientObject(copyOf, socket, reader, writer);
 					String clientName = newClient.getName();
+					System.out.println("CLIENT NAME: " + clientName);
 					if(clientMap.containsKey(clientName))
 					{
 						writer.writeObject("U");//invalid
