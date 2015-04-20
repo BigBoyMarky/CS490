@@ -10,7 +10,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 {
 	private ReliableBroadcaster rb;//Causal is built ontop of RB, therefore once we finish checking, we rbdeliver our msgs
 	private Process self;//this is the ClientObject representation of our own ChatClient
-	private BroadcastReceiver client;//this is the ChatClient ITSELF, which means when we call receive(), it will deliver it straight to the chatclient
+	private BroadcastReceiver client; //this is the ChatClient ITSELF, which means when we call receive(), it will deliver it straight to the chatclient
 	private VectorClock time;//the VC is initiailized when Causal is initialized and set to 0
 	private ConcurrentSkipListSet<ChatClientMessage> pendingMessage;//skip list set of all pending messages
 
@@ -90,8 +90,8 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 				if(s.getVectorClock().isBefore(this.time))
 				{// if there is the message that has the earlier vector clock than the process
 					pendingMessage.remove(s);
-					receiver.receive(s);	// deliver that shit
-					this.time.setVectorClock(new VectorClock(s.getVectorClock(), this.time, self.getID()));// update the clock only upon successful delivery
+					client.receive(s);	// deliver that shit
+					this.time = new VectorClock(s.getVectorClock(), this.time, self.getID());// update the clock only upon successful delivery
 					more = true; // might be more comrades
 
 				}
