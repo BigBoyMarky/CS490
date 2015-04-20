@@ -236,7 +236,7 @@ public class MultiThreadedChatServer
 					}
 					else
 					{
-						writer.writeObject(Integer.toString(id++));//is valid therefore id
+						writer.writeObject(Long.toString(id++));//is valid therefore id
 						writer.flush();
 						clientMap.put(clientName,newClient);
 						keyList.add(clientName);

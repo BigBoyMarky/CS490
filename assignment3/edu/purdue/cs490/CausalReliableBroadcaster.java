@@ -41,7 +41,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	public void addMember(Process member)
 	{
 		//when you add a new Process, you'll have to update the VectorClock
-		time.set(member.getID(),member.getVectorClock().getTime(member.getID()));
+		time.set(member.getID(),((ClientObject)member).getVectorClock().getTime(member.getID()));
 	}
 	public void removeMember(Process member)
 	{

@@ -60,7 +60,7 @@ public class ClientObject extends Process implements Serializable
 	}
 	public void setName(String newName)
 	{
-		ID = newName;
+		username = newName;
 	}
 	public boolean getInitState()
 	{

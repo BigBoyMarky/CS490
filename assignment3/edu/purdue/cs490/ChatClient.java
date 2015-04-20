@@ -126,7 +126,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 				System.out.printf("Connection refused. Are you sure you entered the correct information? Please try again!\n");
 		}
 		//while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
-		myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(), clientPort, listOfUsers);
+		myClientObject = new ClientObject(name, id, InetAddress.getLocalHost().getHostAddress(), clientPort, listOfUsers);
 		beb = new BEBroadcaster(myClientObject, this);
 		rb = new ReliableBroadcaster(myClientObject, this);
 		fifo = new FIFOReliableBroadcaster(myClientObject, this);
@@ -449,7 +449,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	public void receive(Message m)
 	{
 		//prints out message
-		System.out.printf("%s:%s\n",m.getSender().getName(),m.getMessageContents());
+		System.out.printf("%s:%s\n",((ClientObject)m.getSender()).getName(),m.getMessageContents());
 	}
 	public ConcurrentHashMap<String, ClientObject> getHashmap()
 	{
