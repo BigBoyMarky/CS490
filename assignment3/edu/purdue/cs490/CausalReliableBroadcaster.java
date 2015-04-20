@@ -29,7 +29,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	public void crbroadcast(Message m)
 	{
 		rb.rbroadcast(m);
-		((ChatClientMessage)m).getVectorClock().incrementVectorClock(m.getID());
+		((ChatClientMessage)m).getVectorClock().incrementVectorClock(self.getID());
 	}
 	public Message receive(Message throwItDownTheHole)
 	{
@@ -44,10 +44,10 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 				if(self.getVectorClock().isBefore(((ChatClientMessage) m).getVectorClock()))
 				{
 					//it means it's causally in order, so we just deliver it to rb
-					m.setType(((ChatClientMessage)m).getType()-1);
+					((ChatClientMessage)m).setType(((ChatClientMessage)m).getType()-1);
 					rb.receive(m);//then rb will deliver to beb, then print to client, but we also guarantee the rb and beb guarantees
 					//update vector clock based on sender
-					self.getVectorClock().incrementVectorClock(m.getID());
+					self.getVectorClock().incrementVectorClock(self.getID());
 					//check the set to see if any are in order now
 			        Set s = pendingSet.keySet();
         			Iterator i = s.iterator();
@@ -55,7 +55,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 			        {
 			        	if(pendingSet.get((String)i.next()).isBefore(self.getVectorClock()))
 			        	{
-							m.setType(((ChatClientMessage)m).getType()-1);
+							((ChatClientMessage)m).setType(((ChatClientMessage)m).getType()-1);
 							rb.receive(m);//then rb will deliver to beb, then print to client, but we also guarantee the rb and beb guarantees			        	
 			        	}
 			        }
@@ -64,7 +64,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 				else
 				{
 					//we put it into a set and return null
-					pendingSet.put(m.getID(),((ChatClientMessage)m).getVectorClock());
+					pendingSet.put(self.getID(),((ChatClientMessage)m).getVectorClock());
 					return null;
 				}
 			}

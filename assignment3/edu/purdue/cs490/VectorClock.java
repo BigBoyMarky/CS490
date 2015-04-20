@@ -21,7 +21,6 @@ public class VectorClock implements Serializable
             clock.put((String)pair.getKey(),0);
         }
     }
-
     // 0,0,0
 
     public VectorClock(VectorClock old, String name){
@@ -85,6 +84,7 @@ public class VectorClock implements Serializable
     {
         //increments it by the protocol which is, it's ID along with
         this.set(sender,this.getTime(sender)+1);
+        return null;
     }
 
 /*
@@ -101,7 +101,7 @@ public class VectorClock implements Serializable
     public static void main(String[] args){
 
         //Unit test
-
+/*
         ArrayList<String> a = new ArrayList<String>();
         a.add("A");
         a.add("B");
@@ -128,7 +128,8 @@ public class VectorClock implements Serializable
 
         for(String s: v5.getClock().keySet()){
             System.out.println(s + " " + v5.getTime(s));
-        }
+        }*/
+
 
     }
 }
