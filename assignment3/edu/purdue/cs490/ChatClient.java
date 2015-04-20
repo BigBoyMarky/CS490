@@ -50,7 +50,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private static int SOCKET_TIMEOUT = 100;//socket SOCKET_TIMEOUT
 	private String host;
 	private String name;//name of the Client
-	private String id;
+	private long id;
 	private int serverPort;//port of the server it's going to connect to
 	private int clientPort;//port of the client's ServerSocket for chatting with other clients
 	private String ip;//ip of the client
@@ -138,8 +138,11 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		{
 			channel.toServer("reg");
 			channel.toServer(myClientObject);
-			String verification = (String) channel.fromServer();
-			while(verification.equals("U"))
+			//String verification = (String) channel.fromServer();
+			//long verification = (long) channel.fromServer();
+			String uuu = (String) channel.fromServer();
+			//while(verification == -1)
+			while(uuu.equals("U"))
 			{
 				System.out.println("Registration failed because you have the same name as another user");
 				System.out.println("Enter your username again!");
@@ -148,9 +151,13 @@ public class ChatClient implements Runnable, BroadcastReceiver
 				channel.initServer(host,serverPort);
 				channel.toServer("reg");
 				channel.toServer(myClientObject);
-				verification = (String)channel.fromServer();
+				//verification = (long)channel.fromServer();
+				uuu = (String)channel.fromServer();
+				System.out.println(uuu);
 			}
-			id = verification;
+			System.out.println(uuu);
+			id = Long.valueOf(uuu);
+			System.out.print("Your ID = " + id + "\n");
 			new Thread(this).start();
 			System.out.println("Verified!");
 			displayCommands();

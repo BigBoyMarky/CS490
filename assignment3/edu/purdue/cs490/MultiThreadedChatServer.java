@@ -21,6 +21,7 @@ public class MultiThreadedChatServer
 	volatile private ArrayList<String> keyList = new ArrayList<String>();
 	volatile private ConcurrentHashMap<String,ClientObject> clientMap = new ConcurrentHashMap<String,ClientObject>();//hashmap used so we can check if there is a duplicate name easily
 	private long currentTime;
+	volatile private long id = 0;
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -235,8 +236,9 @@ public class MultiThreadedChatServer
 					}
 					else
 					{
-						writer.writeObject(Integer.toString((keyList.size()+1)));//is valid therefore id
+						writer.writeObject(Long.toString(id++));//is valid therefore id
 						writer.flush();
+						System.out.printf("Assigned ID:%d",id);
 						clientMap.put(clientName,newClient);
 						keyList.add(clientName);
 						newClient.updateHeart(System.currentTimeMillis());//for reg purposes
