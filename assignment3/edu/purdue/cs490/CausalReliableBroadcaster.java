@@ -79,10 +79,10 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		while(more){
 			more = false;
 			for(ChatClientMessage s: pendingMessage){ 
-				if(this.time.isBefore(s.getVectorClock())){   // if there is the message that has the earlier vector clock than the process
+				if(s.getVectorClock().isBefore(this.time)){   // if there is the message that has the earlier vector clock than the process
 					pendingMessage.remove(s);
 					receiver.receive(s);	// deliver that shit
-					this.time.incrementVectorClock(s.getSender().getID()); // update the clock
+					this.time.incrementVectorClock(s.getSender().getID()); // update the clock only upon successful delivery
 					more = true; // might be more comrades
 				}
 			}
