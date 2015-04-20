@@ -1,17 +1,20 @@
 package edu.purdue.cs490
-import java.util.concurrent.ConcurrentHashmap;
+//import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class CausalReliableBroadcaster implements CausalReliableBroadcast
 {
 	private ReliableBroadcaster rb;
 	private Process self;
 	private BroadcastReceiver receiver;
-	
+	//private ConcurrentHashMap<String, VectorClock> pendingSet;	
+	private ConcurrentSkipListSet<String, VectorClock> pendingSet;
 	public void init(Process currentProcess, BroadcastReceiver br)
 	{
 		self = currentProcess;
 		receiver = br;
 		rb = new ReliableBroadcaster(self, receiver);
+		pendingSet = new ConcurrentSkipListSet<String, VectorClock>();			
 	}
 	public void addMember(Process member)
 	{
@@ -23,22 +26,52 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	}
 	public void crbroadcast(Message m)
 	{
-		//rbroadcast
 		rb.rbroadcast(m);
-		m.incrementVectorClock();
-		//update vector clock by incrementing this process by 1
+		((ChatClientMessage)m).getVectorClock().incrementVectorClock(m.getID());
 	}
-	public Message receive(Message pre)
+	public Message receive(Message throwItDownTheHole)
 	{
-		Message m = rb.receive(pre);
-		if(m==null)
+		Message m = rb.receive(throwItDownTheHole);
+		if(m==null)//if null it means the message was of a different type therefore it was delivered and we don't need to do anything except tell anything above us that it has already been delivered
 				return null;
 		else
-				
-		return m;
+		{
+			if(m.getType() == 3)//if type is Causal, then we do it
+			{
+				//insert algorithm here
+				if(self.getVectorClock().isBefore(((ChatClientMessage) m).getVectorClock()))
+				{
+					//it means it's causally in order, so we just deliver it to rb
+					m.setType(m.getType()-1);
+					rb.receive(m);//then rb will deliver to beb, then print to client, but we also guarantee the rb and beb guarantees
+					//update vector clock based on sender
+					self.getVectorClock().incrementVectorClock(m.getID());
+					//check the set to see if any are in order now
+			        Set s = pendingSet.keySet();
+        			Iterator i = s.iterator();
+			        while (i.hasNext()) 
+			        {
+			        	if(pendingSet.get((String)i.next()).isBefore(self.getVectorClock()))
+			        	{
+							m.setType(m.getType()-1);
+							rb.receive(m);//then rb will deliver to beb, then print to client, but we also guarantee the rb and beb guarantees			        	
+			        	}
+			        }
+					return null;
+				}
+				else
+				{
+					//we put it into a set and return null
+					pendingSet.put(m.getID(),m.getVectorClock());
+					return null;
+				}
+			}
+			else
+			{
+				return m;//pass it up to whoever needs the message!
+			}
+		}
 	}
-
-
 		//rbdeliver
 		//check if message VC preceds local VC by checking if the vector clock is equal at the origin's index
 		//if yes, deliver to client

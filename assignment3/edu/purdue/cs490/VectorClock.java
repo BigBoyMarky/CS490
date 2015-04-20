@@ -1,20 +1,23 @@
 import java.util.List;
 import java.util.ArrayList;
 import java.io.Serializable;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
 
 public class VectorClock implements Serializable
 {
     private ConcurrentHashMap<String, Integer> clock;
 
-    public VectorClock(ArrayList<String> processes){
+    public VectorClock(ConcurrentMap<String, ClientObject> listOfUsers){
         // create an empty clock with those process names
-        this.clock = new ConcurrentHashMap<String, Integer>();
-        for(String name : processes)
-            clock.put(name, 0);
+        Iterator availableUsers = listOfUsers.entrySet().iterator();
+        while(availableUsers.hasNext())
+        {
+            Map.Entry pair = (Map.Entry)availableUsers.next();
+            clock.put(pair.getKey(),0);
+        }
     }
 
     // 0,0,0
@@ -76,6 +79,12 @@ public class VectorClock implements Serializable
         }
         return ret;
     }
+    public VectorClock incrementVectorClock(String sender)
+    {
+        //increments it by the protocol which is, it's ID along with
+        this.set(sender,this.getTime(sender)+1);
+    }
+
 /*
 	public boolean compare(VectorClock comparedClock)
 	{

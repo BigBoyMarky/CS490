@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.BufferedReader;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
 public class ClientObject extends Process implements Serializable
 {
 	volatile private long heartbeat;
@@ -12,10 +13,12 @@ public class ClientObject extends Process implements Serializable
 	private transient ObjectInputStream ois;
 	private transient ObjectOutputStream oos;
 	private transient BufferedReader buffer;
+	private VectorClock myVectorClock;
 	private boolean isSocketInit = false;
-	public ClientObject(String username, String ipAddress, int port)
+	public ClientObject(String username, String ipAddress, int port, ConcurrentHashMap<String,ClientObject> listOfPeople )
 	{
 		super(ipAddress, port, username);
+		myVectorClock = new VectorClock(listOfPeople);
 	}
 	public ClientObject(ClientObject copy, Socket socket, ObjectInputStream ois, ObjectOutputStream oos)
 	{//for the single-threaded serverside
@@ -64,5 +67,9 @@ public class ClientObject extends Process implements Serializable
 	public void flipInitState()
 	{
 		isSocketInit = !isSocketInit;
+	}
+	public VectorClock getVectorClock()
+	{
+		return myVectorClock;
 	}
 }

@@ -37,6 +37,10 @@ public class ChatClientMessage implements Message, Serializable
 	{
 		return type;
 	}
+	public void setType(int newType)
+	{
+		this.type = newType;
+	}
 	public int getMessageNumber()
 	{
 		return messageNumber;
@@ -64,10 +68,5 @@ public class ChatClientMessage implements Message, Serializable
 	public VectorClock getVectorClock()
 	{
 		return myVectorClock;
-	}
-	public VectorClock incrementVectorClock()
-	{
-		//increments it by the protocol which is, it's ID along with
-		myVectorClock.set(sender.getID(),myVectorClock.getTime(sender.getID())+1);
 	}
 }
