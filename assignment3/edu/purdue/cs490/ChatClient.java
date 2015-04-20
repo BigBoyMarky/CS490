@@ -81,7 +81,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	{
 		try
 		{
-			ChatClient myChatClient = new ChatClient(/*"-1",-1,"-1"*/);//because of the fucking superclass's constructor requirements			
+			ChatClient myChatClient = new ChatClient(/*"-1",-1,"-1"*/);//because of the fucking superclass's constructor requirements
 			myChatClient.register();
 		}
 		catch(Exception e)
@@ -150,7 +150,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 				verification = (String)channel.fromServer();
 			}
 			id = verification;
-			new Thread(this).start();		
+			new Thread(this).start();
 			System.out.println("Verified!");
 			displayCommands();
 			new Thread(new Runnable() {
@@ -176,7 +176,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 				}
 
 			}).start();
-			
+
 			this.heartbeat();
 		}
 		catch(SocketException e)
@@ -230,7 +230,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 					}
 				}
 				*/
-				System.out.printf("But I'd recommend restarting this program and finding a new, active server\n");				
+				System.out.printf("But I'd recommend restarting this program and finding a new, active server\n");
 			}
 		}
 		catch(Exception e)
@@ -250,14 +250,14 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	public void get()
 	{
 		try
-		{		
-			String user;			
+		{
+			String user;
 			channel.toServer("get");
 			System.out.println("Current people online:");
 			//needs InvalidProtoclException
 			listOfUsers = (ConcurrentHashMap<String, ClientObject>)channel.fromServer();
 			channel.updateHashmap(listOfUsers);
-		}		
+		}
 		catch(SocketException e)
 		{
 			if(firstCrashReport)
@@ -266,7 +266,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 				System.out.printf("I'd recommend restarting this program and finding a new, active server\n");
 				firstCrashReport = false;
 			}
-		}		
+		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
@@ -323,14 +323,14 @@ public class ChatClient implements Runnable, BroadcastReceiver
 					try
 					{
 						channel.initClient(currentInterlocuter);//stuck in here
-						currentInterlocuter.flipInitState();//what happens if initClient fails?						
+						currentInterlocuter.flipInitState();//what happens if initClient fails?
 					}
 					catch(ConnectException e)
 					{
 						System.out.printf("Looks like the client is offline! Unable to invite %s to chat!\n",currentInterlocuter.getID());
 					}
 				}
-				System.out.printf("Chatting with %s\n",message);				
+				System.out.printf("Chatting with %s\n",message);
 			}
 			else
 			{
@@ -396,16 +396,16 @@ public class ChatClient implements Runnable, BroadcastReceiver
 					if(listOfUsers.containsValue(currentInterlocuter))
 					{
 						ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,0);
-						channel.whisper(currentInterlocuter,myM);						
+						channel.whisper(currentInterlocuter,myM);
 					}
 					else
 					{
 						System.out.printf("%s is offline! Look for someone new to chat with\n",currentInterlocuter.getID());
-						currentInterlocuter = null;//turns to null for you!						
+						currentInterlocuter = null;//turns to null for you!
 					}
 				}
 				else
-					System.out.println("Unrecognized command! Enter \'\\help\' for a list of commands.");				
+					System.out.println("Unrecognized command! Enter \'\\help\' for a list of commands.");
 			}
 			catch(SocketException e)
 			{
@@ -426,10 +426,10 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			{
 				if(message.length() > command.length())
 				{
-					message = message.substring(command.length()+1,message.length());//keeps rest of message				
+					message = message.substring(command.length()+1,message.length());//keeps rest of message
 				}
 				else
-					message = "";				
+					message = "";
 			}
 			executeCommand(command,message);
 		}
@@ -454,7 +454,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	}
 	public ArrayList<String> getNames()
 	{
-		ArrayList<String> listOfNames;
+		ArrayList<String> listOfNames = new ArrayList<String>();
 		Iterator availableUsers = listOfUsers.entrySet().iterator();
 		int counter = 1;
 		while(availableUsers.hasNext())
@@ -471,19 +471,23 @@ public class ChatClient implements Runnable, BroadcastReceiver
 
 	public void tenThousandsBroadcast(int type)
 	{
-		if(type == 2)
-		{
-			Message m = new ChatClientMessage(myClientObject, Integer.toString(), type);
-			cob.crbroadcast(m);
-		}
+
 		for(int i=0;i<10000;i++)
 		{
-			Message m = new ChatClientMessage(myClientObject, i, Integer.toString(i), type);
-			if(type==1){
-				rb.rbroadcast(m);
+
+			if(type == 2)
+			{
+				Message m = new ChatClientMessage(myClientObject, i, Integer.toString(i), type);
+				cob.crbroadcast(m);
 			}
-			else{
-				fifo.FIFOBroadcast(m);
+			else {
+				Message m = new ChatClientMessage(myClientObject, Integer.toString(i), type, new VectorClock(listOfUsers));
+				if(type==1){
+					rb.rbroadcast(m);
+				}
+				else{
+					fifo.FIFOBroadcast(m);
+				}
 			}
 		}
 	}
