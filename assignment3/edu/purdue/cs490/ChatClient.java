@@ -63,14 +63,14 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private long heartbeat = 0;
 	private ClientObject myClientObject;//object representing this specific client for server purposes
 	private ConcurrentHashMap<String,ClientObject> listOfUsers = new ConcurrentHashMap<String,ClientObject>();//hashmap of users for connecting to others
-	private String[] commands = {"\\hey","\\switch","\\list","\\rb","\\help", "\\fifo", "\\beb", "\\OVER9000", "\\print"};//list of available commands
+	private String[] commands = {"\\hey","\\switch","\\list","\\rb","\\help", "\\fifo", "\\beb", "\\OVER9000", "\\print", "\\causal"};//list of available commands
 	private ClientObject currentInterlocuter;
 	private int numInterlocuters = 0;
 	private boolean firstCrashReport = true;
 	private ReliableBroadcaster rb;
 	private FIFOReliableBroadcaster fifo;
 	private BEBroadcaster beb;
-	private CausalReliableBroadcaster cob;
+	private CausalReliableBroadcaster crb;
 	private int messageCounter = 0;//for fun
 	private int broadcastCounter = 0;//only useful one for our purposes
 	private VectorClock myVectorClock;
@@ -133,7 +133,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		beb = new BEBroadcaster(myClientObject, this);
 		rb = new ReliableBroadcaster(myClientObject, this);
 		fifo = new FIFOReliableBroadcaster(myClientObject, this);
-		cob = new CausalReliableBroadcaster(myClientObject, this);
+		crb = new CausalReliableBroadcaster(myClientObject, this);
 		try
 		{
 			channel.toServer("reg");
@@ -358,7 +358,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		}
 		if(command.equals(commands[3]))
 		{//everybody
-			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,1);
+			ChatClientMessage myM = new ChatClientMessage(myClientObject,message);
 			rb.rbroadcast(myM);
 			//rb.broadcast(message);
 			//rb.broadcast attaches type 1 to ChatClientMessage, if receiver receives it, then saves one
@@ -370,12 +370,12 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		}
 		if(command.equals(commands[5]))
 		{//fifo
-			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,2);
+			ChatClientMessage myM = new ChatClientMessage(myClientObject,message);
 			fifo.FIFOBroadcast(myM);
 		}
 		if(command.equals(commands[6]))
 		{
-			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,0);
+			ChatClientMessage myM = new ChatClientMessage(myClientObject,message);
 			beb.BEBroadcast(myM);
 		}
 		//SECRET COMMANDS FOR MASTER USERS ONLY :D
@@ -388,6 +388,11 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			//for emergency cases if messages were lost
 			channel.forcePrint();
 		}
+		if(commands.equals(commands[9]))
+		{
+			ChatClientMessage myM = new ChatClientMessage(myClientObject,message);			
+			crb.crbroadcast(myM);
+		}
 		if(command.equals(""))
 		{//normal typing
 			try
@@ -396,7 +401,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 				{
 					if(listOfUsers.containsValue(currentInterlocuter))
 					{
-						ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,0);
+						ChatClientMessage myM = new ChatClientMessage(myClientObject,message);
 						channel.whisper(currentInterlocuter,myM);
 					}
 					else
@@ -478,11 +483,11 @@ public class ChatClient implements Runnable, BroadcastReceiver
 
 			if(type == 2)
 			{
-				Message m = new ChatClientMessage(myClientObject, i, Integer.toString(i), type);
-				cob.crbroadcast(m);
+				Message m = new ChatClientMessage(myClientObject, Integer.toString(i));
+				crb.crbroadcast(m);
 			}
 			else {
-				Message m = new ChatClientMessage(myClientObject, Integer.toString(i), type, new VectorClock(listOfUsers));
+				Message m = new ChatClientMessage(myClientObject, Integer.toString(i));
 				if(type==1){
 					rb.rbroadcast(m);
 				}
@@ -502,6 +507,6 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	}
 	public CausalReliableBroadcaster getCO()
 	{
-		return cob;
+		return crb;
 	}
 }

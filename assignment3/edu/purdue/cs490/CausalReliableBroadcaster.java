@@ -8,6 +8,7 @@ import java.util.Comparator;
 
 public class CausalReliableBroadcaster implements CausalReliableBroadcast
 {
+	private final int CAUSAL_ID = 3;
 	private ReliableBroadcaster rb;//Causal is built ontop of RB, therefore once we finish checking, we rbdeliver our msgs
 	private Process self;//this is the ClientObject representation of our own ChatClient
 	private BroadcastReceiver client;//this is the ChatClient ITSELF, which means when we call receive(), it will deliver it straight to the chatclient
@@ -52,12 +53,13 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	public void crbroadcast(Message m)
 	{
 		m.setSender(self);// set sender 
-		((ChatClientMessage)m).setType(3);
+		((ChatClientMessage)m).setType(CAUSAL_ID);
 		((ChatClientMessage)m).setVectorClock(this.time); // set the clock
 		client.receive(m); //auto delivery
 		rb.rbroadcast(m);
 		this.time.incrementVectorClock(self.getID());// increment the clock (coz auto delivery)		
 	}
+	//
 	public Message receive(Message throwItDownTheHole)
 	{
 		Message pre = rb.receive(throwItDownTheHole);

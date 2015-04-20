@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 
 public class BEBroadcaster
 {
+	private final int BEBBROADCAST_ID = 0;
 	private Process self;
 	private BroadcastReceiver client;
 	private ChannelInterface channel;
@@ -21,7 +22,7 @@ public class BEBroadcaster
 	}
 	public void BEBroadcast(Message message)//sending to everyone = broadcast, so just multicasting to everyone, including self :P
 	{
-		//ChatClientMessage message = new ChatClientMessage(self, type, m, broadcastCount);//converts String to message
+		message.setType(BEBBROADCAST_ID);
 		ConcurrentHashMap<String,ClientObject> listOfUsers = ((ChatClient) client).getHashmap();
 		Iterator availableUsers = listOfUsers.entrySet().iterator();//iterates through hashmap
 		while(availableUsers.hasNext())

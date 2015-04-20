@@ -8,4 +8,9 @@ public interface Message
 	void setMessageContents(String contents);
 	Process getSender();
 	void setSender(Process sender);
+	//our own little things
+	int getType();
+	void setType(int type);
+	VectorClock getVectorClock();
+	void setVectorClock(VectorClock vc);
 }

@@ -16,7 +16,12 @@ public class ChatClientMessage implements Message, Serializable
 	//if type == 2
 		//do something
 	//if type == 3
-		//initiailize VectorClock	
+		//initiailize VectorClock
+	public ChatClientMessage(Process sender, String contents)
+	{
+		this.setSender(sender);
+		this.setMessageContents(contents);
+	}
 	public ChatClientMessage(Process sender, int messageNumber, String contents, int type)
 	{
 		this.setSender(sender);
@@ -69,7 +74,7 @@ public class ChatClientMessage implements Message, Serializable
 	{
 		return myVectorClock;
 	}
-	public void setVectorClock(VectorClock v){
-		this.myVectorClock = v;
+	public void setVectorClock(VectorClock vc){
+		this.myVectorClock = vc;
 	}
 }
