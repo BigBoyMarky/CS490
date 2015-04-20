@@ -19,6 +19,7 @@ import java.net.SocketTimeoutException;
 import java.net.ServerSocket;
 import java.util.Hashtable;
 import java.io.InterruptedIOException;
+import java.util.ArrayList;
 
 	/**************************************************************************************************
 	*									SPECIFICATIONS FOR SERVER SIDE								*
@@ -69,7 +70,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private ReliableBroadcaster rb;
 	private FIFOReliableBroadcaster fifo;
 	private BEBroadcaster beb;
-	private CausalOrderBroadcaster cob;
+	private CausalReliableBroadcaster cob;
 	private int messageCounter = 0;//for fun
 	private int broadcastCounter = 0;//only useful one for our purposes
 	private VectorClock myVectorClock;
@@ -128,7 +129,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 				System.out.printf("Connection refused. Are you sure you entered the correct information? Please try again!\n");
 		}
 		//while(clientPort == -1){}//waits for serverSocket to be initialized. Once it's initialized, clientPort will have a value
-		myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(), clientPort);
+		myClientObject = new ClientObject(name, InetAddress.getLocalHost().getHostAddress(), clientPort, listOfUsers);
 		beb = new BEBroadcaster(myClientObject, this);
 		rb = new ReliableBroadcaster(myClientObject, this);
 		fifo = new FIFOReliableBroadcaster(myClientObject, this);
@@ -459,7 +460,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		while(availableUsers.hasNext())
 		{
 			Map.Entry pair = (Map.Entry)availableUsers.next();
-			listOfNames.add(pair.getKey());
+			listOfNames.add(pair.getKey().toString());
 		}
 		return listOfNames;
 	}
@@ -472,8 +473,8 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	{
 		if(type == 2)
 		{
-			Message m = new ChatClientMessage(myClientObject, Integer.toString(i),)
-			cob.cobroadcast(m);
+			Message m = new ChatClientMessage(myClientObject, Integer.toString(), type);
+			cob.crbroadcast(m);
 		}
 		for(int i=0;i<10000;i++)
 		{
@@ -494,7 +495,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	{
 		return fifo;
 	}
-	public CausalOrderBroadcaster getCO()
+	public CausalReliableBroadcaster getCO()
 	{
 		return cob;
 	}

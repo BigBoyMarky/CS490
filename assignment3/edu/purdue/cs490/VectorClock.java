@@ -1,3 +1,4 @@
+package edu.purdue.cs490;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.Serializable;
@@ -5,18 +6,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 public class VectorClock implements Serializable
 {
     private ConcurrentHashMap<String, Integer> clock;
 
-    public VectorClock(ConcurrentMap<String, ClientObject> listOfUsers){
+    public VectorClock(ConcurrentHashMap<String, ClientObject> listOfUsers){
         // create an empty clock with those process names
         Iterator availableUsers = listOfUsers.entrySet().iterator();
         while(availableUsers.hasNext())
         {
             Map.Entry pair = (Map.Entry)availableUsers.next();
-            clock.put(pair.getKey(),0);
+            clock.put((String)pair.getKey(),0);
         }
     }
 
@@ -48,7 +50,7 @@ public class VectorClock implements Serializable
         this.clock.remove(name);
     }
 
-    public ConcurrentMap<String, Integer> getClock(){
+    public ConcurrentHashMap<String, Integer> getClock(){
         return this.clock;
     }
 

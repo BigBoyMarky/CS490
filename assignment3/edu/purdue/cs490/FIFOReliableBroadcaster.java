@@ -87,7 +87,8 @@ public class FIFOReliableBroadcaster implements FIFOReliableBroadcast{
 				}
 			}
 
-			receiver.receive(m);
+			// receiver.receive(m);
+			rblayer.receive(m);
 			return m;
 		}
 		else

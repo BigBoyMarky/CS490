@@ -66,7 +66,7 @@ public class ReliableBroadcaster implements ReliableBroadcast {
 			receivedMessage.add(m);
 
 		if(((ChatClientMessage)m).getType()==1){
-			m.setType(m.getType()-1);
+			m.setType(((ChatClientMessage)m).getType()-1);
 			beblayer.receive(m);
 			return null;
 		}

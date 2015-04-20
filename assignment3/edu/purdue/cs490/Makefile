@@ -27,7 +27,9 @@ ChatClient.class: ChatClient.java
 		BEBroadcaster.java \
 		FIFOReliableBroadcast.java \
 		FIFOReliableBroadcaster.java \
-		VectorClock.java
+		VectorClock.java \
+		CausalReliableBroadcast.java \
+		CausalReliableBroadcaster.java
 
 #FIFOReliableBroadCast.java
 #Caster.class: Caster.java
