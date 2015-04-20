@@ -32,7 +32,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		receiver = br;
 		rb = new ReliableBroadcaster(self, receiver);
 		pendingMessage = new ConcurrentSkipListSet<ChatClientMessage>();
-		time = ((ClientObject)self).getVectorClock();
+		time = ((ClientObject)self).getVectorClock(); // assuming it's initialize in the self shit already. 
 	}
 	public void addMember(Process member)
 	{
@@ -47,6 +47,8 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		m.setSender(self);	// set sender 
 		((ChatClientMessage)m).setType(3);
 		((ChatClientMessage)m).setVectorClock(this.time); // set the clock
+		receiver.receive(m); // auto delivery 
+		this.time.incrementVectorClock(self.getID()); // increment the clock (coz auto delivery)
 		rb.rbroadcast(m);
 	}
 	public Message receive(Message throwItDownTheHole)
