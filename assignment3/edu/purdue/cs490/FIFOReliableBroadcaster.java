@@ -7,7 +7,7 @@ import java.util.Comparator;
 public class FIFOReliableBroadcaster implements FIFOReliableBroadcast{
 	
 	private Process currentProcess;
-	private BroadcastReceiver receiver;
+	private BroadcastReceiver client;
 	private ConcurrentSkipListSet<Message> pending;
 	private ConcurrentSkipListSet<Process> members;
 	private ReliableBroadcaster rblayer;
@@ -37,7 +37,7 @@ public class FIFOReliableBroadcaster implements FIFOReliableBroadcast{
 	
 	public void init(Process currentProcess, BroadcastReceiver br){
 		this.currentProcess = currentProcess;
-		this.receiver = br;
+		this.client = br;
 		rblayer = new ReliableBroadcaster(currentProcess, br);
 		pending = new ConcurrentSkipListSet<Message>(new MessageComparator());
 		members = new ConcurrentSkipListSet<Process>(new ProcessComparator());
@@ -76,7 +76,6 @@ public class FIFOReliableBroadcaster implements FIFOReliableBroadcast{
 		}
 		
 		if( delivered.get(sender)==m.getMessageNumber() ){
-			
 			delivered.put(sender, delivered.get(sender)+1);
 			pending.remove(m);
 			
@@ -91,14 +90,13 @@ public class FIFOReliableBroadcaster implements FIFOReliableBroadcast{
 						delivered.put(sender, delivered.get(sender)+1);
 					}
 				}
-			}
-			
+			}	
 			return m;
 		}
-		else{
+		else
+		{
 			pending.add(m);
 			return null;
 		}
-		
 	}
 }

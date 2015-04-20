@@ -69,8 +69,10 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private ReliableBroadcaster rb;
 	private FIFOReliableBroadcaster fifo;
 	private BEBroadcaster beb;
+	private CausalOrderBroadcaster cob;
 	private int messageCounter = 0;//for fun
 	private int broadcastCounter = 0;//only useful one for our purposes
+	private VectorClock myVectorClock;
 	/**************************************************************************************************
 	*											MAIN METHOD											*
 	**************************************************************************************************/
@@ -449,6 +451,18 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	{
 		return listOfUsers;
 	}
+	public ArrayList<String> getNames()
+	{
+		ArrayList<String> listOfNames;
+		Iterator availableUsers = listOfUsers.entrySet().iterator();
+		int counter = 1;
+		while(availableUsers.hasNext())
+		{
+			Map.Entry pair = (Map.Entry)availableUsers.next();
+			listOfNames.add(pair.getKey());
+		}
+		return listOfNames;
+	}
 	public void setInterlocuter(ClientObject interlocuter)
 	{
 		currentInterlocuter = interlocuter;
@@ -456,6 +470,11 @@ public class ChatClient implements Runnable, BroadcastReceiver
 
 	public void tenThousandsBroadcast(int type)
 	{
+		if(type == 2)
+		{
+			Message m = new ChatClientMessage(myClientObject, Integer.toString(i),)
+			cob.cobroadcast(m);
+		}
 		for(int i=0;i<10000;i++)
 		{
 			Message m = new ChatClientMessage(myClientObject, i, Integer.toString(i), type);
@@ -467,7 +486,6 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			}
 		}
 	}
-
 	public ChannelInterface getChannel()
 	{
 		return channel;
@@ -475,5 +493,9 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	public FIFOReliableBroadcaster getFIFO()
 	{
 		return fifo;
+	}
+	public CausalOrderBroadcaster getCO()
+	{
+		return cob;
 	}
 }

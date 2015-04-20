@@ -65,5 +65,4 @@ public class ClientObject extends Process implements Serializable
 	{
 		isSocketInit = !isSocketInit;
 	}
-
 }
