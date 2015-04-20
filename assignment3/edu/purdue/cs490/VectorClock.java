@@ -26,6 +26,15 @@ public class VectorClock implements Serializable
         this.clock.put(name, this.clock.get(name)+1);
     }
 
+    public VectorClock(VectorClock v1, VectorClock v2, String name){
+        this.clock = new ConcurrentHashMap<String, Integer>();
+        Set<String> allkeys = union(v1.getClock().keySet(), v2.getClock().keySet());
+        for(String s : allkeys){
+            this.clock.put(s, Math.max(v1.getTime(s),v2.getTime(s)));
+        }
+        this.clock.put(name, this.clock.get(name)+1);
+    }
+
     public void set(String name, int time){
         this.clock.put(name,time);
     }
@@ -89,17 +98,20 @@ public class VectorClock implements Serializable
         VectorClock v2 = new VectorClock(b);
 
         VectorClock v15 = new VectorClock(v1, "C");
-        System.out.println(v15.isBefore(v2));
+        System.out.println(v2.isBefore(v15));
+
+        VectorClock v4 = new VectorClock(v15, v2, "A");
+        VectorClock v5 = new VectorClock(v15, v4, "C");
 
 
-        for(String s: v15.getClock().keySet()){
-            System.out.println(s + " " + v15.getTime(s));
+        for(String s: v4.getClock().keySet()){
+            System.out.println(s + " " + v4.getTime(s));
         }
 
         System.out.println();
 
-        for(String s: v2.getClock().keySet()){
-            System.out.println(s + " " + v2.getTime(s));
+        for(String s: v5.getClock().keySet()){
+            System.out.println(s + " " + v5.getTime(s));
         }
 
     }
