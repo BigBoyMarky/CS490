@@ -17,6 +17,8 @@ public class VectorClock implements Serializable
             clock.put(name, 0);
     }
 
+    // 0,0,0
+
     public VectorClock(VectorClock old, String name){
         // create a clock that chronologically follows the old clock
         this.clock = new ConcurrentHashMap<String, Integer>();
@@ -39,8 +41,11 @@ public class VectorClock implements Serializable
         this.clock.put(name,time);
     }
 
-    public ConcurrentMap<String, Integer> getClock()
-    {
+    public void remove(String name){
+        this.clock.remove(name);
+    }
+
+    public ConcurrentMap<String, Integer> getClock(){
         return this.clock;
     }
 
