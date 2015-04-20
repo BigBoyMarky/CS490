@@ -325,7 +325,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 					}
 					catch(ConnectException e)
 					{
-						System.out.printf("Looks like the client is offline! Unable to invite %s to chat!\n",currentInterlocuter.getID());
+						System.out.printf("Looks like the client is offline! Unable to invite %s to chat!\n",currentInterlocuter.getName());
 					}
 				}
 				System.out.printf("Chatting with %s\n",message);
@@ -403,7 +403,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 					}
 					else
 					{
-						System.out.printf("%s is offline! Look for someone new to chat with\n",currentInterlocuter.getID());
+						System.out.printf("%s is offline! Look for someone new to chat with\n",currentInterlocuter.getName());
 						currentInterlocuter = null;//turns to null for you!
 					}
 				}
@@ -412,7 +412,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			}
 			catch(SocketException e)
 			{
-				System.out.printf("%s cannot be reached!\n",currentInterlocuter.getID());
+				System.out.printf("%s cannot be reached!\n",currentInterlocuter.getName());
 			}
 		}
 	}
@@ -449,7 +449,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	public void receive(Message m)
 	{
 		//prints out message
-		System.out.printf("%s:%s\n",m.getSender().getID(),m.getMessageContents());
+		System.out.printf("%s:%s\n",m.getSender().getName(),m.getMessageContents());
 	}
 	public ConcurrentHashMap<String, ClientObject> getHashmap()
 	{

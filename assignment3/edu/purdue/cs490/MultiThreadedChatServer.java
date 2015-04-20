@@ -89,14 +89,14 @@ public class MultiThreadedChatServer
 					catch(IOException e)//exception thrown when reading/writing/closing
 					{
 						System.out.printf("Unable to send clientMap...terminating user\n");
-						clientMap.remove(client.getID());
+						clientMap.remove(client.getName());
 						keyList.remove(client);
 						numClients = keyList.size();
 					}
 					catch(NullPointerException e)
 					{
 						System.out.printf("Unable to send clientMap...terminating user\n");
-						clientMap.remove(client.getID());
+						clientMap.remove(client.getName());
 						keyList.remove(client);
 						numClients = keyList.size();						
 					}
@@ -113,7 +113,7 @@ public class MultiThreadedChatServer
 				if(System.currentTimeMillis()-client.getHeart() > heartbeat_rate)
 				{
 					System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN WORKER THREAD)\n",client);
-					clientMap.remove(client.getID());
+					clientMap.remove(client.getName());
 					keyList.remove(client);
 					numClients = keyList.size();
 				}
@@ -167,8 +167,8 @@ public class MultiThreadedChatServer
 						{
 							if ((System.currentTimeMillis() - currentClient.getHeart()) > heartbeat_rate)
 							{
-								System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN MANAGER THREAD)\n", currentClient.getID());
-								clientMap.remove(currentClient.getID());
+								System.out.printf("Because of lack of heartbeat, user %s has been terminated. (IN MANAGER THREAD)\n", currentClient.getName());
+								clientMap.remove(currentClient.getName());
 								keyList.remove(i);
 								numClients = keyList.size();
 								--i;
@@ -176,8 +176,8 @@ public class MultiThreadedChatServer
 						}
 						catch(SocketException e)
 						{
-							System.out.printf("%s's socket disconnected! S/he will be removed.\n",currentClient.getID());
-							clientMap.remove(currentClient.getID());
+							System.out.printf("%s's socket disconnected! S/he will be removed.\n",currentClient.getName());
+							clientMap.remove(currentClient.getName());
 							keyList.remove(i);
 							numClients = keyList.size();
 							--i;							
@@ -202,7 +202,7 @@ public class MultiThreadedChatServer
 						catch(Exception e)
 						{
 							e.printStackTrace();
-							clientMap.remove(currentClient.getID());
+							clientMap.remove(currentClient.getName());
 							keyList.remove(i);
 							numClients = keyList.size();
 							--i;
@@ -226,7 +226,7 @@ public class MultiThreadedChatServer
 					ClientObject copyOf = (ClientObject)reader.readObject();
 					socket.setSoTimeout(SOCKET_TIMEOUT);//1ms
 					newClient = new ClientObject(copyOf, socket, reader, writer);
-					String clientName = newClient.getID();
+					String clientName = newClient.getName();
 					if(clientMap.containsKey(clientName))
 					{
 						writer.writeObject("U");//invalid

@@ -138,10 +138,10 @@ public class ChannelInterface implements Runnable
 				ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());//waiting for dat flush huh
 				//don't want to send name of guy you're communicating with!
 				socketList.add(clientSocket);
-				nameList.add(interlocuter.getID());
+				nameList.add(interlocuter.getName());
 				oisList.add(ois);
 				oosList.add(oos);
-			}System.out.println(interlocuter.getID());
+			}System.out.println(interlocuter.getName());
 		}
 		catch(ConnectException e)
 		{
@@ -156,11 +156,11 @@ public class ChannelInterface implements Runnable
 	{
 		try
 		{
-			int index = nameList.indexOf(interlocuter.getID());
+			int index = nameList.indexOf(interlocuter.getName());
 			if(index == -1)
 			{
 				this.initClient(interlocuter);
-				index = nameList.indexOf(interlocuter.getID());//initiailizes it
+				index = nameList.indexOf(interlocuter.getName());//initiailizes it
 			}
 			ObjectOutputStream stream = oosList.get(index);
 			oosList.get(index).writeObject(message);
@@ -168,11 +168,11 @@ public class ChannelInterface implements Runnable
 		}
 		catch(ConnectException e)
 		{
-			System.out.printf("%s has disconnected. Try refreshing and seeing if s/he returns!\n", interlocuter.getID());
+			System.out.printf("%s has disconnected. Try refreshing and seeing if s/he returns!\n", interlocuter.getName());
 		}
 		catch(SocketException e)
 		{
-			System.out.printf("Looks like the client is offline! Unable to send message to %s\n", interlocuter.getID());
+			System.out.printf("Looks like the client is offline! Unable to send message to %s\n", interlocuter.getName());
 		}
 		catch(Exception e)
 		{
