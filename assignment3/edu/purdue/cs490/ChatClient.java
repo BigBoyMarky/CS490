@@ -63,7 +63,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private long heartbeat = 0;
 	private ClientObject myClientObject;//object representing this specific client for server purposes
 	private ConcurrentHashMap<String,ClientObject> listOfUsers = new ConcurrentHashMap<String,ClientObject>();//hashmap of users for connecting to others
-	private String[] commands = {"\\hey","\\switch","\\list","\\rb","\\help", "\\fifo", "\\beb", "\\OVER9000", "\\print"};//list of available commands
+	private String[] commands = {"\\hey","\\switch","\\list","\\rb","\\help", "\\fifo", "\\beb", "\\OVER9000", "\\print", "\\causal"};//list of available commands
 	private ClientObject currentInterlocuter;
 	private int numInterlocuters = 0;
 	private boolean firstCrashReport = true;
@@ -304,6 +304,8 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		System.out.println("\\fifo [message] = allow everyone to hear what you want to say in FIFO guaranteed order");
 		System.out.println("\\beb [message] = bebdeliver everyone!");
 		System.out.println("\\help = shows available commands");
+		System.out.println("\\causal [message] = causalbroadcast");
+		System.out.println("\\??????? = ??????");
 	}
 
 	/**************************************************************************************************
@@ -389,7 +391,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		//SECRET COMMANDS FOR MASTER USERS ONLY :D
 		if(command.equals(commands[7]))
 		{
-			this.tenThousandsBroadcast(0);
+			this.tenThousandsBroadcast(3);
 		}
 		if(commands.equals(commands[8]))
 		{
@@ -483,8 +485,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 
 		for(int i=0;i<10000;i++)
 		{
-
-			if(type == 2)
+			if(type == 3)
 			{
 				Message m = new ChatClientMessage(myClientObject, i, Integer.toString(i), type);
 				cob.crbroadcast(m);
