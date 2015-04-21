@@ -63,12 +63,14 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	public void fakeBroadcast(){
 
 		ChatClientMessage n = new ChatClientMessage(self, "fakeyo", 3, new VectorClock(this.time, ((ClientObject)self).getRealID()));
-	
+		n.getVectorClock().print();
 		rb.rbroadcast(n);
 	}
 
 	public Message receive(Message throwItDownTheHole)
 	{
+		System.out.println("booo");
+		((ClientObject)self).getVectorClock().print();
 		Message pre = rb.receive(throwItDownTheHole);
 		if(pre==null)//if null it means the message was of a different type therefore it was delivered and we don't need to do anything except tell anything above us that it has already been delivered
 				return null;
