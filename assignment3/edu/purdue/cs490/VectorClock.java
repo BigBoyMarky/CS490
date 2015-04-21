@@ -20,7 +20,7 @@ public class VectorClock implements Serializable
         while(availableUsers.hasNext())
         {
             Map.Entry pair = (Map.Entry)availableUsers.next();
-            clock.put((String)pair.getKey(),0);
+            clock.put(listOfUsers.get((String)pair.getKey()).getRealID(),0);
         }
     }
     // 0,0,0
