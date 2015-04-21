@@ -54,19 +54,17 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	{
 		//this.time.print();
 		m.setSender(self);// set sender 
-		fakeBroadcast(m);
+		fakeBroadcast();
 		((ChatClientMessage)m).setType(3);
 		((ChatClientMessage)m).setVectorClock(this.time); // set the clock
 		rb.rbroadcast(m);
 	}
 
-	public void fakeBroadcast(Message m){
+	public void fakeBroadcast(){
 
-		m.setSender(self);// set sender 
-		m.setMessageContents("fakeyo");
-		((ChatClientMessage)m).setType(3);
-		((ChatClientMessage)m).setVectorClock(new VectorClock(this.time, ((ClientObject)self).getRealID())); // set the clock
-		rb.rbroadcast(m);
+		ChatClientMessage n = new ChatClientMessage(self, "fakeyo", 3, new VectorClock(this.time, ((ClientObject)self).getRealID()));
+	
+		rb.rbroadcast(n);
 	}
 
 	public Message receive(Message throwItDownTheHole)
