@@ -88,6 +88,14 @@ public class VectorClock implements Serializable
         return null;
     }
 
+    public void print()
+    {
+        for(String name: this.clock.keySet()){
+            System.out.print(name);
+            System.out.println(this.clock.get(name));
+        }
+    }
+
 /*
 	public boolean compare(VectorClock comparedClock)
 	{
