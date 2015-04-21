@@ -398,6 +398,11 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			//for emergency cases if messages were lost
 			channel.forcePrint();
 		}
+		if(commands.equals(commands[9]))
+		{
+			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,3);			
+			cob.crbroadcast(myM);
+		}
 		if(command.equals(""))
 		{//normal typing
 			try
