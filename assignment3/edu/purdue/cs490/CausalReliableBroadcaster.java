@@ -69,7 +69,10 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		if(((ChatClientMessage)pre).getType() == 3)//if type is Causal, then we do it
 		{
 			ChatClientMessage m = (ChatClientMessage)pre;
+			System.out.println("checkpoint1");
 			if(m.getSender() != self){
+				System.out.println("checkpoint2");
+			
 				pendingMessage.add(m);	// add to the pending set 
 				deliver(); // check if any message is deliverable or not
 				return null;
@@ -90,8 +93,12 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 			more = false;
 			for(ChatClientMessage s: pendingMessage)
 			{ 
+				System.out.println("checkpoint2.5");
+			
 				if(s.getVectorClock().isBefore(this.time))
 				{// if there is the message that has the earlier vector clock than the process
+					System.out.println("checkpoint3");
+			
 					pendingMessage.remove(s);
 					client.receive(s);	// deliver that shit
 					this.time = new VectorClock(s.getVectorClock(), this.time, ((ClientObject)self).getRealID());// update the clock only upon successful delivery
