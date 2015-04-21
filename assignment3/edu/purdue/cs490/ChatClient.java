@@ -400,6 +400,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		}
 		if(commands.equals(commands[9]))
 		{
+			System.out.println("yolowdf");
 			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,3);			
 			cob.crbroadcast(myM);
 		}
