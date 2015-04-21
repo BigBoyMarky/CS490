@@ -393,12 +393,12 @@ public class ChatClient implements Runnable, BroadcastReceiver
 		{
 			this.tenThousandsBroadcast(3);
 		}
-		if(commands.equals(commands[8]))
+		if(command.equals(commands[8]))
 		{
 			//for emergency cases if messages were lost
 			channel.forcePrint();
 		}
-		if(commands.equals(commands[9]))
+		if(command.equals(commands[9]))
 		{
 			System.out.println("yolowdf");
 			ChatClientMessage myM = new ChatClientMessage(myClientObject,0,message,3);			
