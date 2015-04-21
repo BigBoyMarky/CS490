@@ -263,6 +263,7 @@ public class ChannelInterface implements Runnable
 			}			
 			try
 			{
+				System.out.println(oisList.get(i));
 				ChatClientMessage message = (ChatClientMessage)oisList.get(i).readObject();
 				long start = System.currentTimeMillis();
 				self.getCO().receive(message);
