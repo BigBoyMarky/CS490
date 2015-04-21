@@ -37,7 +37,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		self = currentProcess;
 		client = br;
 		rb = new ReliableBroadcaster(self, client);
-		pendingMessage = new ConcurrentSkipListSet<ChatClientMessage>();
+		pendingMessage = new ConcurrentSkipListSet<ChatClientMessage>(new MessageComparator());
 	}
 	public void addMember(Process member)
 	{
@@ -57,9 +57,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		m.setSender(self);// set sender 
 		((ChatClientMessage)m).setType(3);
 		((ChatClientMessage)m).setVectorClock(this.time); // set the clock
-		client.receive(m); //auto delivery
 		rb.rbroadcast(m);
-		this.time.incrementVectorClock(((ClientObject)self).getRealID());// increment the clock (coz auto delivery)		
 	}
 
 	public void fakeBroadcast(Message m){
