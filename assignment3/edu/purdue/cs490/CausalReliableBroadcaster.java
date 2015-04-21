@@ -28,7 +28,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	public CausalReliableBroadcaster(Process currentProcess, BroadcastReceiver br, ConcurrentHashMap listOfUsers)
 	{
 		init(currentProcess, br);
-		time = new VectorClock(listOfUsers); // assuming it's initialize in the self shit already. 
+		time = new VectorClock(listOfUsers);
 	}
 
 	//initiailization here

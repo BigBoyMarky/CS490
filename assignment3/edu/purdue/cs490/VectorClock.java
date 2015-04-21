@@ -15,6 +15,7 @@ public class VectorClock implements Serializable
 
     public VectorClock(ConcurrentHashMap<String, ClientObject> listOfUsers){
         // create an empty clock with those process names
+        this.clock = new ConcurrentHashMap<String, Integer>();
         Iterator availableUsers = listOfUsers.entrySet().iterator();
         while(availableUsers.hasNext())
         {
