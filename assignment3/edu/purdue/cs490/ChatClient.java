@@ -265,7 +265,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			System.out.println("Current people online:");
 			//needs InvalidProtoclException
 			listOfUsers = (ConcurrentHashMap<String, ClientObject>)channel.fromServer();
-			cob.getVectorClock().updateVectorClock(listOfUsers);
+			cob.getClock().updateVectorClock(listOfUsers);
 			channel.updateHashmap(listOfUsers);
 		}
 		catch(SocketException e)
