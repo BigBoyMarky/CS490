@@ -52,7 +52,8 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	}
 	public void crbroadcast(Message m)
 	{
-		//this.time.print();
+		System.out.println("initial clock");
+		this.time.print();
 		fakeBroadcast();
 		m.setSender(self);// set sender 
 		((ChatClientMessage)m).setType(3);
