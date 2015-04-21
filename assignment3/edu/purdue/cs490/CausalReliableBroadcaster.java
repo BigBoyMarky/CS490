@@ -1,5 +1,6 @@
 package edu.purdue.cs490;
-//import java.util.concurrent.ConcurrentHashMap;
+
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.Set;
@@ -24,9 +25,10 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	}
 
 	//constructor, just calls .init() to initialize
-	public CausalReliableBroadcaster(Process currentProcess, BroadcastReceiver br)
+	public CausalReliableBroadcaster(Process currentProcess, BroadcastReceiver br, ConcurrentHashMap listOfUsers)
 	{
 		init(currentProcess, br);
+		time = new VectorClock(listOfUsers); // assuming it's initialize in the self shit already. 
 	}
 
 	//initiailization here
@@ -36,7 +38,6 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		client = br;
 		rb = new ReliableBroadcaster(self, client);
 		pendingMessage = new ConcurrentSkipListSet<ChatClientMessage>();
-		time = ((ClientObject)self).getVectorClock(); // assuming it's initialize in the self shit already. 
 	}
 	public void addMember(Process member)
 	{
