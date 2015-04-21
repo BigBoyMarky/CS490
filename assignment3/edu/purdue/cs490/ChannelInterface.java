@@ -304,6 +304,6 @@ public class ChannelInterface implements Runnable
 	}
 	public void forcePrint()
 	{
-		System.out.printf("FORCED EXIT AT %d\nAVG. THROUGHPUT: %d\n", count, (totaltime/count));
+		System.out.printf("FORCED EXIT AT %f\nAVG. THROUGHPUT: %f\n", count, (totaltime/count));
 	}
 }
