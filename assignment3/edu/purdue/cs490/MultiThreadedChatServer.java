@@ -161,6 +161,7 @@ public class MultiThreadedChatServer
 						try
 						{
 							message = (String) currentClient.getIn().readObject();
+							System.out.printf("Message: %s\n",message);
 							executor.execute(new Runner(currentClient, message));
 						}
 						catch(SocketTimeoutException e)
@@ -238,7 +239,7 @@ public class MultiThreadedChatServer
 					{
 						writer.writeObject(Long.toString(id++));//is valid therefore id
 						writer.flush();
-						System.out.printf("Assigned ID:%d",id);
+						System.out.printf("Assigned ID:%d\t",id);
 						clientMap.put(clientName,newClient);
 						keyList.add(clientName);
 						newClient.updateHeart(System.currentTimeMillis());//for reg purposes
