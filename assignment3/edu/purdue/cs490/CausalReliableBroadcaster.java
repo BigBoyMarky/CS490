@@ -104,7 +104,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 			
 				if(s.getVectorClock().isBefore(this.time))
 				{// if there is the message that has the earlier vector clock than the process
-					System.out.println("checkpoint3 " + ((ClientObject)self).getRealID);
+					System.out.println("checkpoint3 " + ((ClientObject)self).getRealID());
 			
 					pendingMessage.remove(s);
 					client.receive(s);	// deliver that shit
