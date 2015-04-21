@@ -90,6 +90,10 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		return null;
 	}
 
+	public VectorClock getClock(){
+		return this.time;
+	}
+
 	public void deliver()
 	{
 		boolean more = true;
