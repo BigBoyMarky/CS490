@@ -3,6 +3,7 @@ import java.io.Serializable;
 
 public class ChatClientMessage implements Message, Serializable
 {
+	private static final long serialVersionUID = 12346;	
 	private String contents;//the contents
 	private Process sender;//the sender, it is initialized with ChatClientObject (which extends Process)
 	private int messageNumber;//for FIFO

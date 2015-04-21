@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
 public class ClientObject extends Process implements Serializable
 {
+	private static final long serialVersionUID = 10000;
 	volatile private long heartbeat;
 	private transient Socket socket;
 	private transient ObjectInputStream ois;
