@@ -90,7 +90,7 @@ public class VectorClock implements Serializable
 
         for(String name : allkeys){
             if(this.getTime(name) > another.getTime(name)){
-                ret = false;
+                return false;
             }
         }
         return ret;
