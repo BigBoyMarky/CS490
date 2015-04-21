@@ -33,7 +33,7 @@ public class VectorClock implements Serializable
         {
             Map.Entry pair = (Map.Entry)availableUsers.next();
             if(!this.clock.containsKey((String)pair.getKey()))
-                clock.put((String)pair.getKey(),0);
+                clock.put(listOfUsers.get((String)pair.getKey()).getRealID(),0);
         }
     }
 
