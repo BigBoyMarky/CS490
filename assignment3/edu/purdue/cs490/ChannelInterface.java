@@ -62,6 +62,7 @@ public class ChannelInterface implements Runnable
 		try
 		{
 			socket = new Socket(serverHost,serverPort);//creates socket to server
+			socket.setSoTimeout(5000);//if nothing in 1 second, assumes its dead
 			heart = new ObjectOutputStream(socket.getOutputStream());//creates new oos
 			heart.flush();//flushes header
 			heartListener = new ObjectInputStream(socket.getInputStream());//creates new ois
@@ -115,6 +116,10 @@ public class ChannelInterface implements Runnable
 		{
 			return heartListener.readObject();
 		}
+		catch(SocketTimeoutException e)
+		{
+			System.out.printf("It has been 1000 ms since response, assuming issue with connection, ending connection\n");
+		}		
 		catch(Exception e)
 		{
 			e.printStackTrace();//will fill it up later

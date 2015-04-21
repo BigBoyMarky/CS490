@@ -11,6 +11,7 @@ import java.util.Map;
 public class VectorClock implements Serializable
 {
     private ConcurrentHashMap<String, Integer> clock;
+    private static final long serialVersionUID = 12345;
 
     public VectorClock(ConcurrentHashMap<String, ClientObject> listOfUsers){
         // create an empty clock with those process names

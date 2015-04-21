@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class Process implements Serializable
 {
+	private static final long serialVersionUID = 10001;
 	String IP;
 	int port;
 	String ID;
