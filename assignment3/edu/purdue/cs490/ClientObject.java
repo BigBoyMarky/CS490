@@ -15,7 +15,7 @@ public class ClientObject extends Process implements Serializable
 	private transient BufferedReader buffer;
 	private VectorClock myVectorClock;
 	private boolean isSocketInit = false;
-	private long realID = -1;//meaning it's not intiailized
+	private String realID = "-1";//meaning it's not intiailized
 	public ClientObject(String username, String ipAddress, int port, ConcurrentHashMap<String,ClientObject> listOfPeople )
 	{
 		super(ipAddress, port, username);
@@ -75,11 +75,11 @@ public class ClientObject extends Process implements Serializable
 	{
 		return myVectorClock;
 	}
-	public long getRealID()
+	public String getRealID()
 	{
 		return realID;
 	}
-	public void setRealID(long realID)
+	public void setRealID(String realID)
 	{
 		this.realID = realID;
 	}

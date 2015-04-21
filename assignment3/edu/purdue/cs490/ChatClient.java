@@ -50,7 +50,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 	private static int SOCKET_TIMEOUT = 100;//socket SOCKET_TIMEOUT
 	private String host;
 	private String name;//name of the Client
-	private long id;
+	private String id;
 	private int serverPort;//port of the server it's going to connect to
 	private int clientPort;//port of the client's ServerSocket for chatting with other clients
 	private String ip;//ip of the client
@@ -156,7 +156,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 				System.out.println(uuu);
 			}
 			System.out.println(uuu);
-			id = Long.valueOf(uuu);
+			id = uuu;
 			myClientObject.setRealID(id);
 			//System.out.print("Your ID = " + id + "\n");
 			new Thread(this).start();
