@@ -50,7 +50,6 @@ public class VectorClock implements Serializable
         this.clock = new ConcurrentHashMap<String, Integer>();
         Set<String> allkeys = union(v1.getClock().keySet(), v2.getClock().keySet());
         for(String s : allkeys){
-            System.out.println(s);
             this.clock.put(s, Math.max(v1.getTime(s),v2.getTime(s)));
         }
         this.clock.put(name, this.clock.get(name)+1);
@@ -105,9 +104,11 @@ public class VectorClock implements Serializable
     public void print()
     {
         for(String name: this.clock.keySet()){
+            System.out.print(name + ":");
+            System.out.print(this.clock.get(name));
             System.out.print(name + " ");
-            System.out.println(this.clock.get(name));
         }
+        System.out.println();
     }
 
 /*
