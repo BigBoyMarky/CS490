@@ -53,8 +53,8 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	public void crbroadcast(Message m)
 	{
 		System.out.println("initial clock");
-		this.time.print();
-		fakeBroadcast();
+		//this.time.print();
+		//fakeBroadcast();
 		m.setSender(self);// set sender 
 		((ChatClientMessage)m).setType(3);
 		((ChatClientMessage)m).setVectorClock(this.time); // set the clock
@@ -62,17 +62,19 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	}
 
 	public void fakeBroadcast(){
-
-		ChatClientMessage n = new ChatClientMessage(self, "fakeyo", 3, new VectorClock(this.time, ((ClientObject)self).getRealID()));
+		ChatClientMessage n = new ChatClientMessage(self,0,"fakeyo",3);		
+		//ChatClientMessage n = new ChatClientMessage(self, "fakeyo", 3, new VectorClock(this.time, ((ClientObject)self).getRealID()));
+		((ChatClientMessage)n).setType(3);
+		((ChatClientMessage)n).setVectorClock( new VectorClock(this.time, ((ClientObject)self).getRealID())); // set the clock
 		System.out.println("fake clock (expect 0 0 0)");
-		n.getVectorClock().print();
+		//n.getVectorClock().print();
 		rb.rbroadcast(n);
 	}
 
 	public Message receive(Message throwItDownTheHole)
 	{
 		System.out.println("the op vector clock");
-		this.time.print();
+		//this.time.print();
 		Message pre = rb.receive(throwItDownTheHole);
 		if(pre==null)//if null it means the message was of a different type therefore it was delivered and we don't need to do anything except tell anything above us that it has already been delivered
 				return null;
