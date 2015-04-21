@@ -25,6 +25,18 @@ public class VectorClock implements Serializable
     }
     // 0,0,0
 
+    public void updateVectorClock(ConcurrentHashMap<String, ClientObject> listOfUsers){
+        // create an empty clock with those process names
+        this.clock = new ConcurrentHashMap<String, Integer>();
+        Iterator availableUsers = listOfUsers.entrySet().iterator();
+        while(availableUsers.hasNext())
+        {
+            Map.Entry pair = (Map.Entry)availableUsers.next();
+            if(!this.clock.containsKey((String)pair.getKey()))
+                clock.put((String)pair.getKey(),0);
+        }
+    }
+
     public VectorClock(VectorClock old, String name){
         // create a clock that chronologically follows the old clock
         this.clock = new ConcurrentHashMap<String, Integer>();
@@ -38,8 +50,10 @@ public class VectorClock implements Serializable
         this.clock = new ConcurrentHashMap<String, Integer>();
         Set<String> allkeys = union(v1.getClock().keySet(), v2.getClock().keySet());
         for(String s : allkeys){
+            System.out.println(s);
             this.clock.put(s, Math.max(v1.getTime(s),v2.getTime(s)));
         }
+        System.out.println("nameee " + name);
         this.clock.put(name, this.clock.get(name)+1);
     }
 

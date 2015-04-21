@@ -37,7 +37,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		self = currentProcess;
 		client = br;
 		rb = new ReliableBroadcaster(self, client);
-		pendingMessage = new ConcurrentSkipListSet<ChatClientMessage>();
+		pendingMessage = new ConcurrentSkipListSet<ChatClientMessage>(new MessageComparator());
 	}
 	public void addMember(Process member)
 	{
@@ -57,9 +57,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		m.setSender(self);// set sender 
 		((ChatClientMessage)m).setType(3);
 		((ChatClientMessage)m).setVectorClock(this.time); // set the clock
-		client.receive(m); //auto delivery
 		rb.rbroadcast(m);
-		this.time.incrementVectorClock(((ClientObject)self).getRealID());// increment the clock (coz auto delivery)		
 	}
 
 	public void fakeBroadcast(Message m){
@@ -90,6 +88,10 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		return null;
 	}
 
+	public VectorClock getClock(){
+		return this.time;
+	}
+
 	public void deliver()
 	{
 		boolean more = true;
@@ -102,7 +104,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 			
 				if(s.getVectorClock().isBefore(this.time))
 				{// if there is the message that has the earlier vector clock than the process
-					System.out.println("checkpoint3");
+					System.out.println("checkpoint3 " + ((ClientObject)self).getRealID());
 			
 					pendingMessage.remove(s);
 					client.receive(s);	// deliver that shit
