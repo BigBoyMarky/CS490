@@ -237,9 +237,11 @@ public class MultiThreadedChatServer
 					}
 					else
 					{
-						writer.writeObject(Long.toString(id++));//is valid therefore id
+						writer.writeObject(Long.toString(id));//is valid therefore id
 						writer.flush();
 						System.out.printf("Assigned ID:%d\t",id);
+						newClient.setRealID(Long.toString(id));//set it so VectorClock gets actul ID instead of a bunch of -1's
+						id++;//increment ID
 						clientMap.put(clientName,newClient);
 						keyList.add(clientName);
 						newClient.updateHeart(System.currentTimeMillis());//for reg purposes

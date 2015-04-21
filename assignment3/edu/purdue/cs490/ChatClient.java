@@ -266,6 +266,7 @@ public class ChatClient implements Runnable, BroadcastReceiver
 			//needs InvalidProtoclException
 			listOfUsers = (ConcurrentHashMap<String, ClientObject>)channel.fromServer();
 			channel.updateHashmap(listOfUsers);
+			
 		}
 		catch(SocketException e)
 		{
