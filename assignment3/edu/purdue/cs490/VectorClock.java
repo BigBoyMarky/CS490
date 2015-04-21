@@ -49,6 +49,7 @@ public class VectorClock implements Serializable
     public VectorClock(VectorClock v1, VectorClock v2, String name){
         this.clock = new ConcurrentHashMap<String, Integer>();
         Set<String> allkeys = union(v1.getClock().keySet(), v2.getClock().keySet());
+
         for(String s : allkeys){
             this.clock.put(s, Math.max(v1.getTime(s),v2.getTime(s)));
         }
