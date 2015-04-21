@@ -53,7 +53,6 @@ public class VectorClock implements Serializable
             System.out.println(s);
             this.clock.put(s, Math.max(v1.getTime(s),v2.getTime(s)));
         }
-        System.out.println("nameee " + name);
         this.clock.put(name, this.clock.get(name)+1);
     }
 
