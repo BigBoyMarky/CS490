@@ -61,6 +61,11 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 		rb.rbroadcast(m);
 		this.time.incrementVectorClock(((ClientObject)self).getRealID());// increment the clock (coz auto delivery)		
 	}
+
+	public void fakeBroadcast(Message m){
+		
+	}
+
 	public Message receive(Message throwItDownTheHole)
 	{
 		Message pre = rb.receive(throwItDownTheHole);
