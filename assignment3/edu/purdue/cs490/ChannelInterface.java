@@ -265,7 +265,7 @@ public class ChannelInterface implements Runnable
 			{
 				ChatClientMessage message = (ChatClientMessage)oisList.get(i).readObject();
 				long start = System.currentTimeMillis();
-				self.getFIFO().receive(message);
+				self.getCO().receive(message);
 				count++;
 				totaltime += System.currentTimeMillis() - start;
 				if(count == 100000){//100,000 total messages received
