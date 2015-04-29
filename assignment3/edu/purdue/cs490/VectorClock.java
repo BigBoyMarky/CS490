@@ -104,12 +104,12 @@ public class VectorClock implements Serializable
 
     public void print()
     {
-        /*for(String name: this.clock.keySet()){
+        for(String name: this.clock.keySet()){
             System.out.print(name + ":");
             System.out.print(this.clock.get(name));
             System.out.print(" ");
         }
-        System.out.println();*/
+        System.out.println();
     }
 
 /*

@@ -53,7 +53,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 	public void crbroadcast(Message m)
 	{
 		//this.time.print();
-		//fakeBroadcast();
+		fakeBroadcast();
 		m.setSender(self);// set sender 
 		((ChatClientMessage)m).setType(3);
 		((ChatClientMessage)m).setVectorClock(this.time); // set the clock
@@ -106,6 +106,7 @@ public class CausalReliableBroadcaster implements CausalReliableBroadcast
 				if(s.getVectorClock().isBefore(this.time))
 				{// if there is the message that has the earlier vector clock than the process
 					pendingMessage.remove(s);
+					s.getVectorClock().print();
 					client.receive(s);	// deliver that shit
 					this.time = new VectorClock(s.getVectorClock(), this.time, ((ClientObject)s.getSender()).getRealID());// update the clock only upon successful delivery
 					more = true; // might be more comrades
